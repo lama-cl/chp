@@ -108,8 +108,19 @@ Workflow:
       --single-tu         analyze every TU independently: no index, no import rounds
                           (for corpora of unrelated single-file programs)
       --config-id ID      value for --summary-config-id
-      --reports           also emit verbose *.cast-report.json sidecars
-      --paper-facts       also emit compact *.cast-paper-facts.json sidecars
+      --reports           also emit verbose *.cast-report.json sidecars (opt-in)
+      --paper-facts       also emit compact *.cast-paper-facts.json sidecars (opt-in)
+Metrics and sidecars (ON by default; each can be disabled):
+      --no-runtime-metrics     skip *.cast-runtime.json timing sidecars and the CSV/LaTeX
+                               timing tables (env: RUNTIME_METRICS=0)
+      --no-prevalence-metrics  skip *.cast-prevalence.json pointer/cast prevalence
+                               sidecars (env: PREVALENCE_METRICS=0)
+      --no-partial-sidecars    do not keep sidecars + status manifests of TUs that fail
+                               in C1 (env: PUBLISH_PARTIAL_C1_SIDECARS=0)
+      --minimal                shorthand for all three --no-* options above
+      --prevalence-return-types  also count pointer-typed function return definitions
+      --normalize-paths        replace tool/project/output roots in the text reports with
+                               <tool-root>, <project-root>, <output-root> (for diffing)
       --heartbeat SEC     print a "still running" line every SEC seconds for a slow
                           TU (default 30; 0 = off)
       --stop-on-fail      stop the whole run at the first TU that fails
@@ -125,6 +136,13 @@ Output layout:
   OUTPUT/<project>/commands.log          every command + failure output + warnings
   OUTPUT/<project>/failed-tus.txt        only if something failed
   OUTPUT/<project>/failed/<stem>.<phase>.txt   analyzer output of each failed TU
+  OUTPUT/<project>/runtime-metrics/*.cast-runtime.json  per-TU timing sidecars (final pass)
+  OUTPUT/<project>/runtime-duration-by-{tu,project}.csv, runtime-duration.tex
+  OUTPUT/<project>/prevalence-metrics/*.cast-prevalence.json  source-level prevalence (C1)
+  OUTPUT/<project>/partial-{summaries,reports,paper-facts,runtime-metrics,prevalence-metrics}/
+                                         sidecars of TUs that failed in C1 (never indexed)
+  OUTPUT/<project>/partial-status/<stem>.cast-analysis-status.json  one manifest per such TU
+  OUTPUT/runtime-duration-*.csv/.tex     same tables aggregated over all projects
   <stem> is the source path relative to the source root with '/' replaced by '_'.
   A TU that fails in C1 is left out of the index and not retried.  A TU that
   fails in an import round falls back to its previous-phase summary/report
@@ -168,6 +186,12 @@ PAPER_FACTS=0
 HEARTBEAT=30
 STOP_ON_FAIL=0
 KEEP=0
+RUNTIME_METRICS="${RUNTIME_METRICS:-1}"
+PREVALENCE_METRICS="${PREVALENCE_METRICS:-1}"
+PUBLISH_PARTIAL_C1_SIDECARS="${PUBLISH_PARTIAL_C1_SIDECARS:-1}"
+PREVALENCE_RETURN_TYPES="${PREVALENCE_INCLUDE_RETURN_TYPES:-0}"
+NORMALIZE_PATHS="${NORMALIZE_PATHS:-0}"
+RUNTIME_AGGREGATOR="${RUNTIME_AGGREGATOR:-}"
 
 ORIG_ARGS=("$@")
 # Allow --opt=value as well as --opt value.
@@ -204,6 +228,12 @@ while [[ $# -gt 0 ]]; do
     --reports)            REPORTS=1; shift ;;
     --paper-facts)        PAPER_FACTS=1; shift ;;
     --heartbeat)          need_value "$@"; HEARTBEAT="$2"; shift 2 ;;
+    --no-runtime-metrics)    RUNTIME_METRICS=0; shift ;;
+    --no-prevalence-metrics) PREVALENCE_METRICS=0; shift ;;
+    --no-partial-sidecars)   PUBLISH_PARTIAL_C1_SIDECARS=0; shift ;;
+    --minimal)               RUNTIME_METRICS=0; PREVALENCE_METRICS=0; PUBLISH_PARTIAL_C1_SIDECARS=0; shift ;;
+    --prevalence-return-types) PREVALENCE_RETURN_TYPES=1; shift ;;
+    --normalize-paths)       NORMALIZE_PATHS=1; shift ;;
     --stop-on-fail)       STOP_ON_FAIL=1; shift ;;
     --keep-intermediates) KEEP=1; shift ;;
     -*)  die "unknown option: $1" "run '$SCRIPT_NAME --help' for the list of options" ;;
@@ -213,6 +243,9 @@ done
 [[ ${#INPUTS[@]} -gt 0 ]] || INPUTS=(".")
 
 [[ "$ROUNDS" =~ ^[0-9]+$ ]] || die "--rounds must be a non-negative integer, got '$ROUNDS'"
+for v in RUNTIME_METRICS PREVALENCE_METRICS PUBLISH_PARTIAL_C1_SIDECARS PREVALENCE_RETURN_TYPES NORMALIZE_PATHS; do
+  [[ "${!v}" == 0 || "${!v}" == 1 ]] || die "$v must be 0 or 1, got '${!v}'"
+done
 [[ "$HEARTBEAT" =~ ^[0-9]+$ ]] || die "--heartbeat must be a non-negative integer (seconds), got '$HEARTBEAT'"
 if (( SINGLE_TU && ROUNDS != 1 )); then
   info "note: --single-tu ignores --rounds"
@@ -257,6 +290,15 @@ if (( ! SINGLE_TU )); then
     "it normally sits next to this script; otherwise pass --build-index /path/to/build_summary_index.py"
   info "index builder:  $BUILD_INDEX"
 fi
+
+# Runtime-timing aggregator (only needed when runtime metrics are on).
+if (( RUNTIME_METRICS )); then
+  RUNTIME_AGGREGATOR="${RUNTIME_AGGREGATOR:-$SCRIPT_DIR/aggregate_runtime_metrics.py}"
+  [[ -f "$RUNTIME_AGGREGATOR" ]] || die "runtime timing aggregator not found: $RUNTIME_AGGREGATOR" \
+    "it normally sits next to this script; set RUNTIME_AGGREGATOR=/path/to/aggregate_runtime_metrics.py" \
+    "or run with --no-runtime-metrics"
+fi
+info "metrics:        runtime=$RUNTIME_METRICS prevalence=$PREVALENCE_METRICS partial-sidecars=$PUBLISH_PARTIAL_C1_SIDECARS"
 
 # Clang resource directory (builtin headers: stddef.h, stdarg.h, ...).
 # Compile databases normally omit -resource-dir because the clang driver adds it
@@ -333,6 +375,11 @@ RUN_LOG="$ROOT_OUT/run.log"
   fi
 } >"$RUN_LOG"
 info "output:         $ROOT_OUT"
+
+esc_sed() { printf '%s' "$1" | sed -e 's/[][\/.*^$&]/\\&/g'; }
+if (( NORMALIZE_PATHS )); then
+  NORM_OUT_ESC="$(esc_sed "$ROOT_OUT")"; NORM_TOOL_ESC="$(esc_sed "$REPO_ROOT")"
+fi
 
 # ----------------------------------------------------- project discovery ---
 export CH_WARN="${C_YEL}warning:${C_OFF}" CH_NOTE="note:"
@@ -494,6 +541,55 @@ hint_for_error() {
   esac
 }
 
+# Stage label stored in runtime sidecars (same names as the older runners).
+stage_name() {
+  case "$1" in
+    c1) echo c1 ;;
+    imp*) echo "import-round-${1#imp}" ;;
+    local-overlay) echo local-index-overlay ;;
+    *) echo "$1" ;;
+  esac
+}
+
+normalize_file() {  # replace machine-specific roots in a text report
+  local f="$1" proj_esc
+  proj_esc="$(esc_sed "$PROJECT_DIR")"
+  sed -e "s/$NORM_OUT_ESC/<output-root>/g" -e "s/$proj_esc/<project-root>/g" -e "s/$NORM_TOOL_ESC/<tool-root>/g" \
+    "$f" >"$f.norm" && mv "$f.norm" "$f"
+}
+
+PARTIAL_ARTIFACTS=()
+# publish_partial SRC_DIR DEST_DIR STEM SUFFIX KIND : keep a sidecar of a failed C1 TU
+publish_partial() {
+  local sdir="$1" ddir="$2" stem="$3" suffix="$4" kind="$5" files=() f i=0
+  [[ -d "$sdir" ]] || return 0
+  mapfile -t files < <(find "$sdir" -type f -name "*$suffix" 2>/dev/null | sort)
+  for f in ${files[@]+"${files[@]}"}; do
+    mkdir -p "$ddir"
+    local dest="$ddir/${stem}${suffix}"; (( i > 0 )) && dest="$ddir/${stem}__extra_${i}${suffix}"
+    cp "$f" "$dest" && PARTIAL_ARTIFACTS+=("$kind|$(basename "$ddir")/$(basename "$dest")")
+    i=$((i + 1))
+  done
+  return 0
+}
+
+write_partial_status() {  # write_partial_status STEM SRC EXIT TEXT_NAME REASON
+  local stem="$1" src="$2" code="$3" tname="$4" reason="$5"
+  mkdir -p "$OUT/partial-status"
+  "$PYTHON" - "$OUT/partial-status/${stem}.cast-analysis-status.json" "$src" "$stem" "$code" "$tname" "$SCRIPT_NAME" "$reason" ${PARTIAL_ARTIFACTS[@]+"${PARTIAL_ARTIFACTS[@]}"} <<'PY'
+import json, pathlib, sys
+status_path, source_file, stem, code, tname, runner, reason = sys.argv[1:8]
+arts = []
+for item in sys.argv[8:]:
+    kind, sep, path = item.partition("|")
+    if sep: arts.append({"kind": kind, "path": path})
+payload = {"schemaVersion": 1, "sourceFile": source_file, "sourceStem": stem, "stage": "c1",
+           "complete": False, "c2Eligible": False, "toolExitCode": int(code), "runner": runner,
+           "capturedTextFile": tname, "reason": reason, "publishedArtifacts": arts}
+pathlib.Path(status_path).write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
+}
+
 # publish_sidecar SRC_DIR DEST_DIR STEM SUFFIX LABEL  -> copies the emitted file(s) with a collision-safe name
 publish_sidecar() {
   local sdir="$1" ddir="$2" stem="$3" suffix="$4" label="$5" files=() i=1 f
@@ -511,11 +607,11 @@ publish_sidecar() {
   return 0
 }
 
-# run_tu TAG IDX STEM SRC REL TEXT_DIR SUM_DIR REP_DIR PF_DIR [INDEX_FILE PREV_TAG PREV_SUM_DIR PREV_TEXT_DIR]
+# run_tu TAG IDX STEM SRC REL TEXT_DIR SUM_DIR REP_DIR PF_DIR RT_DIR [INDEX_FILE PREV_TAG PREV_SUM_DIR PREV_TEXT_DIR]
 # Analyze one TU, publish its outputs, print one progress line.
 run_tu() {
   local tag="$1" idx="$2" stem="$3" src="$4" rel="$5" tdir="$6" sdir_pub="$7" rdir_pub="$8" pdir_pub="$9"
-  local index="${10:-}" prev_tag="${11:-}" prev_sum="${12:-}" prev_text="${13:-}"
+  local rtdir_pub="${10:-}" index="${11:-}" prev_tag="${12:-}" prev_sum="${13:-}" prev_text="${14:-}" prev_json=""
   local tmp="$WORK/$tag-tmp/$stem" sdir rdir out_txt rc t0 nerr first status="ok" hb=""
   sdir="$tmp/s"; rdir="$tmp/r"; out_txt="$tdir/${stem}.txt"
   rm -rf "$tmp"; mkdir -p "$sdir" "$tdir"
@@ -523,14 +619,24 @@ run_tu() {
   [[ -n "$index" ]] && cmd+=(--enable-summary-import --summary-index "$index")
   cmd+=(--summary-dir "$sdir")
   if (( REPORTS )); then mkdir -p "$rdir"; cmd+=(--summary-report-dir "$rdir"); fi
-  (( PAPER_FACTS )) && cmd+=(--paper-facts-dir "$sdir")
+  (( PAPER_FACTS )) && cmd+=(--paper-facts-dir "$sdir" --paper-facts-project-root "$PROJECT_DIR")
+  (( RUNTIME_METRICS )) && cmd+=(--runtime-timing-dir "$sdir" --runtime-timing-project-id "$P_NAME_CUR"
+                                 --runtime-timing-stage "$(stage_name "$tag")")
+  if (( PREVALENCE_METRICS )) && [[ "$tag" == c1 ]]; then   # source-level facts: C1 only
+    prev_json="$OUT/prevalence-metrics/${stem}.cast-prevalence.json"; mkdir -p "$OUT/prevalence-metrics"
+    cmd+=(--prevalence-metrics-json "$prev_json" --prevalence-metrics-project-root "$PROJECT_DIR"
+          --prevalence-metrics-project-id "$P_NAME_CUR")
+    (( PREVALENCE_RETURN_TYPES )) && cmd+=(--prevalence-include-return-types)
+  fi
   [[ -n "$CONFIG_ID" ]] && cmd+=(--summary-config-id "$CONFIG_ID-$tag")
   cmd+=(${RESOURCE_ARGS[@]+"${RESOURCE_ARGS[@]}"} -p "$COMPDB_DIR" "$src")
 
   { printf '%s: ' "$tag"; printf '%q ' "${cmd[@]}"; echo; } >>"$LOG_FILE"
   t0=$SECONDS
   if (( HEARTBEAT > 0 )); then
-    ( while sleep "$HEARTBEAT"; do printf '           ... %s %s still running (%ds)\n' "$tag" "$rel" $((SECONDS - t0)); done ) &
+    # Sleep in 1s steps: a lingering long `sleep` would keep a pipe (| tee) open after we kill this loop.
+    ( while :; do for ((k = 0; k < HEARTBEAT; k++)); do sleep 1; done
+        printf '           ... %s %s still running (%ds)\n' "$tag" "$rel" $((SECONDS - t0)); done ) &
     hb=$!
   fi
   { echo "Command:"; printf '%q ' "${cmd[@]}"; echo; echo; echo "Output:"; "${cmd[@]}"; } >"$out_txt" 2>&1
@@ -538,6 +644,8 @@ run_tu() {
   if [[ -n "$hb" ]]; then kill "$hb" 2>/dev/null; wait "$hb" 2>/dev/null; fi
   nerr="$(grep -E -c ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt")"
   first="$(grep -E -m1 ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt" | sed -e "s#$PROJECT_DIR/##")"
+
+  (( NORMALIZE_PATHS )) && normalize_file "$out_txt"
 
   TU_OK=0
   local reason=""
@@ -549,6 +657,11 @@ run_tu() {
        && { (( ! REPORTS )) || publish_sidecar "$rdir" "$rdir_pub" "$stem" ".cast-report.json" "$tag $rel"; } \
        && { (( ! PAPER_FACTS )) || publish_sidecar "$sdir" "$pdir_pub" "$stem" ".cast-paper-facts.json" "$tag $rel"; }; then
     PASS_OK=$((PASS_OK + 1)); TU_OK=1
+    # Metric sidecars are best-effort: a missing one warns but does not fail the TU.
+    if (( RUNTIME_METRICS )); then publish_sidecar "$sdir" "$rtdir_pub" "$stem" ".cast-runtime.json" "$tag $rel" || true; fi
+    if [[ -n "$prev_json" && ! -f "$prev_json" ]]; then
+      warn "$rel: prevalence sidecar was not written (expected $prev_json)"
+    fi
   else
     status="FAILED (no output)"
     reason="analyzer exited 0 but wrote no usable summary"
@@ -571,6 +684,24 @@ run_tu() {
   printf '%s%s%s\n' "$C_RED" "$line" "$C_OFF"; _log_file "$line"
   if [[ -n "$first" ]]; then hint "$first"; hint_for_error "$first"; else hint "last output: $(tail -n 1 "$out_txt")"; fi
   mkdir -p "$OUT/failed"; cp "$out_txt" "$OUT/failed/${stem}.${tag}.txt"
+  if [[ "$tag" == c1 ]]; then
+    if (( PUBLISH_PARTIAL_C1_SIDECARS )); then
+      # Keep whatever the analyzer managed to write, clearly separated from the indexed outputs.
+      PARTIAL_ARTIFACTS=()
+      publish_partial "$sdir" "$OUT/partial-summaries" "$stem" ".cast-summary.json" summary
+      (( REPORTS ))     && publish_partial "$rdir" "$OUT/partial-reports" "$stem" ".cast-report.json" report
+      (( PAPER_FACTS )) && publish_partial "$sdir" "$OUT/partial-paper-facts" "$stem" ".cast-paper-facts.json" paper-facts
+      (( RUNTIME_METRICS )) && publish_partial "$sdir" "$OUT/partial-runtime-metrics" "$stem" ".cast-runtime.json" runtime-timing
+      if [[ -n "$prev_json" && -f "$prev_json" ]]; then
+        mkdir -p "$OUT/partial-prevalence-metrics"; mv "$prev_json" "$OUT/partial-prevalence-metrics/"
+        PARTIAL_ARTIFACTS+=("prevalence|partial-prevalence-metrics/$(basename "$prev_json")")
+      fi
+      write_partial_status "$stem" "$src" "$rc" "failed/${stem}.${tag}.txt" "$reason"
+      hint "kept ${#PARTIAL_ARTIFACTS[@]} partial sidecar(s); status: $OUT/partial-status/${stem}.cast-analysis-status.json"
+    elif [[ -n "$prev_json" ]]; then
+      rm -f "$prev_json"    # possibly incomplete: do not mix it with good sidecars
+    fi
+  fi
   hint "full output: $OUT/failed/${stem}.${tag}.txt (tail also in commands.log)"
 
   # An import-round failure must not silently drop the TU from the next index:
@@ -608,13 +739,13 @@ run_tu() {
 run_pass() {
   local tag="$1" index="${2:-}" prev_tag="${3:-}" prev_sum="${4:-}" prev_text="${5:-}" i skipped=0
   LATEST_TEXT="$WORK/$tag-text"; LATEST_SUM="$WORK/$tag-summaries"
-  LATEST_REP="$WORK/$tag-reports"; LATEST_PF="$WORK/$tag-paper-facts"
+  LATEST_REP="$WORK/$tag-reports"; LATEST_PF="$WORK/$tag-paper-facts"; LATEST_RT="$WORK/$tag-runtime-metrics"
   mkdir -p "$LATEST_TEXT" "$LATEST_SUM"
   PASS_OK=0; PASS_FAIL=0
   for ((i = 0; i < NSRC; i++)); do
     if [[ -n "${SKIP[i]:-}" ]]; then skipped=$((skipped + 1)); continue; fi
     run_tu "$tag" $((i + 1)) "${STEMS[i]}" "${SRCS[i]}" "${RELS[i]}" \
-           "$LATEST_TEXT" "$LATEST_SUM" "$LATEST_REP" "$LATEST_PF" "$index" "$prev_tag" "$prev_sum" "$prev_text"
+           "$LATEST_TEXT" "$LATEST_SUM" "$LATEST_REP" "$LATEST_PF" "$LATEST_RT" "$index" "$prev_tag" "$prev_sum" "$prev_text"
     [[ "$tag" == c1 && $TU_OK -eq 0 ]] && SKIP[i]=1
     (( STOP_ALL )) && break
   done
@@ -774,6 +905,24 @@ project_finish() {
   P_STATUS="OK"; return 0
 }
 
+aggregate_runtime() {  # aggregate_runtime SIDECAR_DIR... OUT_DIR LABEL  (last two args are OUT_DIR, LABEL)
+  local args=("$@") label out_dir dirs
+  label="${args[${#args[@]}-1]}"; out_dir="${args[${#args[@]}-2]}"; dirs=("${args[@]:0:${#args[@]}-2}")
+  local cmd=("$PYTHON" "$RUNTIME_AGGREGATOR" "${dirs[@]}"
+             --per-tu-csv "$out_dir/runtime-duration-by-tu.csv"
+             --per-project-csv "$out_dir/runtime-duration-by-project.csv"
+             --latex-out "$out_dir/runtime-duration.tex")
+  { printf 'runtime-aggregate(%s): ' "$label"; printf '%q ' "${cmd[@]}"; echo; } >>"${LOG_FILE:-/dev/null}"
+  local out
+  if out="$("${cmd[@]}" 2>&1)"; then
+    info "  runtime timings: $out_dir/runtime-duration-by-project.csv"
+  else
+    warn "runtime timing aggregation failed for $label"
+    printf '%s\n' "$out" | tail -n 3 | sed 's/^/         /' >&2
+    hint "the per-TU sidecars are still in ${dirs[0]}"
+  fi
+}
+
 # --------------------------------------------------------- one project -----
 analyze_project() {  # analyze_project INDEX
   local pi="$1" r tag prev_tag prev_sum prev_text n
@@ -789,6 +938,7 @@ analyze_project() {  # analyze_project INDEX
   LOG_FILE="$OUT/commands.log"; : >"$LOG_FILE"
   (( REPORTS ))     && mkdir -p "$OUT/reports"
   (( PAPER_FACTS )) && mkdir -p "$OUT/paper-facts"
+  (( RUNTIME_METRICS )) && mkdir -p "$OUT/runtime-metrics"
   {
     echo "# project: $PROJECT_DIR"
     if command -v git >/dev/null 2>&1; then echo "# project git commit: $(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || echo n/a)"; fi
@@ -823,7 +973,7 @@ analyze_project() {  # analyze_project INDEX
   echo
   step "C1: per-TU analysis ($NSRC TUs)"
   run_pass c1
-  local c1_sum="$LATEST_SUM" c1_text="$LATEST_TEXT" c1_rep="$LATEST_REP" c1_pf="$LATEST_PF"
+  local c1_sum="$LATEST_SUM" c1_text="$LATEST_TEXT" c1_rep="$LATEST_REP" c1_pf="$LATEST_PF" c1_rt="$LATEST_RT"
   if (( PASS_OK == 0 )); then
     err "no translation unit of $P_NAME_CUR was analyzed successfully"
     hint "see the first failure above; most often it is a missing --resource-dir, a stale compile_commands.json,"
@@ -835,7 +985,7 @@ analyze_project() {  # analyze_project INDEX
     (( PASS_FAIL * 2 > NSRC )) && warn "more than half of the TUs failed: the setup (flags, headers, resource dir) is probably wrong"
   fi
 
-  local last_text="$c1_text" last_sum="$c1_sum" last_rep="$c1_rep" last_pf="$c1_pf" done_rounds=0
+  local last_text="$c1_text" last_sum="$c1_sum" last_rep="$c1_rep" last_pf="$c1_pf" last_rt="$c1_rt" done_rounds=0
   local index="$OUT/project-summary-index.json"
 
   if (( STOP_ALL )); then :
@@ -862,7 +1012,7 @@ analyze_project() {  # analyze_project INDEX
           # The index must sit in $OUT: its summaryFile entries are relative to its own directory.
           cp "$index" "$OUT/import-round-$(printf '%02d' "$r")-index-input.json"
           run_pass "$tag" "$OUT/import-round-$(printf '%02d' "$r")-index-input.json" "$prev_tag" "$prev_sum" "$prev_text"
-          last_text="$LATEST_TEXT"; last_sum="$LATEST_SUM"; last_rep="$LATEST_REP"; last_pf="$LATEST_PF"
+          last_text="$LATEST_TEXT"; last_sum="$LATEST_SUM"; last_rep="$LATEST_REP"; last_pf="$LATEST_PF"; last_rt="$LATEST_RT"
           done_rounds=$r; prev_tag="$tag"; prev_sum="$LATEST_SUM"; prev_text="$LATEST_TEXT"
           (( STOP_ALL )) && break
           if ! compgen -G "$LATEST_SUM/*.cast-summary.json" >/dev/null; then
@@ -875,7 +1025,7 @@ analyze_project() {  # analyze_project INDEX
         step "Import rounds skipped: no cross-TU call edges in the index"
         info "  running one local-index pass so the final reports use the solved summaries"
         run_pass local-overlay "$index" c1 "$c1_sum" "$c1_text"
-        last_text="$LATEST_TEXT"; last_sum="$LATEST_SUM"; last_rep="$LATEST_REP"; last_pf="$LATEST_PF"
+        last_text="$LATEST_TEXT"; last_sum="$LATEST_SUM"; last_rep="$LATEST_REP"; last_pf="$LATEST_PF"; last_rt="$LATEST_RT"
       fi
     fi
   fi
@@ -898,6 +1048,20 @@ analyze_project() {  # analyze_project INDEX
   (( REPORTS ))     && compgen -G "$last_rep/*.cast-report.json" >/dev/null && cp "$last_rep"/*.cast-report.json "$OUT/reports/"
   (( PAPER_FACTS )) && compgen -G "$last_pf/*.cast-paper-facts.json" >/dev/null && cp "$last_pf"/*.cast-paper-facts.json "$OUT/paper-facts/"
 
+  if (( RUNTIME_METRICS )); then
+    compgen -G "$last_rt/*.cast-runtime.json" >/dev/null && cp "$last_rt"/*.cast-runtime.json "$OUT/runtime-metrics/"
+    if compgen -G "$OUT/runtime-metrics/*.cast-runtime.json" >/dev/null; then
+      aggregate_runtime "$OUT/runtime-metrics" "$OUT" "$P_NAME_CUR"
+    else
+      warn "no runtime timing sidecars were produced for $P_NAME_CUR"
+    fi
+  fi
+  if (( PREVALENCE_METRICS )); then
+    n=$(find "$OUT/prevalence-metrics" -name '*.cast-prevalence.json' 2>/dev/null | wc -l)
+    info "  prevalence sidecars: $n"
+    (( n < NSRC - ${#FAILED[@]} )) && warn "only $n prevalence sidecar(s) for $((NSRC - ${#FAILED[@]})) analyzed TU(s)"
+  fi
+
   # Rebuild the index over the *published* summaries so its summaryFile paths
   # stay valid after the work directory is removed.
   if (( ! SINGLE_TU )) && compgen -G "$OUT/summaries/*.cast-summary.json" >/dev/null; then
@@ -918,6 +1082,12 @@ for ((pi = 0; pi < NPROJ; pi++)); do
   LOG_FILE=""
   if (( STOP_ALL )); then warn "run stopped early; remaining projects were not analyzed"; overall=1; break; fi
 done
+
+if (( RUNTIME_METRICS && NPROJ > 1 )); then
+  mapfile -t rt_dirs < <(find "$ROOT_OUT" -mindepth 2 -maxdepth 2 -type d -name runtime-metrics | sort)
+  LOG_FILE=""
+  [[ ${#rt_dirs[@]} -gt 0 ]] && aggregate_runtime "${rt_dirs[@]}" "$ROOT_OUT" "all projects"
+fi
 
 { printf 'project\tstatus\ttus\tsummaries\tfailed\tstale\twarnings\tpath\n'; printf '%s\n' "${RESULTS[@]}"; } >"$ROOT_OUT/projects-summary.tsv"
 
