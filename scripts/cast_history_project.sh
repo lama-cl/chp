@@ -40,6 +40,9 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 SCRIPT_NAME="$(basename "$0")"
+SCRIPT_PID=$$     # the heartbeat helper exits when this process is gone
+TOOL_PID=""       # analyzer currently running in the background
+HB_PID=""         # its heartbeat helper
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
 # ---------------------------------------------------------------- logging ---
@@ -123,6 +126,8 @@ Metrics and sidecars (ON by default; each can be disabled):
                                <tool-root>, <project-root>, <output-root> (for diffing)
       --heartbeat SEC     print a "still running" line every SEC seconds for a slow
                           TU (default 30; 0 = off)
+      --tu-timeout SEC    kill an analyzer that runs longer than SEC seconds and count the
+                          TU as failed (default 0 = no limit; needs coreutils `timeout`)
       --stop-on-fail      stop the whole run at the first TU that fails
       --keep-intermediates keep per-phase work files under <project>/.work
   -h, --help              this help
@@ -184,6 +189,7 @@ CONFIG_ID=""
 REPORTS=0
 PAPER_FACTS=0
 HEARTBEAT=30
+TU_TIMEOUT=0
 STOP_ON_FAIL=0
 KEEP=0
 RUNTIME_METRICS="${RUNTIME_METRICS:-1}"
@@ -228,6 +234,7 @@ while [[ $# -gt 0 ]]; do
     --reports)            REPORTS=1; shift ;;
     --paper-facts)        PAPER_FACTS=1; shift ;;
     --heartbeat)          need_value "$@"; HEARTBEAT="$2"; shift 2 ;;
+    --tu-timeout)         need_value "$@"; TU_TIMEOUT="$2"; shift 2 ;;
     --no-runtime-metrics)    RUNTIME_METRICS=0; shift ;;
     --no-prevalence-metrics) PREVALENCE_METRICS=0; shift ;;
     --no-partial-sidecars)   PUBLISH_PARTIAL_C1_SIDECARS=0; shift ;;
@@ -247,6 +254,13 @@ for v in RUNTIME_METRICS PREVALENCE_METRICS PUBLISH_PARTIAL_C1_SIDECARS PREVALEN
   [[ "${!v}" == 0 || "${!v}" == 1 ]] || die "$v must be 0 or 1, got '${!v}'"
 done
 [[ "$HEARTBEAT" =~ ^[0-9]+$ ]] || die "--heartbeat must be a non-negative integer (seconds), got '$HEARTBEAT'"
+[[ "$TU_TIMEOUT" =~ ^[0-9]+$ ]] || die "--tu-timeout must be a non-negative integer (seconds), got '$TU_TIMEOUT'"
+TIMEOUT_CMD=""
+if (( TU_TIMEOUT > 0 )); then
+  for c in timeout gtimeout; do command -v "$c" >/dev/null 2>&1 && { TIMEOUT_CMD="$c"; break; }; done
+  [[ -n "$TIMEOUT_CMD" ]] || die "--tu-timeout needs the coreutils 'timeout' command, which was not found" \
+    "install coreutils (macOS: brew install coreutils, which provides gtimeout) or drop --tu-timeout"
+fi
 if (( SINGLE_TU && ROUNDS != 1 )); then
   info "note: --single-tu ignores --rounds"
 fi
@@ -530,7 +544,7 @@ STOP_ALL=0
 hint_for_error() {
   local msg="$1"
   case "$msg" in
-    *"'std"*"h' file not found"*|*"'stdarg.h' file not found"*|*"'stdbool.h' file not found"*|*"'stdint.h' file not found"*|*"'limits.h' file not found"*)
+    *"'stddef.h' file not found"*|*"'stdarg.h' file not found"*|*"'stdbool.h' file not found"*|*"'stdint.h' file not found"*|*"'limits.h' file not found"*|*"'float.h' file not found"*)
       hint "builtin clang header missing: --resource-dir (${RESOURCE_DIR:-not set}) does not match the clang the tool was built with"
       hint "pass --resource-dir \$(clang-NN -print-resource-dir) for the right LLVM version" ;;
     *"file not found"*)
@@ -540,6 +554,45 @@ hint_for_error() {
       hint "likely a missing -D macro or include path in compile_commands.json for this TU." ;;
   esac
 }
+
+# Prints a progress line every $HEARTBEAT seconds while analyzer $1 runs.  It ends on its
+# own when the analyzer or this script disappears, so it can never be left behind.
+heartbeat_loop() {  # heartbeat_loop TOOL_PID TAG REL T0
+  local pid="$1" tag="$2" rel="$3" t0="$4" k
+  while :; do
+    for ((k = 0; k < HEARTBEAT; k++)); do
+      sleep 1
+      kill -0 "$pid" 2>/dev/null && kill -0 "$SCRIPT_PID" 2>/dev/null || return 0
+    done
+    printf '           ... %s %s still running (%ds)\n' "$tag" "$rel" $((SECONDS - t0))
+  done
+}
+
+# Stop whatever we started in the background.  Runs on every exit path (EXIT trap).
+cleanup_children() {
+  local pid i
+  for pid in "$HB_PID" "$TOOL_PID"; do
+    [[ -n "$pid" ]] || continue
+    kill "$pid" 2>/dev/null || continue
+    for i in 1 2 3 4 5 6 7 8 9 10; do kill -0 "$pid" 2>/dev/null || break; sleep 0.2; done
+    kill -KILL "$pid" 2>/dev/null
+    wait "$pid" 2>/dev/null
+  done
+  HB_PID=""; TOOL_PID=""
+  return 0
+}
+
+on_signal() {  # on_signal SIGNAL-NAME
+  trap - INT TERM HUP
+  echo; err "interrupted ($1): stopping the analyzer"
+  [[ -n "${ROOT_OUT:-}" ]] && hint "partial results are in $ROOT_OUT"
+  cleanup_children
+  exit 130
+}
+trap 'on_signal INT' INT
+trap 'on_signal TERM' TERM
+trap 'on_signal HUP' HUP
+trap cleanup_children EXIT
 
 # Stage label stored in runtime sidecars (same names as the older runners).
 stage_name() {
@@ -612,7 +665,7 @@ publish_sidecar() {
 run_tu() {
   local tag="$1" idx="$2" stem="$3" src="$4" rel="$5" tdir="$6" sdir_pub="$7" rdir_pub="$8" pdir_pub="$9"
   local rtdir_pub="${10:-}" index="${11:-}" prev_tag="${12:-}" prev_sum="${13:-}" prev_text="${14:-}" prev_json=""
-  local tmp="$WORK/$tag-tmp/$stem" sdir rdir out_txt rc t0 nerr first status="ok" hb=""
+  local tmp="$WORK/$tag-tmp/$stem" sdir rdir out_txt rc t0 nerr first status="ok"
   sdir="$tmp/s"; rdir="$tmp/r"; out_txt="$tdir/${stem}.txt"
   rm -rf "$tmp"; mkdir -p "$sdir" "$tdir"
   local cmd=("$TOOL")
@@ -633,15 +686,17 @@ run_tu() {
 
   { printf '%s: ' "$tag"; printf '%q ' "${cmd[@]}"; echo; } >>"$LOG_FILE"
   t0=$SECONDS
-  if (( HEARTBEAT > 0 )); then
-    # Sleep in 1s steps: a lingering long `sleep` would keep a pipe (| tee) open after we kill this loop.
-    ( while :; do for ((k = 0; k < HEARTBEAT; k++)); do sleep 1; done
-        printf '           ... %s %s still running (%ds)\n' "$tag" "$rel" $((SECONDS - t0)); done ) &
-    hb=$!
-  fi
-  { echo "Command:"; printf '%q ' "${cmd[@]}"; echo; echo; echo "Output:"; "${cmd[@]}"; } >"$out_txt" 2>&1
-  rc=$?
-  if [[ -n "$hb" ]]; then kill "$hb" 2>/dev/null; wait "$hb" 2>/dev/null; fi
+  { echo "Command:"; printf '%q ' "${cmd[@]}"; echo; echo; echo "Output:"; } >"$out_txt"
+  local run=("${cmd[@]}")
+  (( TU_TIMEOUT > 0 )) && run=("$TIMEOUT_CMD" --kill-after=10 "$TU_TIMEOUT" "${cmd[@]}")
+  # Run in the background and wait: bash then handles Ctrl-C/TERM immediately instead of
+  # after the analyzer finishes, and cleanup_children can stop it.
+  "${run[@]}" >>"$out_txt" 2>&1 &
+  TOOL_PID=$!
+  if (( HEARTBEAT > 0 )); then heartbeat_loop "$TOOL_PID" "$tag" "$rel" "$t0" & HB_PID=$!; fi
+  wait "$TOOL_PID"; rc=$?
+  TOOL_PID=""
+  if [[ -n "$HB_PID" ]]; then kill "$HB_PID" 2>/dev/null; wait "$HB_PID" 2>/dev/null; HB_PID=""; fi
   nerr="$(grep -E -c ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt")"
   first="$(grep -E -m1 ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt" | sed -e "s#$PROJECT_DIR/##")"
 
@@ -652,6 +707,9 @@ run_tu() {
   if (( rc != 0 )); then
     status="FAILED (exit $rc)"
     reason="${first:-analyzer exited nonzero}"
+    if (( TU_TIMEOUT > 0 && (rc == 124 || rc == 137) )); then
+      status="FAILED (timeout)"; reason="analyzer killed after the ${TU_TIMEOUT}s limit (--tu-timeout)"
+    fi
     { echo; echo "===== $tag failure output for $rel ====="; tail -n 40 "$out_txt"; } >>"$LOG_FILE"
   elif publish_sidecar "$sdir" "$sdir_pub" "$stem" ".cast-summary.json" "$tag $rel" \
        && { (( ! REPORTS )) || publish_sidecar "$rdir" "$rdir_pub" "$stem" ".cast-report.json" "$tag $rel"; } \
@@ -1072,7 +1130,6 @@ analyze_project() {  # analyze_project INDEX
 }
 
 # ------------------------------------------------------------------- main ---
-trap 'echo; err "interrupted"; hint "partial results in $ROOT_OUT"; exit 130' INT TERM
 RUN_START=$SECONDS
 RESULTS=()
 overall=0

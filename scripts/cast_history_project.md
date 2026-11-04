@@ -112,6 +112,11 @@ OUT/<project>/
   prints a red `!!! WARNING: STALE RESULT`, and its report starts with a STALE
   banner. The run summary lists these TUs again.
 - `--stop-on-fail` aborts the whole run at the first failing TU.
+- `--tu-timeout SEC` kills an analyzer that runs longer than SEC seconds; that TU
+  counts as failed ("FAILED (timeout)"). Default: no limit.
+- Ctrl-C or `kill` stops the analyzer and its progress helper immediately
+  (exit status 130); nothing is left running. Only `kill -9` of the script itself
+  can leave the analyzer behind, and its progress helper then exits on its own.
 - Slow TUs print a "still running" line every 30 s (`--heartbeat SEC`, `0` = off).
 
 ## Common errors
