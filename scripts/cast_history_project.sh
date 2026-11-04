@@ -1,32 +1,34 @@
 #!/usr/bin/env bash
-# cast_history_project.sh - build the cast history of ONE C/C++ project
+# cast_history_project.sh - build the cast history of one or MANY C/C++ projects
 # (in-tree or out-of-tree) into a chosen output directory.
 #
-# Clean replacement for run_all_multitu_projects-rp.sh when the benchmark
-# lives outside this repository.  It runs the same workflow:
+# Clean replacement for run_all_multitu_projects-rp.sh when the benchmarks live
+# outside this repository.  Per project it runs the same workflow:
 #
 #   C1  analyze every translation unit (TU)  -> per-TU cast-summary.json
 #   C2  build project-summary-index.json     <- all C1 summaries
 #   IMP N import-aware rounds: re-analyze each TU with --enable-summary-import,
-#       rebuild the index from the new summaries (default N=2)
-#   FIN publish final text + summaries + index to the output directory
+#       rebuild the index from the new summaries (default N=1)
+#   FIN publish final text + summaries + index
 #
 # Usage:
-#   cast_history_project.sh [options] [PROJECT_DIR | path/to/compile_commands.json]
+#   cast_history_project.sh [options] [INPUT...]
 #
-#   PROJECT_DIR defaults to the current directory.
+#   INPUT is a project directory, a directory that CONTAINS several projects,
+#   or a compile_commands.json file.  Default: the current directory.
 #
 # Required inputs (everything else is auto-detected; see --help):
 #   1. cast-history-tool binary   --tool, $TOOL, ./cast-history-tool,
 #                                 ./build/ or <repo>/build/
-#   2. compile_commands.json      --compdb, or PROJECT_DIR/{,build/}compile_commands.json,
+#   2. compile_commands.json      per project: --compdb, INPUT/{,build/}compile_commands.json,
 #                                 or --synthesize-compdb for self-contained sources
 #   3. a clang whose builtin headers match the tool's LLVM (stddef.h, ...)
 #                                 --resource-dir / --clang, or `clang` on PATH
 #   4. python3 + scripts/build_summary_index.py (found next to this script)
 #
-# Exit status: 0 all TUs analyzed, 1 finished but some TU/phase failed,
-#              2 usage or environment problem (nothing was analyzed).
+# Exit status: 0 every project fully analyzed
+#              1 finished, but some TU failed / used a stale fallback / a project was skipped
+#              2 usage or environment problem (nothing was analyzed)
 
 set -uo pipefail
 
@@ -42,18 +44,25 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 
 # ---------------------------------------------------------------- logging ---
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
-  C_RED=$'\033[31m'; C_YEL=$'\033[33m'; C_GRN=$'\033[32m'; C_BLD=$'\033[1m'; C_OFF=$'\033[0m'
+  C_RED=$'\033[1;31m'; C_YEL=$'\033[33m'; C_GRN=$'\033[32m'; C_BLD=$'\033[1m'; C_OFF=$'\033[0m'
 else
   C_RED=""; C_YEL=""; C_GRN=""; C_BLD=""; C_OFF=""
 fi
-LOG_FILE=""
-WARN_COUNT=0
+RUN_LOG=""        # <output>/run.log   (whole run)
+LOG_FILE=""       # <output>/<project>/commands.log (current project)
+WARN_COUNT=0      # warnings in the current project (reset per project)
+TOTAL_WARN=0
 
-_log_file() { [[ -n "$LOG_FILE" ]] && printf '%s\n' "$*" >>"$LOG_FILE"; return 0; }
+_log_file() {
+  [[ -n "$RUN_LOG" ]] && printf '%s\n' "$*" >>"$RUN_LOG"
+  [[ -n "$LOG_FILE" ]] && printf '%s\n' "$*" >>"$LOG_FILE"
+  return 0
+}
 info()  { printf '%s\n' "$*"; _log_file "$*"; }
 step()  { printf '%s==> %s%s\n' "$C_BLD" "$*" "$C_OFF"; _log_file "==> $*"; }
 ok()    { printf '%s%s%s\n' "$C_GRN" "$*" "$C_OFF"; _log_file "$*"; }
-warn()  { WARN_COUNT=$((WARN_COUNT + 1)); printf '%swarning:%s %s\n' "$C_YEL" "$C_OFF" "$*" >&2; _log_file "warning: $*"; }
+warn()  { WARN_COUNT=$((WARN_COUNT + 1)); TOTAL_WARN=$((TOTAL_WARN + 1)); printf '%swarning:%s %s\n' "$C_YEL" "$C_OFF" "$*" >&2; _log_file "warning: $*"; }
+loud()  { WARN_COUNT=$((WARN_COUNT + 1)); TOTAL_WARN=$((TOTAL_WARN + 1)); printf '%s!!! WARNING: %s%s\n' "$C_RED" "$*" "$C_OFF" >&2; _log_file "!!! WARNING: $*"; }
 hint()  { printf '         %s\n' "$*" >&2; _log_file "         $*"; }
 err()   { printf '%serror:%s %s\n' "$C_RED" "$C_OFF" "$*" >&2; _log_file "error: $*"; }
 die()   { err "$1"; shift; local h; for h in "$@"; do hint "$h"; done; exit 2; }
@@ -61,24 +70,28 @@ die()   { err "$1"; shift; local h; for h in "$@"; do hint "$h"; done; exit 2; }
 # ------------------------------------------------------------------ usage ---
 usage() {
   cat <<EOF
-Usage: $SCRIPT_NAME [options] [PROJECT_DIR | compile_commands.json]
+Usage: $SCRIPT_NAME [options] [INPUT...]
 
-Build the cast history of the project in PROJECT_DIR (default: current dir)
-and write it to the output directory.
+Build the cast history of the project(s) found in INPUT (default: current dir).
+INPUT may be a project directory, a directory containing several projects
+(each immediate subdirectory with a compile_commands.json is one project), or a
+compile_commands.json file.
 
 Output:
-  -o, --output DIR        output directory (default: ./cast-history-out)
-      --force             allow OUTPUT to be non-empty and not created by this script;
+  -o, --output DIR        output root (default: ./cast-history-out); each project
+                          is written to DIR/<project-name>/
+      --force             allow DIR to be non-empty and not created by this script;
                           its CONTENTS ARE DELETED
 Inputs:
-      --compdb PATH       compile_commands.json (or the directory holding it)
-      --synthesize-compdb generate a simple compile_commands.json from a recursive
-                          source scan when the project has none (flags are guessed:
-                          see --std / --cflags; header paths/macros may be wrong)
+      --compdb PATH       compile_commands.json (or its directory); single project only
+      --synthesize-compdb for projects without a compile database, generate a simple
+                          one from a recursive source scan (flags are guesses: see
+                          --std / --cflags). Also makes a root directory with
+                          source-only subdirectories count as several projects.
       --std STD           -std= for synthesized entries (default: c11 / c++17)
       --cflags "FLAGS"    extra flags for synthesized entries, e.g. "-Iinclude -DNDEBUG"
-      --source-root DIR   directory that output file names are made relative to
-                          (default: PROJECT_DIR, or the common parent of the sources)
+      --source-root DIR   base for output file names (default: the project directory,
+                          or the common parent of its sources)
       --filter REGEX      keep only source paths matching this Python regex
       --exclude REGEX     drop source paths matching this Python regex
                           e.g. '/(test|tests|third_party|vendor|build)/'
@@ -91,35 +104,46 @@ Tool / toolchain:
       --no-resource-dir   do not inject -resource-dir (only if your compdb has it)
       --python CMD        python interpreter (env: PYTHON, default python3)
 Workflow:
-      --rounds N          import/index refinement rounds (default 2; 0 = C1 only)
+      --rounds N          import/index refinement rounds (default 1; 0 = C1 only)
+      --single-tu         analyze every TU independently: no index, no import rounds
+                          (for corpora of unrelated single-file programs)
       --config-id ID      value for --summary-config-id
       --reports           also emit verbose *.cast-report.json sidecars
       --paper-facts       also emit compact *.cast-paper-facts.json sidecars
-      --stop-on-fail      stop at the first TU that fails
-      --keep-intermediates keep per-phase work files under OUTPUT/.work
+      --heartbeat SEC     print a "still running" line every SEC seconds for a slow
+                          TU (default 30; 0 = off)
+      --stop-on-fail      stop the whole run at the first TU that fails
+      --keep-intermediates keep per-phase work files under <project>/.work
   -h, --help              this help
 
 Output layout:
-  OUTPUT/<stem>.txt                    final human-readable report per TU
-  OUTPUT/summaries/<stem>.cast-summary.json   final machine-readable summaries
-  OUTPUT/project-summary-index.json    index over the final summaries
-  OUTPUT/commands.log                  every command + failure output + warnings
-  OUTPUT/failed-tus.txt                only if something failed: phase, exit code, source
-  OUTPUT/failed/<stem>.<phase>.txt     analyzer output of each failed TU
-  (a TU that fails in C1 is left out of the index and not retried in later rounds)
+  OUTPUT/run.log                         everything printed in this run
+  OUTPUT/projects-summary.tsv            one row per project (status, counts)
+  OUTPUT/<project>/<stem>.txt            final human-readable report per TU
+  OUTPUT/<project>/summaries/<stem>.cast-summary.json   final machine-readable summaries
+  OUTPUT/<project>/project-summary-index.json           index over the final summaries
+  OUTPUT/<project>/commands.log          every command + failure output + warnings
+  OUTPUT/<project>/failed-tus.txt        only if something failed
+  OUTPUT/<project>/failed/<stem>.<phase>.txt   analyzer output of each failed TU
   <stem> is the source path relative to the source root with '/' replaced by '_'.
+  A TU that fails in C1 is left out of the index and not retried.  A TU that
+  fails in an import round falls back to its previous-phase summary/report
+  (the report gets a STALE banner) and is flagged loudly.
 
 Examples:
-  # project already has build/compile_commands.json
-  $SCRIPT_NAME -o /data/out/lua /data/benchmarks/lua-5.4.1
+  # one project with build/compile_commands.json
+  $SCRIPT_NAME -o /data/out /data/benchmarks/lua-5.4.1
 
-  # run from inside the project, skip tests/vendored code
-  cd ~/src/zlib && $SCRIPT_NAME --exclude '/(test|contrib)/' -o ~/out/zlib
+  # a directory holding many projects (each with a compile_commands.json)
+  $SCRIPT_NAME -o /data/out /data/benchmarks
+
+  # source-only benchmark corpus, no build metadata, independent programs
+  $SCRIPT_NAME --synthesize-compdb --single-tu -o /data/out /data/bench-genc2rust
 EOF
 }
 
 # ------------------------------------------------------------- arguments ---
-PROJECT_ARG=""
+INPUTS=()
 OUTPUT_DIR="./cast-history-out"
 FORCE=0
 COMPDB_ARG=""
@@ -136,10 +160,12 @@ CLANG_BIN="${CLANG_BIN:-}"
 RESOURCE_DIR="${RESOURCE_DIR:-}"
 NO_RESOURCE_DIR=0
 PYTHON="${PYTHON:-python3}"
-ROUNDS=2
+ROUNDS=1
+SINGLE_TU=0
 CONFIG_ID=""
 REPORTS=0
 PAPER_FACTS=0
+HEARTBEAT=30
 STOP_ON_FAIL=0
 KEEP=0
 
@@ -173,40 +199,30 @@ while [[ $# -gt 0 ]]; do
     --no-resource-dir)    NO_RESOURCE_DIR=1; shift ;;
     --python)             need_value "$@"; PYTHON="$2"; shift 2 ;;
     --rounds)             need_value "$@"; ROUNDS="$2"; shift 2 ;;
+    --single-tu)          SINGLE_TU=1; shift ;;
     --config-id)          need_value "$@"; CONFIG_ID="$2"; shift 2 ;;
     --reports)            REPORTS=1; shift ;;
     --paper-facts)        PAPER_FACTS=1; shift ;;
+    --heartbeat)          need_value "$@"; HEARTBEAT="$2"; shift 2 ;;
     --stop-on-fail)       STOP_ON_FAIL=1; shift ;;
     --keep-intermediates) KEEP=1; shift ;;
     -*)  die "unknown option: $1" "run '$SCRIPT_NAME --help' for the list of options" ;;
-    *)
-      [[ -z "$PROJECT_ARG" ]] || die "more than one project given: '$PROJECT_ARG' and '$1'" \
-        "this script handles one project per run; loop over projects in your shell"
-      PROJECT_ARG="$1"; shift ;;
+    *)   INPUTS+=("$1"); shift ;;
   esac
 done
+[[ ${#INPUTS[@]} -gt 0 ]] || INPUTS=(".")
 
 [[ "$ROUNDS" =~ ^[0-9]+$ ]] || die "--rounds must be a non-negative integer, got '$ROUNDS'"
+[[ "$HEARTBEAT" =~ ^[0-9]+$ ]] || die "--heartbeat must be a non-negative integer (seconds), got '$HEARTBEAT'"
+if (( SINGLE_TU && ROUNDS != 1 )); then
+  info "note: --single-tu ignores --rounds"
+fi
 
 # ------------------------------------------------------------- pre-flight ---
 step "Pre-flight checks"
 
 command -v "$PYTHON" >/dev/null 2>&1 || die "python interpreter not found: $PYTHON" \
   "install python3 or pass --python /path/to/python3"
-
-# Project directory (or a compile_commands.json given directly).
-PROJECT_ARG="${PROJECT_ARG:-.}"
-if [[ -f "$PROJECT_ARG" ]]; then
-  [[ "$(basename "$PROJECT_ARG")" == "compile_commands.json" ]] || die \
-    "project argument is a file but not compile_commands.json: $PROJECT_ARG" \
-    "pass the project directory, or a file named exactly compile_commands.json"
-  COMPDB_ARG="${COMPDB_ARG:-$PROJECT_ARG}"
-  PROJECT_ARG="$(dirname "$PROJECT_ARG")"
-fi
-[[ -d "$PROJECT_ARG" ]] || die "project directory not found: $PROJECT_ARG" \
-  "check the path; relative paths are resolved from $(pwd -P)"
-PROJECT_DIR="$(cd "$PROJECT_ARG" && pwd -P)"
-info "project:        $PROJECT_DIR"
 
 # Tool binary.
 if [[ -z "$TOOL" ]]; then
@@ -215,7 +231,7 @@ if [[ -z "$TOOL" ]]; then
   done
 fi
 [[ -n "$TOOL" ]] || die "cast-history-tool binary not found" \
-  "build it:  cmake -S $REPO_ROOT -B $REPO_ROOT/build && cmake --build $REPO_ROOT/build -j" \
+  "build it:  cmake -S $REPO_ROOT -B $REPO_ROOT/build -DLLVM_DIR=<llvm>/lib/cmake/llvm -DClang_DIR=<llvm>/lib/cmake/clang && cmake --build $REPO_ROOT/build -j" \
   "then pass --tool $REPO_ROOT/build/cast-history-tool (or export TOOL=...)"
 [[ -f "$TOOL" && -x "$TOOL" ]] || die "tool is missing or not executable: $TOOL" \
   "check the path or run: chmod +x $TOOL"
@@ -231,13 +247,16 @@ for opt in --summary-dir --enable-summary-import --summary-index; do
   grep -q -- "$opt" <<<"$TOOL_HELP" || die "tool does not support $opt: $TOOL" \
     "it is older than this script; rebuild from the current source tree"
 done
-info "tool:           $TOOL"
+TOOL_LLVM_MAJOR="$("$TOOL" --version 2>/dev/null | sed -n 's/.*LLVM version \([0-9][0-9]*\)\..*/\1/p' | head -1)"
+info "tool:           $TOOL (LLVM ${TOOL_LLVM_MAJOR:-version unknown})"
 
 # Index builder.
 BUILD_INDEX="${BUILD_INDEX:-$SCRIPT_DIR/build_summary_index.py}"
-[[ -f "$BUILD_INDEX" ]] || die "index builder not found: $BUILD_INDEX" \
-  "it normally sits next to this script; otherwise pass --build-index /path/to/build_summary_index.py"
-info "index builder:  $BUILD_INDEX"
+if (( ! SINGLE_TU )); then
+  [[ -f "$BUILD_INDEX" ]] || die "index builder not found: $BUILD_INDEX" \
+    "it normally sits next to this script; otherwise pass --build-index /path/to/build_summary_index.py"
+  info "index builder:  $BUILD_INDEX"
+fi
 
 # Clang resource directory (builtin headers: stddef.h, stdarg.h, ...).
 # Compile databases normally omit -resource-dir because the clang driver adds it
@@ -249,17 +268,24 @@ if (( NO_RESOURCE_DIR )); then
 else
   if [[ -z "$RESOURCE_DIR" ]]; then
     if [[ -z "$CLANG_BIN" ]]; then
-      for c in clang clang-20 clang-19 clang-18 clang-17 clang-16 clang-15 clang-14; do
+      # Prefer the clang that matches the LLVM the tool was built with.
+      for c in ${TOOL_LLVM_MAJOR:+clang-$TOOL_LLVM_MAJOR} clang clang-22 clang-21 clang-20 clang-19 clang-18 clang-17 clang-16 clang-15 clang-14; do
         if command -v "$c" >/dev/null 2>&1; then CLANG_BIN="$c"; break; fi
       done
     fi
     [[ -n "$CLANG_BIN" ]] && command -v "$CLANG_BIN" >/dev/null 2>&1 || die \
-      "no clang found to locate the builtin headers (${CLANG_BIN:-searched clang, clang-14..20})" \
+      "no clang found to locate the builtin headers (${CLANG_BIN:-searched clang, clang-14..22})" \
       "install clang, or pass --clang /path/to/clang (same LLVM version as the tool)" \
       "or pass --resource-dir <dir containing include/stddef.h>"
     RESOURCE_DIR="$("$CLANG_BIN" -print-resource-dir 2>/dev/null)" || die \
       "'$CLANG_BIN -print-resource-dir' failed" "pass --resource-dir explicitly"
     info "clang:          $CLANG_BIN ($("$CLANG_BIN" --version 2>/dev/null | head -1))"
+  fi
+  # Builtin headers from another LLVM major version can fail to parse or change semantics.
+  rd_major="$(basename "$RESOURCE_DIR" | sed -n 's/^\([0-9][0-9]*\).*/\1/p')"
+  if [[ -n "$TOOL_LLVM_MAJOR" && -n "$rd_major" && "$rd_major" != "$TOOL_LLVM_MAJOR" ]]; then
+    warn "resource dir is for LLVM $rd_major but the tool was built with LLVM $TOOL_LLVM_MAJOR: $RESOURCE_DIR"
+    hint "pass --clang clang-$TOOL_LLVM_MAJOR or --resource-dir <LLVM $TOOL_LLVM_MAJOR resource dir>"
   fi
   [[ -f "$RESOURCE_DIR/include/stddef.h" ]] || die \
     "invalid clang resource directory: $RESOURCE_DIR" \
@@ -269,53 +295,152 @@ else
   info "resource dir:   $RESOURCE_DIR"
 fi
 
-# Output directory.  We only ever delete a directory this script created
-# (marker file) or one the user explicitly allowed with --force.
+# Output root.  We only ever delete a directory this script created (marker
+# file) or one the user explicitly allowed with --force.
 mkdir -p "$OUTPUT_DIR" 2>/dev/null || die "cannot create output directory: $OUTPUT_DIR" \
   "check permissions and that the parent exists"
 [[ -w "$OUTPUT_DIR" ]] || die "output directory is not writable: $OUTPUT_DIR" "check permissions"
-OUT="$(cd "$OUTPUT_DIR" && pwd -P)"
-MARKER="$OUT/.cast-history-output"
-if [[ "$OUT" == "/" || "$OUT" == "${HOME:-/nonexistent}" || "$OUT" == "$PROJECT_DIR" || "$PROJECT_DIR/" == "$OUT/"* ]]; then
-  die "refusing to use $OUT as output: it is, or contains, the project/home/root directory" \
-    "choose a dedicated directory, e.g. -o $OUT/cast-history-out"
+ROOT_OUT="$(cd "$OUTPUT_DIR" && pwd -P)"
+MARKER="$ROOT_OUT/.cast-history-output"
+if [[ "$ROOT_OUT" == "/" || "$ROOT_OUT" == "${HOME:-/nonexistent}" ]]; then
+  die "refusing to use $ROOT_OUT as output directory" "choose a dedicated directory, e.g. -o $ROOT_OUT/cast-history-out"
 fi
-if [[ -n "$(ls -A "$OUT")" && ! -f "$MARKER" ]]; then
-  (( FORCE )) || die "output directory is not empty and was not created by this script: $OUT" \
+if [[ -n "$(ls -A "$ROOT_OUT")" && ! -f "$MARKER" ]]; then
+  (( FORCE )) || die "output directory is not empty and was not created by this script: $ROOT_OUT" \
     "choose a new/empty directory, or pass --force to overwrite its contents"
 fi
-find "$OUT" -mindepth 1 -delete 2>/dev/null
+# Never wipe a directory that holds (or is) one of the inputs.
+for in in "${INPUTS[@]}"; do
+  if [[ -e "$in" ]]; then
+    in_abs="$(cd "$(dirname "$in")" && pwd -P)/$(basename "$in")"; [[ -d "$in" ]] && in_abs="$(cd "$in" && pwd -P)"
+    if [[ "$in_abs" == "$ROOT_OUT" || "$in_abs/" == "$ROOT_OUT/"* ]]; then
+      die "input $in is, or lies inside, the output directory $ROOT_OUT" \
+        "its contents would be deleted; choose an output directory outside the inputs (e.g. -o $ROOT_OUT/../cast-history-out)"
+    fi
+  fi
+done
+find "$ROOT_OUT" -mindepth 1 -delete 2>/dev/null
 echo "created by $SCRIPT_NAME on $(date -u +%FT%TZ)" >"$MARKER"
-LOG_FILE="$OUT/commands.log"
-: >"$LOG_FILE"
-WORK="$OUT/.work"
-mkdir -p "$WORK" "$OUT/summaries"
-(( REPORTS ))    && mkdir -p "$OUT/reports"
-(( PAPER_FACTS )) && mkdir -p "$OUT/paper-facts"
-info "output:         $OUT"
-
+RUN_LOG="$ROOT_OUT/run.log"
 {
   echo "# $SCRIPT_NAME  $(date -u +%FT%TZ)"
   printf '# argv:'; printf ' %q' ${ORIG_ARGS[@]+"${ORIG_ARGS[@]}"}; echo
   echo "# cwd: $(pwd -P)"
-  echo "# project: $PROJECT_DIR"
   echo "# tool: $TOOL"
-  command -v git >/dev/null 2>&1 && {
-    echo "# project git commit: $(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || echo n/a)"
+  echo "# resource dir: ${RESOURCE_DIR:-none}"
+  if command -v git >/dev/null 2>&1; then
     echo "# tool-repo git commit: $(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo n/a)"
-  }
-} >>"$LOG_FILE"
+  fi
+} >"$RUN_LOG"
+info "output:         $ROOT_OUT"
 
-# ------------------------------------------------- compile_commands.json ---
-sanitize_stem() { printf '%s' "$1" | sed -e 's/[^A-Za-z0-9._-]/_/g' -e 's/__*/_/g' -e 's/^_//' -e 's/_$//'; }
-
-# Prefixes the embedded Python uses for diagnostics (keeps colors consistent).
+# ----------------------------------------------------- project discovery ---
 export CH_WARN="${C_YEL}warning:${C_OFF}" CH_NOTE="note:"
 export CH_EXT="$SRC_EXT" CH_FILTER="$SRC_FILTER" CH_EXCLUDE="$SRC_EXCLUDE"
 
-synthesize_compdb() {  # synthesize_compdb OUT_DIR
-  local dir="$1"; mkdir -p "$dir"
-  "$PYTHON" - "$dir/compile_commands.json" "$PROJECT_DIR" "$SYNTH_STD" "$SYNTH_CFLAGS" <<'PY'
+P_DIR=(); P_COMPDB=(); P_NAME=()
+
+# Echo the compile database that belongs to directory $1 (if any).
+dir_compdb() {
+  local d="$1"
+  if   [[ -f "$d/compile_commands.json" ]];       then echo "$d/compile_commands.json"
+  elif [[ -f "$d/build/compile_commands.json" ]]; then echo "$d/build/compile_commands.json"
+  fi
+}
+
+# True if directory $1 contains source files (optionally only down to depth $2).
+dir_has_sources() {
+  local d="$1" depth="${2:-}" names=() e md=()
+  for e in $SRC_EXT; do names+=(-o -iname "*$e"); done
+  [[ -n "$depth" ]] && md=(-maxdepth "$depth")
+  [[ -n "$(find "$d" -mindepth 1 ${md[@]+"${md[@]}"} \( -name '.*' -prune -o -type f \( "${names[@]:1}" \) -print -quit \) 2>/dev/null)" ]]
+}
+
+add_project() {  # add_project DIR COMPDB(or empty)
+  local d="$1" cdb="$2" name base n=2
+  name="$(basename "$d")"
+  base="$name"
+  while printf '%s\n' ${P_NAME[@]+"${P_NAME[@]}"} | grep -qx -- "$name"; do
+    name="${base}_$n"; n=$((n + 1))
+  done
+  [[ "$name" == "$base" ]] || warn "two projects are both named '$base'; the second is written to '$name'"
+  P_DIR+=("$d"); P_COMPDB+=("$cdb"); P_NAME+=("$name")
+}
+
+discover_projects() {
+  local in dir cdb sub subs n_before dname
+  for in in "${INPUTS[@]}"; do
+    n_before=${#P_DIR[@]}
+    if [[ -f "$in" ]]; then
+      [[ "$(basename "$in")" == "compile_commands.json" ]] || die \
+        "input is a file but not compile_commands.json: $in" \
+        "pass a project directory, a directory of projects, or a file named exactly compile_commands.json"
+      cdb="$(cd "$(dirname "$in")" && pwd -P)/compile_commands.json"
+      dir="$(dirname "$cdb")"
+      dname="$(basename "$dir")"
+      case "$dname" in build|_build|out|cmake-build-*) dir="$(dirname "$dir")";; esac
+      add_project "$dir" "$cdb"
+      continue
+    fi
+    [[ -d "$in" ]] || die "input not found: $in" "check the path; relative paths are resolved from $(pwd -P)"
+    dir="$(cd "$in" && pwd -P)"
+
+    if [[ -n "$COMPDB_ARG" ]]; then
+      if [[ -d "$COMPDB_ARG" ]]; then cdb="$COMPDB_ARG/compile_commands.json"; else cdb="$COMPDB_ARG"; fi
+      [[ -f "$cdb" ]] || die "compile_commands.json not found at: $COMPDB_ARG" "pass the file or the directory that contains it"
+      [[ "$(basename "$cdb")" == "compile_commands.json" ]] || die \
+        "the tool only reads files named compile_commands.json, got: $(basename "$cdb")" \
+        "copy or symlink it:  ln -s $(basename "$cdb") $(dirname "$cdb")/compile_commands.json"
+      add_project "$dir" "$(cd "$(dirname "$cdb")" && pwd -P)/compile_commands.json"
+      continue
+    fi
+
+    cdb="$(dir_compdb "$dir")"
+    if [[ -n "$cdb" ]]; then add_project "$dir" "$cdb"; continue; fi
+
+    # Not a project itself: is it a root holding several projects?
+    mapfile -t subs < <(find "$dir" -mindepth 1 -maxdepth 1 -type d -not -name '.*' 2>/dev/null | sort)
+    for sub in ${subs[@]+"${subs[@]}"}; do
+      [[ "$sub" == "$ROOT_OUT" ]] && continue
+      cdb="$(dir_compdb "$sub")"
+      if [[ -n "$cdb" ]]; then add_project "$sub" "$cdb"
+      elif (( SYNTH )) && dir_has_sources "$sub"; then add_project "$sub" ""
+      elif dir_has_sources "$sub"; then
+        warn "skipping $sub: it has sources but no compile_commands.json"
+        hint "generate one (cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON / bear -- make) or use --synthesize-compdb"
+      fi
+    done
+    (( ${#P_DIR[@]} > n_before )) && continue
+
+    # A directory with sources of its own, and --synthesize-compdb: one project.
+    if (( SYNTH )) && dir_has_sources "$dir"; then add_project "$dir" ""; continue; fi
+
+    err "no project found in: $dir"
+    hint "looked for compile_commands.json in $dir/, $dir/build/ and in each immediate subdirectory"
+    hint "create one, then re-run (or pass --compdb for a single project):"
+    hint "  CMake:      cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+    hint "  make/other: bear -- make        (or: compiledb -n make)"
+    hint "  self-contained sources only: re-run with --synthesize-compdb"
+    exit 2
+  done
+}
+
+echo
+step "Discovering projects"
+discover_projects
+NPROJ=${#P_DIR[@]}
+(( NPROJ > 0 )) || die "no projects to analyze" "see the messages above"
+for ((i = 0; i < NPROJ; i++)); do
+  info "  $(printf '%-24s' "${P_NAME[i]}") ${P_DIR[i]}  [${P_COMPDB[i]:-compile db will be synthesized}]"
+done
+if [[ -n "$COMPDB_ARG" && $NPROJ -gt 1 ]]; then
+  die "--compdb applies to a single project but $NPROJ projects were found" "pass one project directory with --compdb"
+fi
+
+# ------------------------------------------------- compile_commands.json ---
+synthesize_compdb() {  # synthesize_compdb PROJECT_DIR OUT_DIR  -> prints number of entries
+  local project="$1" dir="$2"; mkdir -p "$dir"
+  "$PYTHON" - "$dir/compile_commands.json" "$project" "$SYNTH_STD" "$SYNTH_CFLAGS" <<'PY'
 import json, os, re, shlex, sys
 out_file, project, std, cflags = sys.argv[1:5]
 exts = tuple(e.lower() for e in os.environ["CH_EXT"].split())
@@ -347,62 +472,192 @@ print(f"{len(out)}")
 PY
 }
 
-find_compdb() {
-  local cand
-  if [[ -n "$COMPDB_ARG" ]]; then
-    if [[ -d "$COMPDB_ARG" ]]; then cand="$COMPDB_ARG/compile_commands.json"; else cand="$COMPDB_ARG"; fi
-    [[ -f "$cand" ]] || die "compile_commands.json not found at: $COMPDB_ARG" \
-      "pass the file or the directory that contains it"
-    [[ "$(basename "$cand")" == "compile_commands.json" ]] || die \
-      "the tool only reads files named compile_commands.json, got: $(basename "$cand")" \
-      "copy or symlink it:  ln -s $(basename "$cand") $(dirname "$cand")/compile_commands.json"
-    COMPDB="$(cd "$(dirname "$cand")" && pwd -P)/compile_commands.json"; return
-  fi
-  for cand in "$PROJECT_DIR/compile_commands.json" "$PROJECT_DIR/build/compile_commands.json"; do
-    [[ -f "$cand" ]] && { COMPDB="$cand"; return; }
-  done
-  local found=()
-  mapfile -t found < <(find "$PROJECT_DIR" -mindepth 2 -maxdepth 2 -name compile_commands.json 2>/dev/null | sort)
-  if [[ ${#found[@]} -eq 1 ]]; then
-    COMPDB="${found[0]}"; info "note: using ${found[0]} (only compile_commands.json one level down)"; return
-  elif [[ ${#found[@]} -gt 1 ]]; then
-    err "several compile_commands.json files found under $PROJECT_DIR:"
-    printf '         %s\n' "${found[@]}" >&2
-    hint "pick one with --compdb <file-or-dir>"
-    exit 2
-  fi
-  if (( SYNTH )); then
-    warn "no compile_commands.json found: synthesizing one in $OUT/synthetic-compdb"
-    hint "include paths, macros and generated headers are guesses; prefer a real compile database"
-    local n
-    n="$(synthesize_compdb "$OUT/synthetic-compdb")" || die "could not synthesize compile_commands.json" \
-      "check --extensions / --exclude, or supply a real compile database with --compdb"
-    info "synthesized $n compile command(s)"
-    COMPDB="$OUT/synthetic-compdb/compile_commands.json"; return
-  fi
-  err "no compile_commands.json found for project: $PROJECT_DIR"
-  hint "looked in: $PROJECT_DIR/ and $PROJECT_DIR/build/ (and one level below)"
-  hint "create one, then re-run (or pass --compdb):"
-  hint "  CMake:      cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-  hint "  make/other: bear -- make        (or: compiledb -n make)"
-  hint "  self-contained sources only: re-run with --synthesize-compdb"
-  exit 2
+# ----------------------------------------------------------- run helpers ---
+FAILED=()      # "phase<TAB>exit<TAB>source<TAB>reason<TAB>fallback"
+SKIP=()        # SKIP[i]=1: TU failed in C1, so later passes do not retry it
+STALE=()       # "tag<TAB>relpath": TUs whose final result is a previous-phase fallback
+PASS_OK=0; PASS_FAIL=0; TU_OK=1
+STOP_ALL=0
+
+# Suggest a fix for the first clang error we saw.
+hint_for_error() {
+  local msg="$1"
+  case "$msg" in
+    *"'std"*"h' file not found"*|*"'stdarg.h' file not found"*|*"'stdbool.h' file not found"*|*"'stdint.h' file not found"*|*"'limits.h' file not found"*)
+      hint "builtin clang header missing: --resource-dir (${RESOURCE_DIR:-not set}) does not match the clang the tool was built with"
+      hint "pass --resource-dir \$(clang-NN -print-resource-dir) for the right LLVM version" ;;
+    *"file not found"*)
+      hint "missing include: check the -I flags in compile_commands.json for this TU;"
+      hint "generated headers (config.h, ...) exist only after the project's configure/build step has run." ;;
+    *"unknown type name"*|*"undeclared identifier"*)
+      hint "likely a missing -D macro or include path in compile_commands.json for this TU." ;;
+  esac
 }
 
-COMPDB=""
-find_compdb
-COMPDB_DIR="$(dirname "$COMPDB")"
-info "compile db:     $COMPDB"
+# publish_sidecar SRC_DIR DEST_DIR STEM SUFFIX LABEL  -> copies the emitted file(s) with a collision-safe name
+publish_sidecar() {
+  local sdir="$1" ddir="$2" stem="$3" suffix="$4" label="$5" files=() i=1 f
+  mapfile -t files < <(find "$sdir" -type f -name "*$suffix" 2>/dev/null | sort)
+  if [[ ${#files[@]} -eq 0 ]]; then
+    warn "$label: tool exited 0 but wrote no *$suffix under $sdir"
+    return 1
+  fi
+  mkdir -p "$ddir"
+  cp "${files[0]}" "$ddir/${stem}${suffix}" || { err "$label: cannot copy ${files[0]} to $ddir"; return 1; }
+  for f in "${files[@]:1}"; do
+    cp "$f" "$ddir/${stem}__extra_${i}${suffix}"; i=$((i + 1))
+  done
+  (( ${#files[@]} > 1 )) && warn "$label: ${#files[@]} $suffix files emitted for one source; extras saved as ${stem}__extra_N${suffix}"
+  return 0
+}
 
-# ------------------------------------------------------ source discovery ---
-if [[ -n "$SOURCE_ROOT" ]]; then
-  [[ -d "$SOURCE_ROOT" ]] || die "--source-root is not a directory: $SOURCE_ROOT"
-  SOURCE_ROOT="$(cd "$SOURCE_ROOT" && pwd -P)"
-fi
-export CH_REQUIRE_EXISTS=1
+# run_tu TAG IDX STEM SRC REL TEXT_DIR SUM_DIR REP_DIR PF_DIR [INDEX_FILE PREV_TAG PREV_SUM_DIR PREV_TEXT_DIR]
+# Analyze one TU, publish its outputs, print one progress line.
+run_tu() {
+  local tag="$1" idx="$2" stem="$3" src="$4" rel="$5" tdir="$6" sdir_pub="$7" rdir_pub="$8" pdir_pub="$9"
+  local index="${10:-}" prev_tag="${11:-}" prev_sum="${12:-}" prev_text="${13:-}"
+  local tmp="$WORK/$tag-tmp/$stem" sdir rdir out_txt rc t0 nerr first status="ok" hb=""
+  sdir="$tmp/s"; rdir="$tmp/r"; out_txt="$tdir/${stem}.txt"
+  rm -rf "$tmp"; mkdir -p "$sdir" "$tdir"
+  local cmd=("$TOOL")
+  [[ -n "$index" ]] && cmd+=(--enable-summary-import --summary-index "$index")
+  cmd+=(--summary-dir "$sdir")
+  if (( REPORTS )); then mkdir -p "$rdir"; cmd+=(--summary-report-dir "$rdir"); fi
+  (( PAPER_FACTS )) && cmd+=(--paper-facts-dir "$sdir")
+  [[ -n "$CONFIG_ID" ]] && cmd+=(--summary-config-id "$CONFIG_ID-$tag")
+  cmd+=(${RESOURCE_ARGS[@]+"${RESOURCE_ARGS[@]}"} -p "$COMPDB_DIR" "$src")
 
-SRC_TSV="$WORK/sources.tsv"
-"$PYTHON" - "$COMPDB" "$PROJECT_DIR" "$SOURCE_ROOT" "$SRC_TSV" <<'PY'
+  { printf '%s: ' "$tag"; printf '%q ' "${cmd[@]}"; echo; } >>"$LOG_FILE"
+  t0=$SECONDS
+  if (( HEARTBEAT > 0 )); then
+    ( while sleep "$HEARTBEAT"; do printf '           ... %s %s still running (%ds)\n' "$tag" "$rel" $((SECONDS - t0)); done ) &
+    hb=$!
+  fi
+  { echo "Command:"; printf '%q ' "${cmd[@]}"; echo; echo; echo "Output:"; "${cmd[@]}"; } >"$out_txt" 2>&1
+  rc=$?
+  if [[ -n "$hb" ]]; then kill "$hb" 2>/dev/null; wait "$hb" 2>/dev/null; fi
+  nerr="$(grep -E -c ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt")"
+  first="$(grep -E -m1 ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt" | sed -e "s#$PROJECT_DIR/##")"
+
+  TU_OK=0
+  local reason=""
+  if (( rc != 0 )); then
+    status="FAILED (exit $rc)"
+    reason="${first:-analyzer exited nonzero}"
+    { echo; echo "===== $tag failure output for $rel ====="; tail -n 40 "$out_txt"; } >>"$LOG_FILE"
+  elif publish_sidecar "$sdir" "$sdir_pub" "$stem" ".cast-summary.json" "$tag $rel" \
+       && { (( ! REPORTS )) || publish_sidecar "$rdir" "$rdir_pub" "$stem" ".cast-report.json" "$tag $rel"; } \
+       && { (( ! PAPER_FACTS )) || publish_sidecar "$sdir" "$pdir_pub" "$stem" ".cast-paper-facts.json" "$tag $rel"; }; then
+    PASS_OK=$((PASS_OK + 1)); TU_OK=1
+  else
+    status="FAILED (no output)"
+    reason="analyzer exited 0 but wrote no usable summary"
+  fi
+
+  local line
+  line="$(printf '  [%*d/%d] %-6s %s  %s (%ds)' "${#NSRC}" "$idx" "$NSRC" "$tag" "$rel" "$status" $((SECONDS - t0)))"
+  if (( TU_OK )); then
+    printf '%s\n' "$line"; _log_file "$line"
+    if (( nerr > 0 )); then
+      warn "$rel: analyzed, but clang reported $nerr error(s); results for this TU may be incomplete"
+      hint "first: $first"; hint_for_error "$first"
+      hint "full report: $OUT/${stem}.txt (published at the end of the run)"
+    fi
+    return 0
+  fi
+
+  # ---- failure path
+  PASS_FAIL=$((PASS_FAIL + 1))
+  printf '%s%s%s\n' "$C_RED" "$line" "$C_OFF"; _log_file "$line"
+  if [[ -n "$first" ]]; then hint "$first"; hint_for_error "$first"; else hint "last output: $(tail -n 1 "$out_txt")"; fi
+  mkdir -p "$OUT/failed"; cp "$out_txt" "$OUT/failed/${stem}.${tag}.txt"
+  hint "full output: $OUT/failed/${stem}.${tag}.txt (tail also in commands.log)"
+
+  # An import-round failure must not silently drop the TU from the next index:
+  # fall back to the previous phase's results and say so, loudly.
+  local fallback="none"
+  if [[ -n "$prev_sum" && -f "$prev_sum/${stem}.cast-summary.json" ]]; then
+    mkdir -p "$sdir_pub"; cp "$prev_sum/${stem}.cast-summary.json" "$sdir_pub/"
+    if [[ -f "$prev_text/${stem}.txt" ]]; then
+      {
+        echo "##############################################################################"
+        echo "### STALE REPORT: $tag failed for this TU ($reason)"
+        echo "### The content below is the $prev_tag result. It does NOT include cross-TU"
+        echo "### import information from this round. Failure output: failed/${stem}.${tag}.txt"
+        echo "##############################################################################"
+        echo
+        cat "$prev_text/${stem}.txt"
+      } >"$out_txt.stale" && mv "$out_txt.stale" "$out_txt"
+    else
+      rm -f "$out_txt"
+    fi
+    fallback="$prev_tag"
+    STALE+=("$tag"$'\t'"$rel")
+    loud "STALE RESULT: $rel failed in $tag - FALLING BACK to its $prev_tag summary/report"
+    hint "its final results lack the cross-TU information gained in $tag; fix the failure above and re-run"
+  else
+    rm -f "$out_txt"
+  fi
+  FAILED+=("$tag"$'\t'"$rc"$'\t'"$src"$'\t'"$reason"$'\t'"$fallback")
+  if (( STOP_ON_FAIL )); then STOP_ALL=1; err "stopping the run: --stop-on-fail"; fi
+  return 0
+}
+
+# run_pass TAG [INDEX_FILE PREV_TAG PREV_SUM_DIR PREV_TEXT_DIR]
+# Sets LATEST_TEXT/SUM/REP/PF to the directories this pass produced.
+run_pass() {
+  local tag="$1" index="${2:-}" prev_tag="${3:-}" prev_sum="${4:-}" prev_text="${5:-}" i skipped=0
+  LATEST_TEXT="$WORK/$tag-text"; LATEST_SUM="$WORK/$tag-summaries"
+  LATEST_REP="$WORK/$tag-reports"; LATEST_PF="$WORK/$tag-paper-facts"
+  mkdir -p "$LATEST_TEXT" "$LATEST_SUM"
+  PASS_OK=0; PASS_FAIL=0
+  for ((i = 0; i < NSRC; i++)); do
+    if [[ -n "${SKIP[i]:-}" ]]; then skipped=$((skipped + 1)); continue; fi
+    run_tu "$tag" $((i + 1)) "${STEMS[i]}" "${SRCS[i]}" "${RELS[i]}" \
+           "$LATEST_TEXT" "$LATEST_SUM" "$LATEST_REP" "$LATEST_PF" "$index" "$prev_tag" "$prev_sum" "$prev_text"
+    [[ "$tag" == c1 && $TU_OK -eq 0 ]] && SKIP[i]=1
+    (( STOP_ALL )) && break
+  done
+  local extra=""; (( skipped > 0 )) && extra=", $skipped skipped (failed in C1)"
+  info "  $tag: $PASS_OK ok, $PASS_FAIL failed$extra"
+}
+
+run_index() {  # run_index REASON OUTPUT SUMMARY_DIR [extra args...]
+  local reason="$1" outfile="$2" sumdir="$3"; shift 3
+  local cmd=("$PYTHON" "$BUILD_INDEX" "$sumdir" --project-kind real --build-reason "$reason" "$@" -o "$outfile")
+  { printf 'index(%s): ' "$reason"; printf '%q ' "${cmd[@]}"; echo; } >>"$LOG_FILE"
+  local out
+  if ! out="$("${cmd[@]}" 2>&1)"; then
+    { echo "===== index build ($reason) failed ====="; echo "$out"; } >>"$LOG_FILE"
+    err "building the project summary index failed ($reason)"
+    printf '%s\n' "$out" | tail -n 5 | sed 's/^/         /' >&2
+    hint "full output in $LOG_FILE"
+    return 1
+  fi
+  { echo "===== index build ($reason) ====="; echo "$out"; } >>"$LOG_FILE"
+  local w p nf ne
+  nf="$(sed -n 's/^  summary files: *//p' <<<"$out")"; ne="$(sed -n 's/^  dep edges: *//p' <<<"$out")"
+  info "  index ($reason): ${nf:-?} summaries, ${ne:-?} dependency edges"
+  w="$(sed -n 's/^  warnings: *//p' <<<"$out")"; p="$(sed -n 's/^  problems: *//p' <<<"$out")"
+  [[ "${w:-0}" != 0 ]] && warn "index ($reason): $w warning(s); see commands.log"
+  [[ "${p:-0}" != 0 ]] && warn "index ($reason): $p unresolved cross-TU problem(s); see commands.log"
+  return 0
+}
+
+has_cross_tu_edges() {  # exit 0: import rounds are useful (or unknown) / 1: purely local project
+  "$PYTHON" - "$1" <<'PY'
+import json, sys
+try: edges = json.load(open(sys.argv[1], encoding="utf-8")).get("summaryDependencyEdges")
+except Exception: raise SystemExit(0)
+if not isinstance(edges, list) or any(not isinstance(e, dict) or "crossTUCandidate" not in e for e in edges): raise SystemExit(0)
+raise SystemExit(0 if any(e.get("crossTUCandidate") for e in edges) else 1)
+PY
+}
+
+# Select the TUs of the current project.  Fills STEMS/SRCS/RELS.
+discover_sources() {
+  local SRC_TSV="$WORK/sources.tsv"
+  "$PYTHON" - "$COMPDB" "$PROJECT_DIR" "$SOURCE_ROOT" "$SRC_TSV" <<'PY'
 import json, os, re, sys
 compdb, project, source_root, out_tsv = sys.argv[1:5]
 W, N = os.environ["CH_WARN"], os.environ["CH_NOTE"]
@@ -483,282 +738,202 @@ with open(out_tsv, "w", encoding="utf-8") as fh:
 note(f"{len(rows)} translation unit(s) selected from {c['entries']} compile_commands entries"
      f" (skipped: {c['ext']} by suffix, {c['filt']} by --filter, {c['exc']} by --exclude, {c['dup']} duplicate)")
 PY
-rc=$?
-case $rc in
-  0) ;;
-  *) exit 2 ;;
-esac
-
-STEMS=(); SRCS=(); RELS=()
-while IFS=$'\t' read -r s p r; do STEMS+=("$s"); SRCS+=("$p"); RELS+=("$r"); done <"$SRC_TSV"
-NSRC=${#STEMS[@]}
-_log_file "sources: $NSRC (list in .work/sources.tsv)"
-(( NSRC > 400 )) && info "note: $NSRC TUs and $((ROUNDS + 2)) passes; this can take a while (each TU is analyzed once per pass)"
-
-# ----------------------------------------------------------- run helpers ---
-FAILED=()      # "phase<TAB>exit<TAB>source<TAB>reason"
-SKIP=()        # SKIP[i]=1: TU failed in C1, so later passes do not retry it
-PASS_OK=0; PASS_FAIL=0; TU_OK=1
-
-# Suggest a fix for the first clang error we saw.
-hint_for_error() {
-  local msg="$1"
-  case "$msg" in
-    *"'std"*"h' file not found"*|*"'stdarg.h' file not found"*|*"'stdbool.h' file not found"*|*"'stdint.h' file not found"*|*"'limits.h' file not found"*)
-      hint "builtin clang header missing: --resource-dir ($RESOURCE_DIR) does not match the clang the tool was built with"
-      hint "pass --resource-dir \$(clang-NN -print-resource-dir) for the right LLVM version" ;;
-    *"file not found"*)
-      hint "missing include: check the -I flags in compile_commands.json for this TU;"
-      hint "generated headers (config.h, ...) exist only after the project's configure/build step has run." ;;
-    *"unknown type name"*|*"undeclared identifier"*)
-      hint "likely a missing -D macro or include path in compile_commands.json for this TU." ;;
-  esac
+  [[ $? -eq 0 ]] || return 1
+  STEMS=(); SRCS=(); RELS=()
+  local s p r
+  while IFS=$'\t' read -r s p r; do STEMS+=("$s"); SRCS+=("$p"); RELS+=("$r"); done <"$SRC_TSV"
+  NSRC=${#STEMS[@]}
 }
 
-# publish_sidecar SRC_DIR DEST_DIR STEM SUFFIX LABEL  -> copies the emitted file(s) with a collision-safe name
-publish_sidecar() {
-  local sdir="$1" ddir="$2" stem="$3" suffix="$4" label="$5" files=() i=1 f
-  mapfile -t files < <(find "$sdir" -type f -name "*$suffix" 2>/dev/null | sort)
-  if [[ ${#files[@]} -eq 0 ]]; then
-    warn "$label: tool exited 0 but wrote no *$suffix under $sdir"
-    return 1
-  fi
-  mkdir -p "$ddir"
-  cp "${files[0]}" "$ddir/${stem}${suffix}" || { err "$label: cannot copy ${files[0]} to $ddir"; return 1; }
-  for f in "${files[@]:1}"; do
-    cp "$f" "$ddir/${stem}__extra_${i}${suffix}"; i=$((i + 1))
-  done
-  (( ${#files[@]} > 1 )) && warn "$label: ${#files[@]} $suffix files emitted for one source; extras saved as ${stem}__extra_N${suffix}"
-  return 0
-}
-
-# run_tu TAG IDX STEM SRC REL TEXT_DIR SUM_DIR REP_DIR PF_DIR [INDEX_FILE] [PREV_SUM_DIR]
-# Analyze one TU, publish its outputs, print one progress line.
-run_tu() {
-  local tag="$1" idx="$2" stem="$3" src="$4" rel="$5" tdir="$6" sdir_pub="$7" rdir_pub="$8" pdir_pub="$9"
-  local index="${10:-}" prev_sum="${11:-}"
-  local tmp="$WORK/$tag-tmp/$stem" sdir rdir out_txt rc t0 nerr first status="ok"
-  sdir="$tmp/s"; rdir="$tmp/r"; out_txt="$tdir/${stem}.txt"
-  rm -rf "$tmp"; mkdir -p "$sdir" "$tdir"
-  local cmd=("$TOOL")
-  [[ -n "$index" ]] && cmd+=(--enable-summary-import --summary-index "$index")
-  cmd+=(--summary-dir "$sdir")
-  if (( REPORTS )); then mkdir -p "$rdir"; cmd+=(--summary-report-dir "$rdir"); fi
-  (( PAPER_FACTS )) && cmd+=(--paper-facts-dir "$sdir")
-  [[ -n "$CONFIG_ID" ]] && cmd+=(--summary-config-id "$CONFIG_ID-$tag")
-  cmd+=(${RESOURCE_ARGS[@]+"${RESOURCE_ARGS[@]}"} -p "$COMPDB_DIR" "$src")
-
-  { printf '%s: ' "$tag"; printf '%q ' "${cmd[@]}"; echo; } >>"$LOG_FILE"
-  t0=$SECONDS
-  { echo "Command:"; printf '%q ' "${cmd[@]}"; echo; echo; echo "Output:"; "${cmd[@]}"; } >"$out_txt" 2>&1
-  rc=$?
-  nerr="$(grep -E -c ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt")"
-  first="$(grep -E -m1 ':[0-9]+:[0-9]+: (fatal )?error:' "$out_txt" | sed -e "s#$PROJECT_DIR/##")"
-
-  TU_OK=0
-  if (( rc != 0 )); then
-    status="FAILED (exit $rc)"
-    PASS_FAIL=$((PASS_FAIL + 1))
-    FAILED+=("$tag"$'\t'"$rc"$'\t'"$src"$'\t'"${first:-analyzer exited nonzero}")
-    { echo; echo "===== $tag failure output for $rel ====="; tail -n 40 "$out_txt"; } >>"$LOG_FILE"
-  else
-    if publish_sidecar "$sdir" "$sdir_pub" "$stem" ".cast-summary.json" "$tag $rel" \
-       && { (( ! REPORTS )) || publish_sidecar "$rdir" "$rdir_pub" "$stem" ".cast-report.json" "$tag $rel"; } \
-       && { (( ! PAPER_FACTS )) || publish_sidecar "$sdir" "$pdir_pub" "$stem" ".cast-paper-facts.json" "$tag $rel"; }; then
-      PASS_OK=$((PASS_OK + 1)); TU_OK=1
-    else
-      status="FAILED (no output)"
-      PASS_FAIL=$((PASS_FAIL + 1))
-      FAILED+=("$tag"$'\t'"0"$'\t'"$src"$'\t'"analyzer exited 0 but wrote no usable summary")
-    fi
-  fi
-
-  local line
-  line="$(printf '  [%*d/%d] %-5s %s  %s (%ds)' "${#NSRC}" "$idx" "$NSRC" "$tag" "$rel" "$status" $((SECONDS - t0)))"
-  if [[ "$status" == ok ]]; then
-    if (( nerr > 0 )); then
-      printf '%s\n' "$line"; _log_file "$line"
-      warn "$rel: analyzed, but clang reported $nerr error(s); results for this TU may be incomplete"
-      hint "first: $first"; hint_for_error "$first"
-      hint "full report: $OUT/${stem}.txt (published at the end of the run)"
-    else
-      printf '%s\n' "$line"; _log_file "$line"
-    fi
-  else
-    printf '%s%s%s\n' "$C_RED" "$line" "$C_OFF"; _log_file "$line"
-    if [[ -n "$first" ]]; then
-      hint "$first"; hint_for_error "$first"
-    else
-      hint "last output: $(tail -n 1 "$out_txt")"
-    fi
-    mkdir -p "$OUT/failed"; cp "$out_txt" "$OUT/failed/${stem}.${tag}.txt"
-    hint "full output: $OUT/failed/${stem}.${tag}.txt (tail also in commands.log)"
-    # An import-round failure must not silently drop the TU from the next index.
-    if [[ -n "$prev_sum" && -f "$prev_sum/${stem}.cast-summary.json" ]]; then
-      mkdir -p "$sdir_pub"; cp "$prev_sum/${stem}.cast-summary.json" "$sdir_pub/"
-      warn "$rel: keeping its previous-phase summary so the index stays complete (its $tag text report is missing)"
-    fi
-    (( STOP_ON_FAIL )) && { err "stopping: --stop-on-fail"; finish 1; }
-  fi
-}
-
-# run_pass TAG [INDEX_FILE] [PREV_SUM_DIR]
-# Sets LATEST_TEXT/SUM/REP/PF to the directories this pass produced.
-run_pass() {
-  local tag="$1" index="${2:-}" prev="${3:-}" i
-  LATEST_TEXT="$WORK/$tag-text"; LATEST_SUM="$WORK/$tag-summaries"
-  LATEST_REP="$WORK/$tag-reports"; LATEST_PF="$WORK/$tag-paper-facts"
-  mkdir -p "$LATEST_TEXT" "$LATEST_SUM"
-  PASS_OK=0; PASS_FAIL=0
-  local skipped=0
-  for ((i = 0; i < NSRC; i++)); do
-    if [[ -n "${SKIP[i]:-}" ]]; then skipped=$((skipped + 1)); continue; fi
-    run_tu "$tag" $((i + 1)) "${STEMS[i]}" "${SRCS[i]}" "${RELS[i]}" \
-           "$LATEST_TEXT" "$LATEST_SUM" "$LATEST_REP" "$LATEST_PF" "$index" "$prev"
-    [[ "$tag" == c1 && $TU_OK -eq 0 ]] && SKIP[i]=1
-  done
-  local extra=""; (( skipped > 0 )) && extra=", $skipped skipped (failed in C1)"
-  info "  $tag: $PASS_OK ok, $PASS_FAIL failed$extra"
-}
-
-run_index() {  # run_index REASON OUTPUT SUMMARY_DIR [extra args...]
-  local reason="$1" outfile="$2" sumdir="$3"; shift 3
-  local cmd=("$PYTHON" "$BUILD_INDEX" "$sumdir" --project-kind real --build-reason "$reason" "$@" -o "$outfile")
-  { printf 'index(%s): ' "$reason"; printf '%q ' "${cmd[@]}"; echo; } >>"$LOG_FILE"
-  local out
-  if ! out="$("${cmd[@]}" 2>&1)"; then
-    { echo "===== index build ($reason) failed ====="; echo "$out"; } >>"$LOG_FILE"
-    err "building the project summary index failed ($reason)"
-    printf '%s\n' "$out" | tail -n 5 | sed 's/^/         /' >&2
-    hint "full output in $LOG_FILE"
-    return 1
-  fi
-  { echo "===== index build ($reason) ====="; echo "$out"; } >>"$LOG_FILE"
-  # Surface index-level problems that would otherwise hide in the log.
-  local w p nf ne
-  nf="$(sed -n 's/^  summary files: *//p' <<<"$out")"; ne="$(sed -n 's/^  dep edges: *//p' <<<"$out")"
-  info "  index ($reason): ${nf:-?} summaries, ${ne:-?} dependency edges"
-  w="$(sed -n 's/^  warnings: *//p' <<<"$out")"; p="$(sed -n 's/^  problems: *//p' <<<"$out")"
-  [[ "${w:-0}" != 0 ]] && warn "index ($reason): $w warning(s); see commands.log"
-  [[ "${p:-0}" != 0 ]] && warn "index ($reason): $p unresolved cross-TU problem(s); see commands.log"
-  return 0
-}
-
-has_cross_tu_edges() {  # exit 0: import rounds are useful (or unknown) / 1: purely local project
-  "$PYTHON" - "$1" <<'PY'
-import json, sys
-try: edges = json.load(open(sys.argv[1], encoding="utf-8")).get("summaryDependencyEdges")
-except Exception: raise SystemExit(0)
-if not isinstance(edges, list) or any(not isinstance(e, dict) or "crossTUCandidate" not in e for e in edges): raise SystemExit(0)
-raise SystemExit(0 if any(e.get("crossTUCandidate") for e in edges) else 1)
-PY
-}
-
-# ----------------------------------------------------------------- finish ---
-START=$SECONDS
-finish() {
-  local code="${1:-0}" n
+# Write failed-tus.txt, clean up, print the per-project summary.
+# Sets P_STATUS and returns 0 (all good) / 1.
+project_finish() {
+  local n
   if [[ ${#FAILED[@]} -gt 0 ]]; then
-    { printf 'phase\texit\tsource\treason\n'; printf '%s\n' "${FAILED[@]}"; } >"$OUT/failed-tus.txt"
+    { printf 'phase\texit\tsource\treason\tfallback\n'; printf '%s\n' "${FAILED[@]}"; } >"$OUT/failed-tus.txt"
   fi
   if (( ! KEEP )); then
     rm -rf "$WORK"; rm -f "$OUT"/import-round-*-index-input.json
   fi
   n=$(find "$OUT/summaries" -name '*.cast-summary.json' 2>/dev/null | wc -l)
+  P_TUS=$NSRC; P_SUMS=$n; P_FAILED=${#FAILED[@]}; P_STALE=${#STALE[@]}; P_WARN=$WARN_COUNT
   echo
-  step "Summary"
-  info "  translation units:   $NSRC"
-  info "  final summaries:     $n"
-  info "  failed analyses:     ${#FAILED[@]}"
-  info "  warnings:            $WARN_COUNT"
-  info "  elapsed:             $((SECONDS - START))s"
-  info "  output:              $OUT"
+  info "  ${P_NAME_CUR}: $NSRC TUs, $n final summaries, ${#FAILED[@]} failed, ${#STALE[@]} stale, $WARN_COUNT warnings, $((SECONDS - P_START))s"
+  if [[ ${#STALE[@]} -gt 0 ]]; then
+    printf '%s!!! %d TU(s) in "%s" have STALE results (import round failed, previous-phase fallback used):%s\n' \
+      "$C_RED" "${#STALE[@]}" "$P_NAME_CUR" "$C_OFF" >&2
+    printf '%s\n' "${STALE[@]}" | awk -F'\t' '{printf "!!!    %s  (failed in %s)\n", $2, $1}' >&2
+  fi
   if [[ ${#FAILED[@]} -gt 0 ]]; then
-    err "${#FAILED[@]} analysis step(s) failed; details in $OUT/failed-tus.txt and $OUT/commands.log"
-    (( code == 0 )) && code=1
+    err "${#FAILED[@]} analysis step(s) failed in $P_NAME_CUR; see $OUT/failed-tus.txt"
+    P_STATUS="FAILED"
+    (( ${#STALE[@]} == ${#FAILED[@]} )) && P_STATUS="STALE"
+    (( n == 0 )) && P_STATUS="FAILED"
+    return 1
   fi
-  if (( code == 0 )); then ok "Done: cast history written to $OUT"; fi
-  exit "$code"
+  P_STATUS="OK"; return 0
 }
-trap 'echo; err "interrupted"; hint "partial results in $OUT"; exit 130' INT TERM
 
-# ------------------------------------------------------------- C1 and C2 ---
-echo
-step "C1: per-TU analysis ($NSRC TUs)"
-run_pass c1
-C1_SUM="$LATEST_SUM"; C1_TEXT="$LATEST_TEXT"; C1_REP="$LATEST_REP"; C1_PF="$LATEST_PF"
-if (( PASS_OK == 0 )); then
-  err "no translation unit was analyzed successfully"
-  hint "see the first failure above; most often it is a missing --resource-dir, a stale compile_commands.json,"
-  hint "or missing generated headers (run the project's configure/build once)"
-  finish 1
-fi
-if (( PASS_FAIL > 0 )); then
-  warn "$PASS_FAIL of $NSRC TUs failed in C1; they are missing from the index, so calls into them stay unresolved"
-  (( PASS_FAIL * 2 > NSRC )) && warn "more than half of the TUs failed: the setup (flags, headers, resource dir) is probably wrong"
-fi
+# --------------------------------------------------------- one project -----
+analyze_project() {  # analyze_project INDEX
+  local pi="$1" r tag prev_tag prev_sum prev_text n
+  PROJECT_DIR="${P_DIR[pi]}"; COMPDB="${P_COMPDB[pi]}"; P_NAME_CUR="${P_NAME[pi]}"
+  OUT="$ROOT_OUT/$P_NAME_CUR"; WORK="$OUT/.work"
+  FAILED=(); SKIP=(); STALE=(); WARN_COUNT=0; NSRC=0; P_START=$SECONDS
+  P_TUS=0; P_SUMS=0; P_FAILED=0; P_STALE=0; P_WARN=0; P_STATUS="SKIPPED"
+  LOG_FILE=""
+  echo
+  step "[$((pi + 1))/$NPROJ] Project: $P_NAME_CUR  ($PROJECT_DIR)"
 
-INDEX="$OUT/project-summary-index.json"
-echo
-step "C2: build project summary index"
-if ! run_index c1-raw "$INDEX" "$C1_SUM"; then
-  hint "cannot continue without an index; publishing C1 results only"
-  ROUNDS=0
-fi
+  mkdir -p "$OUT/summaries" "$WORK"
+  LOG_FILE="$OUT/commands.log"; : >"$LOG_FILE"
+  (( REPORTS ))     && mkdir -p "$OUT/reports"
+  (( PAPER_FACTS )) && mkdir -p "$OUT/paper-facts"
+  {
+    echo "# project: $PROJECT_DIR"
+    if command -v git >/dev/null 2>&1; then echo "# project git commit: $(git -C "$PROJECT_DIR" rev-parse HEAD 2>/dev/null || echo n/a)"; fi
+  } >>"$LOG_FILE"
 
-LAST_TEXT="$C1_TEXT"; LAST_SUM="$C1_SUM"; LAST_REP="$C1_REP"; LAST_PF="$C1_PF"
-DONE_ROUNDS=0
+  # compile database
+  if [[ -z "$COMPDB" ]]; then
+    warn "no compile_commands.json for $P_NAME_CUR: synthesizing one in $OUT/synthetic-compdb"
+    hint "include paths, macros and generated headers are guesses; prefer a real compile database"
+    hint "if the files are independent programs rather than one linked program, add --single-tu"
+    if ! n="$(synthesize_compdb "$PROJECT_DIR" "$OUT/synthetic-compdb")"; then
+      err "could not synthesize compile_commands.json for $P_NAME_CUR"
+      hint "check --extensions / --exclude, or supply a real compile database with --compdb"
+      rm -rf "$WORK"; return 1
+    fi
+    info "synthesized $n compile command(s)"
+    COMPDB="$OUT/synthetic-compdb/compile_commands.json"
+  fi
+  COMPDB_DIR="$(dirname "$COMPDB")"
+  info "compile db:     $COMPDB"
 
-# ---------------------------------------------------------- import rounds ---
-if (( ROUNDS > 0 )); then
-  if has_cross_tu_edges "$INDEX"; then
-    prev_sum="$C1_SUM"
-    for ((r = 1; r <= ROUNDS; r++)); do
-      tag="$(printf 'imp%02d' "$r")"
-      echo
-      step "Import round $r/$ROUNDS"
-      # The index must sit in $OUT: its summaryFile entries are relative to its own directory.
-      cp "$INDEX" "$OUT/import-round-$(printf '%02d' "$r")-index-input.json"
-      run_pass "$tag" "$OUT/import-round-$(printf '%02d' "$r")-index-input.json" "$prev_sum"
-      LAST_TEXT="$LATEST_TEXT"; LAST_SUM="$LATEST_SUM"; LAST_REP="$LATEST_REP"; LAST_PF="$LATEST_PF"
-      DONE_ROUNDS=$r; prev_sum="$LATEST_SUM"
-      if ! compgen -G "$LATEST_SUM/*.cast-summary.json" >/dev/null; then
-        err "round $r produced no summaries; stopping refinement"; break
-      fi
-      run_index "$tag-import-aware" "$INDEX" "$LATEST_SUM" --reuse-output-if-input-unchanged "$INDEX" || break
-    done
+  if [[ -n "$SOURCE_ROOT" && ! -d "$SOURCE_ROOT" ]]; then
+    err "--source-root is not a directory: $SOURCE_ROOT"; return 1
+  fi
+  if ! discover_sources; then
+    err "skipping $P_NAME_CUR: no usable sources (see messages above)"; rm -rf "$WORK"; return 1
+  fi
+  _log_file "sources: $NSRC (list in .work/sources.tsv)"
+  (( NSRC > 400 )) && info "note: $NSRC TUs; each is analyzed once per pass, so this can take a while"
+
+  # ---- C1
+  echo
+  step "C1: per-TU analysis ($NSRC TUs)"
+  run_pass c1
+  local c1_sum="$LATEST_SUM" c1_text="$LATEST_TEXT" c1_rep="$LATEST_REP" c1_pf="$LATEST_PF"
+  if (( PASS_OK == 0 )); then
+    err "no translation unit of $P_NAME_CUR was analyzed successfully"
+    hint "see the first failure above; most often it is a missing --resource-dir, a stale compile_commands.json,"
+    hint "or missing generated headers (run the project's configure/build once)"
+    project_finish; P_STATUS="FAILED"; return 1
+  fi
+  if (( PASS_FAIL > 0 )); then
+    warn "$PASS_FAIL of $NSRC TUs failed in C1; they are missing from the index, so calls into them stay unresolved"
+    (( PASS_FAIL * 2 > NSRC )) && warn "more than half of the TUs failed: the setup (flags, headers, resource dir) is probably wrong"
+  fi
+
+  local last_text="$c1_text" last_sum="$c1_sum" last_rep="$c1_rep" last_pf="$c1_pf" done_rounds=0
+  local index="$OUT/project-summary-index.json"
+
+  if (( STOP_ALL )); then :
+  elif (( SINGLE_TU )); then
+    info "  --single-tu: skipping index and import rounds"
   else
+    # ---- C2
     echo
-    step "Import rounds skipped: no cross-TU call edges in the index"
-    info "  running one local-index pass so the final reports use the solved summaries"
-    run_pass local-overlay "$INDEX" "$C1_SUM"
-    LAST_TEXT="$LATEST_TEXT"; LAST_SUM="$LATEST_SUM"; LAST_REP="$LATEST_REP"; LAST_PF="$LATEST_PF"
-  fi
-fi
+    step "C2: build project summary index"
+    local rounds="$ROUNDS"
+    if ! run_index c1-raw "$index" "$c1_sum"; then
+      hint "cannot continue without an index; publishing C1 results only"
+      rounds=0
+    fi
 
-# ----------------------------------------------------------------- publish ---
-echo
-step "Publish final outputs"
-missing_text=0
-for ((i = 0; i < NSRC; i++)); do
-  [[ -n "${SKIP[i]:-}" ]] && continue
-  if [[ -f "$LAST_TEXT/${STEMS[i]}.txt" ]]; then
-    cp "$LAST_TEXT/${STEMS[i]}.txt" "$OUT/${STEMS[i]}.txt"
-  else
-    missing_text=$((missing_text + 1))
+    # ---- import rounds
+    if (( rounds > 0 )); then
+      if has_cross_tu_edges "$index"; then
+        prev_tag=c1; prev_sum="$c1_sum"; prev_text="$c1_text"
+        for ((r = 1; r <= rounds; r++)); do
+          tag="$(printf 'imp%02d' "$r")"
+          echo
+          step "Import round $r/$rounds"
+          # The index must sit in $OUT: its summaryFile entries are relative to its own directory.
+          cp "$index" "$OUT/import-round-$(printf '%02d' "$r")-index-input.json"
+          run_pass "$tag" "$OUT/import-round-$(printf '%02d' "$r")-index-input.json" "$prev_tag" "$prev_sum" "$prev_text"
+          last_text="$LATEST_TEXT"; last_sum="$LATEST_SUM"; last_rep="$LATEST_REP"; last_pf="$LATEST_PF"
+          done_rounds=$r; prev_tag="$tag"; prev_sum="$LATEST_SUM"; prev_text="$LATEST_TEXT"
+          (( STOP_ALL )) && break
+          if ! compgen -G "$LATEST_SUM/*.cast-summary.json" >/dev/null; then
+            err "round $r produced no summaries; stopping refinement"; break
+          fi
+          run_index "$tag-import-aware" "$index" "$LATEST_SUM" --reuse-output-if-input-unchanged "$index" || break
+        done
+      else
+        echo
+        step "Import rounds skipped: no cross-TU call edges in the index"
+        info "  running one local-index pass so the final reports use the solved summaries"
+        run_pass local-overlay "$index" c1 "$c1_sum" "$c1_text"
+        last_text="$LATEST_TEXT"; last_sum="$LATEST_SUM"; last_rep="$LATEST_REP"; last_pf="$LATEST_PF"
+      fi
+    fi
   fi
+
+  # ---- publish
+  echo
+  step "Publish final outputs"
+  local i missing_text=0
+  for ((i = 0; i < NSRC; i++)); do
+    [[ -n "${SKIP[i]:-}" ]] && continue
+    if [[ -f "$last_text/${STEMS[i]}.txt" ]]; then
+      cp "$last_text/${STEMS[i]}.txt" "$OUT/${STEMS[i]}.txt"
+    else
+      missing_text=$((missing_text + 1))
+    fi
+  done
+  (( missing_text > 0 )) && warn "$missing_text TU(s) have no final text report; see failed-tus.txt"
+
+  compgen -G "$last_sum/*.cast-summary.json" >/dev/null && cp "$last_sum"/*.cast-summary.json "$OUT/summaries/"
+  (( REPORTS ))     && compgen -G "$last_rep/*.cast-report.json" >/dev/null && cp "$last_rep"/*.cast-report.json "$OUT/reports/"
+  (( PAPER_FACTS )) && compgen -G "$last_pf/*.cast-paper-facts.json" >/dev/null && cp "$last_pf"/*.cast-paper-facts.json "$OUT/paper-facts/"
+
+  # Rebuild the index over the *published* summaries so its summaryFile paths
+  # stay valid after the work directory is removed.
+  if (( ! SINGLE_TU )) && compgen -G "$OUT/summaries/*.cast-summary.json" >/dev/null; then
+    run_index final "$index" "$OUT/summaries" || true
+  fi
+  (( SINGLE_TU )) || info "  import rounds completed: $done_rounds"
+  project_finish
+}
+
+# ------------------------------------------------------------------- main ---
+trap 'echo; err "interrupted"; hint "partial results in $ROOT_OUT"; exit 130' INT TERM
+RUN_START=$SECONDS
+RESULTS=()
+overall=0
+for ((pi = 0; pi < NPROJ; pi++)); do
+  analyze_project "$pi" || overall=1
+  RESULTS+=("${P_NAME[pi]}"$'\t'"$P_STATUS"$'\t'"$P_TUS"$'\t'"$P_SUMS"$'\t'"$P_FAILED"$'\t'"$P_STALE"$'\t'"$P_WARN"$'\t'"${P_DIR[pi]}")
+  LOG_FILE=""
+  if (( STOP_ALL )); then warn "run stopped early; remaining projects were not analyzed"; overall=1; break; fi
 done
-(( missing_text > 0 )) && warn "$missing_text TU(s) have no final text report (they failed in an import round); see failed-tus.txt"
 
-compgen -G "$LAST_SUM/*.cast-summary.json" >/dev/null && cp "$LAST_SUM"/*.cast-summary.json "$OUT/summaries/"
-(( REPORTS ))     && compgen -G "$LAST_REP/*.cast-report.json" >/dev/null && cp "$LAST_REP"/*.cast-report.json "$OUT/reports/"
-(( PAPER_FACTS )) && compgen -G "$LAST_PF/*.cast-paper-facts.json" >/dev/null && cp "$LAST_PF"/*.cast-paper-facts.json "$OUT/paper-facts/"
+{ printf 'project\tstatus\ttus\tsummaries\tfailed\tstale\twarnings\tpath\n'; printf '%s\n' "${RESULTS[@]}"; } >"$ROOT_OUT/projects-summary.tsv"
 
-# Rebuild the index over the *published* summaries so its summaryFile paths
-# stay valid after the work directory is removed.
-if compgen -G "$OUT/summaries/*.cast-summary.json" >/dev/null; then
-  run_index final "$INDEX" "$OUT/summaries" || true
+echo
+step "Run summary"
+printf '  %-28s %-8s %5s %9s %6s %6s\n' project status TUs summaries failed stale
+for row in "${RESULTS[@]}"; do
+  IFS=$'\t' read -r n st tus sums fl stl wn path <<<"$row"
+  col="$C_GRN"; [[ "$st" == OK ]] || col="$C_RED"
+  printf '  %-28s %s%-8s%s %5s %9s %6s %6s\n' "$n" "$col" "$st" "$C_OFF" "$tus" "$sums" "$fl" "$stl"
+done
+info "  warnings: $TOTAL_WARN   elapsed: $((SECONDS - RUN_START))s"
+info "  output:   $ROOT_OUT  (table: projects-summary.tsv, log: run.log)"
+if (( overall == 0 )); then
+  ok "Done: cast history written to $ROOT_OUT"
+else
+  err "finished with problems: see the failed/stale/skipped projects above"
 fi
-info "  import rounds completed: $DONE_ROUNDS"
-
-finish 0
+exit "$overall"
