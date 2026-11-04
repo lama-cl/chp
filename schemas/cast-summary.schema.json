@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cast-history/cast-summary.schema.json",
+  "title": "Cast History TU Summary",
+  "description": "C6g5f4 JSON schema for cast-history-tool translation-unit summary JSON. The schema is intentionally forward-compatible: it validates stable classification and callback-mediation fields while allowing verbose/debug sections to evolve.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaName",
+    "schemaVersion",
+    "tu"
+  ],
+  "properties": {
+    "schemaName": {
+      "oneOf": [
+        {
+          "const": "cast-history-tu-report"
+        },
+        {
+          "const": "cast-history-tu-summary"
+        }
+      ]
+    },
+    "schemaVersion": {
+      "description": "Current analyzer emits integer 1. Future versions may use a string such as cast-summary-c6f3-v1.",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    },
+    "toolVersion": {
+      "type": "string"
+    },
+    "tu": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sourceFile"
+      ],
+      "properties": {
+        "sourceFile": {
+          "type": "string"
+        },
+        "configurationId": {
+          "type": "string"
+        },
+        "compileCommandHash": {
+          "type": "string"
+        }
+      }
+    },
+    "pointerBehaviorMetrics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pointerBehaviorMetric"
+      }
+    },
+    "functionParameterBehaviorMetrics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/functionParameterBehaviorMetric"
+      }
+    },
+    "functionBehaviorClassifications": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/functionBehaviorClassification"
+      }
+    }
+  },
+  "$defs": {
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": false
+    },
+    "paperWildness": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "surfaceKind": {
+          "type": "string"
+        },
+        "surfaceReasons": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "semanticFamily": {
+          "type": "string"
+        },
+        "semanticRiskTier": {
+          "type": "string"
+        },
+        "interpretation": {
+          "type": "string"
+        }
+      }
+    },
+    "semanticMediation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "kind",
+        "semanticFamily",
+        "flags"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semanticFamily": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fields": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "callbacks": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "targets": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "edges": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "sources": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "flags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "properties": {
+            "dataField": {
+              "type": "boolean"
+            },
+            "nestedDataField": {
+              "type": "boolean"
+            },
+            "callback": {
+              "type": "boolean"
+            },
+            "externalBoundary": {
+              "type": "boolean"
+            },
+            "returnAlias": {
+              "type": "boolean"
+            },
+            "imported": {
+              "type": "boolean"
+            },
+            "sameTUCall": {
+              "type": "boolean"
+            },
+            "fieldCallbackCarrier": {
+              "type": "boolean"
+            },
+            "resolvedCallbackTarget": {
+              "type": "boolean"
+            },
+            "guardedCallbackSelection": {
+              "type": "boolean"
+            }
+          }
+        },
+        "callbackMediationState": {
+          "type": "string"
+        },
+        "fieldPaths": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "callbackFieldPaths": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "callbackExprs": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "targetFunctions": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "edgeKinds": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "stableClassification": {
+      "$ref": "stable-classification.schema.json"
+    },
+    "pointerBehaviorMetric": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "entity",
+        "behavior",
+        "paperWildness",
+        "semanticMediation",
+        "stableClassification"
+      ],
+      "properties": {
+        "entity": {
+          "type": "string"
+        },
+        "view": {
+          "type": "string"
+        },
+        "historyShape": {
+          "type": "string"
+        },
+        "historyRisk": {
+          "type": "string"
+        },
+        "behavior": {
+          "type": "string"
+        },
+        "wildLike": {
+          "type": "boolean"
+        },
+        "history": {
+          "type": "string"
+        },
+        "paperWildness": {
+          "$ref": "#/$defs/paperWildness"
+        },
+        "semanticMediation": {
+          "$ref": "#/$defs/semanticMediation"
+        },
+        "stableClassification": {
+          "$ref": "#/$defs/stableClassification"
+        },
+        "callbackMediationState": {
+          "type": "string"
+        }
+      }
+    },
+    "functionParameterBehaviorMetric": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "function",
+        "paramIndex",
+        "declaredType",
+        "behavior",
+        "paperWildness",
+        "semanticMediation",
+        "stableParamClassification"
+      ],
+      "properties": {
+        "function": {
+          "type": "string"
+        },
+        "paramIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "paramName": {
+          "type": "string"
+        },
+        "declaredType": {
+          "type": "string"
+        },
+        "paramRole": {
+          "type": "string"
+        },
+        "view": {
+          "type": "string"
+        },
+        "historyShape": {
+          "type": "string"
+        },
+        "historyRisk": {
+          "type": "string"
+        },
+        "behavior": {
+          "type": "string"
+        },
+        "wildLike": {
+          "type": "boolean"
+        },
+        "paperWildness": {
+          "$ref": "#/$defs/paperWildness"
+        },
+        "semanticMediation": {
+          "$ref": "#/$defs/semanticMediation"
+        },
+        "stableParamClassification": {
+          "$ref": "#/$defs/stableClassification"
+        },
+        "callbackMediationState": {
+          "type": "string"
+        }
+      }
+    },
+    "functionBehaviorClassification": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "function": {
+          "type": "string"
+        },
+        "class": {
+          "type": "string"
+        },
+        "classificationEvidenceSourceKind": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

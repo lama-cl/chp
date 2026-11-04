@@ -1,0 +1,10 @@
+# Build outputs
+*.o
+/vsftpd
+/compile_commands.json
+
+# 3C outputs
+/out.checked
+# Hope this only matches -dump-stats output files.
+# TODO: Somehow get 3C to put them all in a subdirectory?
+/*Stats*.json

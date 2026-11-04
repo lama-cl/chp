@@ -1,0 +1,3 @@
+[submodule "c/shairport"]
+	path = c/shairport
+	url = https://github.com/abrasive/shairport

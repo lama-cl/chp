@@ -1,0 +1,398 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cast-history/cast-prevalence-metrics.schema.json",
+  "title": "Cast History Pointer and Cast Prevalence Metrics (C6g5f4d)",
+  "description": "Per-translation-unit, source-level pointer/cast prevalence sidecar. Schema version 2 adds a separate inventory of void-pointer positions nested inside function-pointer types; direct outer pointer declarations remain the denominator used by the original prevalence table.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaName",
+    "schemaVersion",
+    "project",
+    "tu",
+    "pointerDeclarations",
+    "casts",
+    "tuCounts"
+  ],
+  "properties": {
+    "schemaName": {
+      "const": "cast-history-prevalence-metrics"
+    },
+    "schemaVersion": {
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "toolVersion": {
+      "type": "string"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "root",
+        "includeReturnTypes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "includeReturnTypes": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tu": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sourceFile"
+      ],
+      "properties": {
+        "sourceFile": {
+          "type": "string"
+        },
+        "configurationId": {
+          "type": "string"
+        },
+        "compileCommandHash": {
+          "type": "string"
+        }
+      }
+    },
+    "pointerDeclarations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pointerDeclaration"
+      }
+    },
+    "casts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/cast"
+      }
+    },
+    "tuCounts": {
+      "$ref": "#/$defs/counts"
+    },
+    "functionTypeVoidPointerPositions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/functionTypeVoidPointerPosition"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": [
+        "file",
+        "line",
+        "column"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "pointerDeclaration": {
+      "type": "object",
+      "required": [
+        "id",
+        "source",
+        "declarationKind",
+        "type",
+        "canonicalType",
+        "isVoidPointer",
+        "isFunctionPointer",
+        "isPointerField"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "declarationKind": {
+          "enum": [
+            "global",
+            "local",
+            "parameter",
+            "field",
+            "return",
+            "other"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "canonicalType": {
+          "type": "string"
+        },
+        "isVoidPointer": {
+          "type": "boolean"
+        },
+        "isFunctionPointer": {
+          "type": "boolean"
+        },
+        "isPointerField": {
+          "type": "boolean"
+        }
+      }
+    },
+    "cast": {
+      "type": "object",
+      "required": [
+        "id",
+        "source",
+        "castKind",
+        "isImplicit",
+        "sourceType",
+        "sourceCanonicalType",
+        "destinationType",
+        "destinationCanonicalType",
+        "sourceIsPointer",
+        "destinationIsPointer",
+        "toVoidPointer",
+        "fromVoidPointer",
+        "bytePointerCast"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "castKind": {
+          "type": "string"
+        },
+        "isImplicit": {
+          "type": "boolean"
+        },
+        "sourceType": {
+          "type": "string"
+        },
+        "sourceCanonicalType": {
+          "type": "string"
+        },
+        "destinationType": {
+          "type": "string"
+        },
+        "destinationCanonicalType": {
+          "type": "string"
+        },
+        "sourceIsPointer": {
+          "type": "boolean"
+        },
+        "destinationIsPointer": {
+          "type": "boolean"
+        },
+        "toVoidPointer": {
+          "type": "boolean"
+        },
+        "fromVoidPointer": {
+          "type": "boolean"
+        },
+        "bytePointerCast": {
+          "type": "boolean"
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "pointerDeclarations",
+        "voidPointerDeclarations",
+        "functionPointerDeclarations",
+        "pointerFieldDeclarations",
+        "returnPointerDeclarations",
+        "explicitCasts",
+        "implicitCasts",
+        "toVoidPointerCasts",
+        "fromVoidPointerCasts",
+        "bytePointerCasts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pointerDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "voidPointerDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "functionPointerDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pointerFieldDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "returnPointerDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "explicitCasts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "implicitCasts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "toVoidPointerCasts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fromVoidPointerCasts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bytePointerCasts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "voidPointerGlobalDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "voidPointerFieldDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "voidPointerLocalDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "voidPointerParameterDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "voidPointerReturnDeclarations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "functionTypeVoidPointerPositions": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "functionTypeVoidPointerPosition": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "ownerDeclarationId",
+        "source",
+        "ownerDeclarationKind",
+        "ownerName",
+        "positionKind",
+        "positionPath",
+        "type",
+        "canonicalType"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerDeclarationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "ownerDeclarationKind": {
+          "enum": [
+            "global",
+            "local",
+            "parameter",
+            "field",
+            "return",
+            "other"
+          ]
+        },
+        "ownerName": {
+          "type": "string"
+        },
+        "positionKind": {
+          "enum": [
+            "function-parameter",
+            "function-return"
+          ]
+        },
+        "positionPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string"
+        },
+        "canonicalType": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 2
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "functionTypeVoidPointerPositions"
+        ],
+        "properties": {
+          "tuCounts": {
+            "required": [
+              "voidPointerGlobalDeclarations",
+              "voidPointerFieldDeclarations",
+              "voidPointerLocalDeclarations",
+              "voidPointerParameterDeclarations",
+              "voidPointerReturnDeclarations",
+              "functionTypeVoidPointerPositions"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1539 @@
+Only in libarchive/: archive_acl.c
+Only in libarchive/: archive_acl_private.h
+Only in libarchive/: archive_blake2.h
+Only in libarchive/: archive_blake2_impl.h
+Only in libarchive/: archive_blake2sp_ref.c
+Only in libarchive/: archive_blake2s_ref.c
+Only in libarchive/: archive_check_magic.c
+Only in libarchive/: archive_cmdline.c
+Only in libarchive/: archive_cmdline_private.h
+Only in libarchive/: archive_crc32.h
+Only in libarchive/: archive_cryptor.c
+Only in libarchive/: archive_cryptor_private.h
+Only in libarchive/: archive_digest.c
+Only in libarchive/: archive_digest_private.h
+Only in libarchive/: archive_disk_acl_darwin.c
+Only in libarchive/: archive_disk_acl_freebsd.c
+Only in libarchive/: archive_disk_acl_linux.c
+Only in libarchive/: archive_disk_acl_sunos.c
+Only in libarchive/: archive_endian.h
+Only in libarchive/: archive_entry.3
+Only in libarchive/: archive_entry_acl.3
+Only in libarchive/: archive_entry.c
+Only in libarchive/: archive_entry_copy_bhfi.c
+Only in libarchive/: archive_entry_copy_stat.c
+Only in libarchive/: archive_entry.h
+Only in libarchive/: archive_entry_linkify.3
+Only in libarchive/: archive_entry_link_resolver.c
+Only in libarchive/: archive_entry_locale.h
+Only in libarchive/: archive_entry_misc.3
+Only in libarchive/: archive_entry_paths.3
+Only in libarchive/: archive_entry_perms.3
+diff -ru libarchive/archive_entry_private.h libarchive_no_inline_structs/archive_entry_private.h
+--- libarchive/archive_entry_private.h	2020-01-16 16:05:41.000000000 -0500
++++ libarchive_no_inline_structs/archive_entry_private.h	2021-04-13 11:48:59.651541998 -0400
+@@ -70,6 +70,37 @@
+  *
+  * TODO: Design a good API for handling sparse files.
+  */
++struct aest {
++  int64_t		aest_atime;
++  uint32_t	aest_atime_nsec;
++  int64_t		aest_ctime;
++  uint32_t	aest_ctime_nsec;
++  int64_t		aest_mtime;
++  uint32_t	aest_mtime_nsec;
++  int64_t		aest_birthtime;
++  uint32_t	aest_birthtime_nsec;
++  int64_t		aest_gid;
++  int64_t		aest_ino;
++  uint32_t	aest_nlink;
++  uint64_t	aest_size;
++  int64_t		aest_uid;
++  /*
++   * Because converting between device codes and
++   * major/minor values is platform-specific and
++   * inherently a bit risky, we only do that conversion
++   * lazily.  That way, we will do a better job of
++   * preserving information in those cases where no
++   * conversion is actually required.
++   */
++  int		aest_dev_is_broken_down;
++  dev_t		aest_dev;
++  dev_t		aest_devmajor;
++  dev_t		aest_devminor;
++  int		aest_rdev_is_broken_down;
++  dev_t		aest_rdev;
++  dev_t		aest_rdevmajor;
++  dev_t		aest_rdevminor;
++};
+ struct archive_entry {
+ 	struct archive *archive;
+ 
+@@ -96,37 +127,7 @@
+ 	void *stat;
+ 	int  stat_valid; /* Set to 0 whenever a field in aest changes. */
+ 
+-	struct aest {
+-		int64_t		aest_atime;
+-		uint32_t	aest_atime_nsec;
+-		int64_t		aest_ctime;
+-		uint32_t	aest_ctime_nsec;
+-		int64_t		aest_mtime;
+-		uint32_t	aest_mtime_nsec;
+-		int64_t		aest_birthtime;
+-		uint32_t	aest_birthtime_nsec;
+-		int64_t		aest_gid;
+-		int64_t		aest_ino;
+-		uint32_t	aest_nlink;
+-		uint64_t	aest_size;
+-		int64_t		aest_uid;
+-		/*
+-		 * Because converting between device codes and
+-		 * major/minor values is platform-specific and
+-		 * inherently a bit risky, we only do that conversion
+-		 * lazily.  That way, we will do a better job of
+-		 * preserving information in those cases where no
+-		 * conversion is actually required.
+-		 */
+-		int		aest_dev_is_broken_down;
+-		dev_t		aest_dev;
+-		dev_t		aest_devmajor;
+-		dev_t		aest_devminor;
+-		int		aest_rdev_is_broken_down;
+-		dev_t		aest_rdev;
+-		dev_t		aest_rdevmajor;
+-		dev_t		aest_rdevminor;
+-	} ae_stat;
++	struct aest ae_stat;
+ 
+ 	int ae_set; /* bitmap of fields that are currently set */
+ #define	AE_SET_HARDLINK	1
+Only in libarchive/: archive_entry_sparse.c
+Only in libarchive/: archive_entry_stat.3
+Only in libarchive/: archive_entry_stat.c
+Only in libarchive/: archive_entry_strmode.c
+Only in libarchive/: archive_entry_time.3
+Only in libarchive/: archive_entry_xattr.c
+Only in libarchive/: archive_getdate.c
+Only in libarchive/: archive_getdate.h
+Only in libarchive/: archive.h
+Only in libarchive/: archive_hmac.c
+Only in libarchive/: archive_hmac_private.h
+Only in libarchive/: archive_match.c
+Only in libarchive/: archive_openssl_evp_private.h
+Only in libarchive/: archive_openssl_hmac_private.h
+Only in libarchive/: archive_options.c
+Only in libarchive/: archive_options_private.h
+Only in libarchive/: archive_pack_dev.c
+Only in libarchive/: archive_pack_dev.h
+Only in libarchive/: archive_pathmatch.c
+Only in libarchive/: archive_pathmatch.h
+Only in libarchive/: archive_platform_acl.h
+Only in libarchive/: archive_platform.h
+Only in libarchive/: archive_platform_xattr.h
+Only in libarchive/: archive_ppmd7.c
+Only in libarchive/: archive_ppmd7_private.h
+Only in libarchive/: archive_ppmd8.c
+Only in libarchive/: archive_ppmd8_private.h
+Only in libarchive/: archive_ppmd_private.h
+Only in libarchive/: archive_private.h
+Only in libarchive/: archive_random.c
+Only in libarchive/: archive_random_private.h
+Only in libarchive/: archive_rb.c
+Only in libarchive/: archive_rb.h
+Only in libarchive/: archive_read.3
+Only in libarchive/: archive_read_add_passphrase.3
+Only in libarchive/: archive_read_add_passphrase.c
+Only in libarchive/: archive_read_append_filter.c
+Only in libarchive/: archive_read.c
+Only in libarchive/: archive_read_data.3
+Only in libarchive/: archive_read_data_into_fd.c
+Only in libarchive/: archive_read_disk.3
+Only in libarchive/: archive_read_disk_entry_from_file.c
+diff -ru libarchive/archive_read_disk_posix.c libarchive_no_inline_structs/archive_read_disk_posix.c
+--- libarchive/archive_read_disk_posix.c	2020-04-29 21:45:35.000000000 -0400
++++ libarchive_no_inline_structs/archive_read_disk_posix.c	2021-04-13 12:06:40.562402717 -0400
+@@ -194,6 +194,10 @@
+ /*
+  * Local data for this package.
+  */
++struct entry_sparse {
++  int64_t		 length;
++  int64_t		 offset;
++};
+ struct tree {
+ 	struct tree_entry	*stack;
+ 	struct tree_entry	*current;
+@@ -230,10 +234,7 @@
+ 	/* How to restore time of a file. */
+ 	struct restore_time	 restore_time;
+ 
+-	struct entry_sparse {
+-		int64_t		 length;
+-		int64_t		 offset;
+-	}			*sparse_list, *current_sparse;
++	struct entry_sparse	*sparse_list, *current_sparse;
+ 	int			 sparse_count;
+ 	int			 sparse_list_size;
+ 
+Only in libarchive/: archive_read_disk_private.h
+diff -ru libarchive/archive_read_disk_set_standard_lookup.c libarchive_no_inline_structs/archive_read_disk_set_standard_lookup.c
+--- libarchive/archive_read_disk_set_standard_lookup.c	2019-12-14 16:13:52.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_disk_set_standard_lookup.c	2021-04-13 12:11:41.723369645 -0400
+@@ -58,7 +58,10 @@
+ #define	name_cache_size 127
+ 
+ static const char * const NO_NAME = "(noname)";
+-
++struct name_cache_inner {
++  id_t id;
++  const char *name;
++};
+ struct name_cache {
+ 	struct archive *archive;
+ 	char   *buff;
+@@ -66,10 +69,7 @@
+ 	int	probes;
+ 	int	hits;
+ 	size_t	size;
+-	struct {
+-		id_t id;
+-		const char *name;
+-	} cache[name_cache_size];
++	struct name_cache_inner cache[name_cache_size];
+ };
+ 
+ static const char *	lookup_gname(void *, int64_t);
+diff -ru libarchive/archive_read_disk_windows.c libarchive_no_inline_structs/archive_read_disk_windows.c
+--- libarchive/archive_read_disk_windows.c	2021-04-13 12:21:50.702216498 -0400
++++ libarchive_no_inline_structs/archive_read_disk_windows.c	2021-04-13 12:21:34.770090000 -0400
+@@ -124,6 +124,19 @@
+ /*
+  * Local data for this package.
+  */
++struct entry_sparse {
++        int64_t		 length;
++        int64_t		 offset;
++};
++struct la_overlapped {
++        OVERLAPPED	 ol;
++        struct archive * _a;
++        unsigned char	*buff;
++        size_t		 buff_size;
++        int64_t		 offset;
++        size_t		 bytes_expected;
++        size_t		 bytes_transferred;
++};
+ struct tree {
+ 	struct tree_entry	*stack;
+ 	struct tree_entry	*current;
+@@ -154,10 +167,7 @@
+ 	/* How to restore time of a file. */
+ 	struct restore_time	restore_time;
+ 
+-	struct entry_sparse {
+-		int64_t		 length;
+-		int64_t		 offset;
+-	}			*sparse_list, *current_sparse;
++	struct entry_sparse     *sparse_list, *current_sparse;
+ 	int			 sparse_count;
+ 	int			 sparse_list_size;
+ 
+@@ -181,15 +191,7 @@
+ 	int			 ol_num_done;
+ 	int64_t			 ol_remaining_bytes;
+ 	int64_t			 ol_total;
+-	struct la_overlapped {
+-		OVERLAPPED	 ol;
+-		struct archive * _a;
+-		unsigned char	*buff;
+-		size_t		 buff_size;
+-		int64_t		 offset;
+-		size_t		 bytes_expected;
+-		size_t		 bytes_transferred;
+-	}			 ol[MAX_OVERLAPPED];
++	struct la_overlapped 	 ol[MAX_OVERLAPPED];
+ 	int			 direct_io;
+ 	int			 async_io;
+ };
+@@ -304,29 +306,32 @@
+ static void	entry_symlink_from_pathw(struct archive_entry *,
+ 		    const wchar_t *path);
+ 
++struct _REPARSE_DATA_BUFFER_Symlink {
++        USHORT	SubstituteNameOffset;
++        USHORT	SubstituteNameLength;
++        USHORT	PrintNameOffset;
++        USHORT	PrintNameLength;
++        ULONG	Flags;
++        WCHAR	PathBuffer[1];
++};
++struct _REPARSE_DATA_BUFFER_MountPoint {
++        USHORT	SubstituteNameOffset;
++        USHORT	SubstituteNameLength;
++        USHORT	PrintNameOffset;
++        USHORT	PrintNameLength;
++        WCHAR	PathBuffer[1];
++};
++struct _REPARSE_DATA_BUFFER_Generic {
++        UCHAR	DataBuffer[1];
++};
+ typedef struct _REPARSE_DATA_BUFFER {
+ 	ULONG	ReparseTag;
+ 	USHORT ReparseDataLength;
+ 	USHORT	Reserved;
+ 	union {
+-		struct {
+-			USHORT	SubstituteNameOffset;
+-			USHORT	SubstituteNameLength;
+-			USHORT	PrintNameOffset;
+-			USHORT	PrintNameLength;
+-			ULONG	Flags;
+-			WCHAR	PathBuffer[1];
+-		} SymbolicLinkReparseBuffer;
+-		struct {
+-			USHORT	SubstituteNameOffset;
+-			USHORT	SubstituteNameLength;
+-			USHORT	PrintNameOffset;
+-			USHORT	PrintNameLength;
+-			WCHAR	PathBuffer[1];
+-		} MountPointReparseBuffer;
+-		struct {
+-			UCHAR	DataBuffer[1];
+-		} GenericReparseBuffer;
++		struct _REPARSE_DATA_BUFFER_Symlink SymbolicLinkReparseBuffer;
++		struct _REPARSE_DATA_BUFFER_MountPoint MountPointReparseBuffer;
++		struct _REPARSE_DATA_BUFFER_Generic GenericReparseBuffer;
+ 	} DUMMYUNIONNAME;
+ } REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
+ 
+Only in libarchive/: archive_read_extract2.c
+Only in libarchive/: archive_read_extract.3
+Only in libarchive/: archive_read_extract.c
+Only in libarchive/: archive_read_filter.3
+Only in libarchive/: archive_read_format.3
+Only in libarchive/: archive_read_free.3
+Only in libarchive/: archive_read_header.3
+Only in libarchive/: archive_read_new.3
+Only in libarchive/: archive_read_open.3
+Only in libarchive/: archive_read_open_fd.c
+Only in libarchive/: archive_read_open_file.c
+Only in libarchive/: archive_read_open_filename.c
+Only in libarchive/: archive_read_open_memory.c
+Only in libarchive/: archive_read_private.h
+Only in libarchive/: archive_read_set_format.c
+Only in libarchive/: archive_read_set_options.3
+Only in libarchive/: archive_read_set_options.c
+Only in libarchive/: archive_read_support_filter_all.c
+Only in libarchive/: archive_read_support_filter_bzip2.c
+Only in libarchive/: archive_read_support_filter_compress.c
+Only in libarchive/: archive_read_support_filter_grzip.c
+Only in libarchive/: archive_read_support_filter_gzip.c
+Only in libarchive/: archive_read_support_filter_lrzip.c
+diff -ru libarchive/archive_read_support_filter_lz4.c libarchive_no_inline_structs/archive_read_support_filter_lz4.c
+--- libarchive/archive_read_support_filter_lz4.c	2019-12-14 16:13:52.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_filter_lz4.c	2021-04-13 12:52:31.999129666 -0400
+@@ -55,6 +55,14 @@
+ #define LZ4_LEGACY		0x184c2102
+ 
+ #if defined(HAVE_LIBLZ4)
++struct private_data_flags {
++        unsigned block_independence:1;
++        unsigned block_checksum:3;
++        unsigned stream_size:1;
++        unsigned stream_checksum:1;
++        unsigned preset_dictionary:1;
++        int	 block_maximum_size;
++};
+ struct private_data {
+ 	enum {  SELECT_STREAM,
+ 		READ_DEFAULT_STREAM,
+@@ -62,14 +70,7 @@
+ 		READ_LEGACY_STREAM,
+ 		READ_LEGACY_BLOCK,
+ 	}		stage;
+-	struct {
+-		unsigned block_independence:1;
+-		unsigned block_checksum:3;
+-		unsigned stream_size:1;
+-		unsigned stream_checksum:1;
+-		unsigned preset_dictionary:1;
+-		int	 block_maximum_size;
+-	} flags;
++	struct private_data_flags flags;
+ 	int64_t		 stream_size;
+ 	uint32_t	 dict_id;
+ 	char		*out_block;
+Only in libarchive/: archive_read_support_filter_lzop.c
+Only in libarchive/: archive_read_support_filter_none.c
+Only in libarchive/: archive_read_support_filter_program.c
+Only in libarchive/: archive_read_support_filter_rpm.c
+Only in libarchive/: archive_read_support_filter_uu.c
+Only in libarchive/: archive_read_support_filter_xz.c
+Only in libarchive/: archive_read_support_filter_zstd.c
+diff -ru libarchive/archive_read_support_format_7zip.c libarchive_no_inline_structs/archive_read_support_format_7zip.c
+--- libarchive/archive_read_support_format_7zip.c	2020-02-07 08:45:20.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_format_7zip.c	2021-04-13 13:04:07.097150999 -0400
+@@ -116,20 +116,22 @@
+ };
+ 
+ 
++struct _7z_coder {
++  unsigned long	 codec;
++  uint64_t	 numInStreams;
++  uint64_t	 numOutStreams;
++  uint64_t	 propertiesSize;
++  unsigned char	*properties;
++};
++struct _7z_folder_bindPairs {
++  uint64_t	 inIndex;
++  uint64_t	 outIndex;
++};
+ struct _7z_folder {
+ 	uint64_t		 numCoders;
+-	struct _7z_coder {
+-		unsigned long	 codec;
+-		uint64_t	 numInStreams;
+-		uint64_t	 numOutStreams;
+-		uint64_t	 propertiesSize;
+-		unsigned char	*properties;
+-	} *coders;
++	struct _7z_coder         *coders;
+ 	uint64_t		 numBindPairs;
+-	struct {
+-		uint64_t	 inIndex;
+-		uint64_t	 outIndex;
+-	} *bindPairs;
++	struct _7z_folder_bindPairs *bindPairs;
+ 	uint64_t		 numPackedStreams;
+ 	uint64_t		*packedStreams;
+ 	uint64_t		 numInStreams;
+@@ -205,6 +207,15 @@
+ 	uint32_t		 attr;
+ };
+ 
++struct _7zip_ppstream {
++  const unsigned char	*next_in;
++  int64_t			 avail_in;
++  int64_t			 total_in;
++  unsigned char		*next_out;
++  int64_t			 avail_out;
++  int64_t			 total_out;
++  int			 overconsumed;
++};
+ struct _7zip {
+ 	/* Structural information about the archive. */
+ 	struct _7z_stream_info	 si;
+@@ -283,15 +294,7 @@
+ 	CPpmd7			 ppmd7_context;
+ 	CPpmd7z_RangeDec	 range_dec;
+ 	IByteIn			 bytein;
+-	struct {
+-		const unsigned char	*next_in;
+-		int64_t			 avail_in;
+-		int64_t			 total_in;
+-		unsigned char		*next_out;
+-		int64_t			 avail_out;
+-		int64_t			 total_out;
+-		int			 overconsumed;
+-	} ppstream;
++	struct _7zip_ppstream    ppstream;
+ 	int			 ppmd7_valid;
+ 
+ 	/* Decoding BCJ and BCJ2 data. */
+Only in libarchive/: archive_read_support_format_all.c
+Only in libarchive/: archive_read_support_format_ar.c
+Only in libarchive/: archive_read_support_format_by_code.c
+diff -ru libarchive/archive_read_support_format_cab.c libarchive_no_inline_structs/archive_read_support_format_cab.c
+--- libarchive/archive_read_support_format_cab.c	2019-12-14 16:13:52.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_format_cab.c	2021-04-13 14:17:22.758619379 -0400
+@@ -49,6 +49,39 @@
+ #include "archive_endian.h"
+ 
+ 
++struct lzx_pos_tbl {
++  int		 base;
++  int		 footer_bits;
++};
++struct lzx_br {
++#define CACHE_TYPE		uint64_t
++#define CACHE_BITS		(8 * sizeof(CACHE_TYPE))
++  /* Cache buffer. */
++  CACHE_TYPE	 cache_buffer;
++  /* Indicates how many bits avail in cache_buffer. */
++  int		 cache_avail;
++  unsigned char	 odd;
++  char		 have_odd;
++};
++/*
++ * Huffman coding.
++ */
++struct huffman {
++  int		 len_size;
++  int		 freq[17];
++  unsigned char	*bitlen;
++
++  /*
++   * Use a index table. It's faster than searching a huffman
++   * coding tree, which is a binary tree. But a use of a large
++   * index table causes L1 cache read miss many times.
++   */
++  int		 max_bits;
++  int		 tbl_bits;
++  int		 tree_used;
++  /* Direct access table. */
++  uint16_t	*tbl;
++};
+ struct lzx_dec {
+ 	/* Decoding status. */
+ 	int     		 state;
+@@ -85,43 +118,16 @@
+ 	int			 position_slot;
+ 	int			 offset_bits;
+ 
+-	struct lzx_pos_tbl {
+-		int		 base;
+-		int		 footer_bits;
+-	}			*pos_tbl;
++	struct lzx_pos_tbl       *pos_tbl;
+ 	/*
+ 	 * Bit stream reader.
+ 	 */
+-	struct lzx_br {
+-#define CACHE_TYPE		uint64_t
+-#define CACHE_BITS		(8 * sizeof(CACHE_TYPE))
+-	 	/* Cache buffer. */
+-		CACHE_TYPE	 cache_buffer;
+-		/* Indicates how many bits avail in cache_buffer. */
+-		int		 cache_avail;
+-		unsigned char	 odd;
+-		char		 have_odd;
+-	} br;
++	struct lzx_br            br;
+ 
+ 	/*
+ 	 * Huffman coding.
+ 	 */
+-	struct huffman {
+-		int		 len_size;
+-		int		 freq[17];
+-		unsigned char	*bitlen;
+-
+-		/*
+-		 * Use a index table. It's faster than searching a huffman
+-		 * coding tree, which is a binary tree. But a use of a large
+-		 * index table causes L1 cache read miss many times.
+-		 */
+-		int		 max_bits;
+-		int		 tbl_bits;
+-		int		 tree_used;
+-		/* Direct access table. */
+-		uint16_t	*tbl;
+-	}			 at, lt, mt, pt;
++	struct huffman 	        at, lt, mt, pt;
+ 
+ 	int			 loop;
+ 	int			 error;
+Only in libarchive/: archive_read_support_format_cpio.c
+Only in libarchive/: archive_read_support_format_empty.c
+diff -ru libarchive/archive_read_support_format_iso9660.c libarchive_no_inline_structs/archive_read_support_format_iso9660.c
+--- libarchive/archive_read_support_format_iso9660.c	2019-12-14 16:13:52.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_format_iso9660.c	2021-04-13 14:26:17.221572591 -0400
+@@ -257,6 +257,14 @@
+ 	struct content	*next;
+ };
+ 
++struct file_info_contents {
++  struct content	*first;
++  struct content	**last;
++};
++struct file_info_rede {
++  struct file_info	*first;
++  struct file_info	**last;
++};
+ /* In-memory storage for a directory record. */
+ struct file_info {
+ 	struct file_info	*use_next;
+@@ -297,14 +305,8 @@
+ 	uint64_t	 pz_uncompressed_size;
+ 	/* Set 1 if this file is multi extent. */
+ 	int		 multi_extent;
+-	struct {
+-		struct content	*first;
+-		struct content	**last;
+-	} contents;
+-	struct {
+-		struct file_info	*first;
+-		struct file_info	**last;
+-	} rede_files;
++	struct file_info_contents contents;
++	struct file_info_rede rede_files;
+ };
+ 
+ struct heap_queue {
+@@ -313,6 +315,27 @@
+ 	int		 used;
+ };
+ 
++struct read_ce_req {
++  uint64_t	 offset;/* Offset of CE on disk. */
++  struct file_info *file;
++};
++struct read_ce_queue {
++  struct read_ce_req 		*reqs;
++  int		 cnt;
++  int		 allocated;
++};
++struct iso9660_cache {
++  struct file_info	*first;
++  struct file_info	**last;
++};
++struct iso9660_re {
++  struct file_info	*first;
++  struct file_info	**last;
++};
++struct vd {
++  int		location;	/* Location of Extent.	*/
++  uint32_t	size;
++};
+ struct iso9660 {
+ 	int	magic;
+ #define ISO9660_MAGIC   0x96609660
+@@ -327,38 +350,22 @@
+ 
+ 	unsigned char	suspOffset;
+ 	struct file_info *rr_moved;
+-	struct read_ce_queue {
+-		struct read_ce_req {
+-			uint64_t	 offset;/* Offset of CE on disk. */
+-			struct file_info *file;
+-		}		*reqs;
+-		int		 cnt;
+-		int		 allocated;
+-	}	read_ce_req;
++	struct read_ce_queue 	read_ce_req;
+ 
+ 	int64_t		previous_number;
+ 	struct archive_string previous_pathname;
+ 
+ 	struct file_info		*use_files;
+ 	struct heap_queue		 pending_files;
+-	struct {
+-		struct file_info	*first;
+-		struct file_info	**last;
+-	}	cache_files;
+-	struct {
+-		struct file_info	*first;
+-		struct file_info	**last;
+-	}	re_files;
++	struct iso9660_cache	cache_files;
++	struct iso9660_re	re_files;
+ 
+ 	uint64_t current_position;
+ 	ssize_t	logical_block_size;
+ 	uint64_t volume_size; /* Total size of volume in bytes. */
+ 	int32_t  volume_block;/* Total size of volume in logical blocks. */
+ 
+-	struct vd {
+-		int		location;	/* Location of Extent.	*/
+-		uint32_t	size;
+-	} primary, joliet;
++	struct vd  primary, joliet;
+ 
+ 	int64_t	entry_sparse_offset;
+ 	int64_t	entry_bytes_remaining;
+diff -ru libarchive/archive_read_support_format_lha.c libarchive_no_inline_structs/archive_read_support_format_lha.c
+--- libarchive/archive_read_support_format_lha.c	2020-01-09 20:38:34.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_format_lha.c	2021-04-13 14:29:32.266039127 -0400
+@@ -63,6 +63,47 @@
+  * Note: this used for both position table and pre literal table.*/
+ #define PT_BITLEN_SIZE		(3 + 16)
+ 
++/*
++ * Bit stream reader.
++ */
++struct lzh_br {
++#define CACHE_TYPE		uint64_t
++#define CACHE_BITS		(8 * sizeof(CACHE_TYPE))
++  /* Cache buffer. */
++  CACHE_TYPE	 cache_buffer;
++  /* Indicates how many bits avail in cache_buffer. */
++  int		 cache_avail;
++};
++/*
++ * Huffman coding.
++ */
++struct htree_t {
++  uint16_t left;
++  uint16_t right;
++};
++struct huffman {
++  int		 len_size;
++  int		 len_avail;
++  int		 len_bits;
++  int		 freq[17];
++  unsigned char	*bitlen;
++
++  /*
++   * Use a index table. It's faster than searching a huffman
++   * coding tree, which is a binary tree. But a use of a large
++   * index table causes L1 cache read miss many times.
++   */
++#define HTBL_BITS	10
++  int		 max_bits;
++  int		 shift_bits;
++  int		 tbl_bits;
++  int		 tree_used;
++  int		 tree_avail;
++  /* Direct access table. */
++  uint16_t	*tbl;
++  /* Binary tree table for extra bits over the direct access. */
++  struct htree_t		*tree;
++};
+ struct lzh_dec {
+ 	/* Decoding status. */
+ 	int     		 state;
+@@ -86,44 +127,12 @@
+ 	/*
+ 	 * Bit stream reader.
+ 	 */
+-	struct lzh_br {
+-#define CACHE_TYPE		uint64_t
+-#define CACHE_BITS		(8 * sizeof(CACHE_TYPE))
+-	 	/* Cache buffer. */
+-		CACHE_TYPE	 cache_buffer;
+-		/* Indicates how many bits avail in cache_buffer. */
+-		int		 cache_avail;
+-	} br;
++	struct lzh_br  br;
+ 
+ 	/*
+ 	 * Huffman coding.
+ 	 */
+-	struct huffman {
+-		int		 len_size;
+-		int		 len_avail;
+-		int		 len_bits;
+-		int		 freq[17];
+-		unsigned char	*bitlen;
+-
+-		/*
+-		 * Use a index table. It's faster than searching a huffman
+-		 * coding tree, which is a binary tree. But a use of a large
+-		 * index table causes L1 cache read miss many times.
+-		 */
+-#define HTBL_BITS	10
+-		int		 max_bits;
+-		int		 shift_bits;
+-		int		 tbl_bits;
+-		int		 tree_used;
+-		int		 tree_avail;
+-		/* Direct access table. */
+-		uint16_t	*tbl;
+-		/* Binary tree table for extra bits over the direct access. */
+-		struct htree_t {
+-			uint16_t left;
+-			uint16_t right;
+-		}		*tree;
+-	}			 lt, pt;
++	struct huffman 		 lt, pt;
+ 
+ 	int			 blocks_avail;
+ 	int			 pos_pt_len_size;
+Only in libarchive/: archive_read_support_format_mtree.c
+Only in libarchive/: archive_read_support_format_rar5.c
+diff -ru libarchive/archive_read_support_format_rar.c libarchive_no_inline_structs/archive_read_support_format_rar.c
+--- libarchive/archive_read_support_format_rar.c	2020-01-16 16:05:41.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_format_rar.c	2021-04-13 14:33:33.100527556 -0400
+@@ -210,6 +210,19 @@
+   int64_t end_offset;
+ };
+ 
++/*
++ * Bit stream reader.
++ */
++struct rar_br {
++#define CACHE_TYPE	uint64_t
++#define CACHE_BITS	(8 * sizeof(CACHE_TYPE))
++  /* Cache buffer. */
++  CACHE_TYPE		 cache_buffer;
++  /* Indicates how many bits avail in cache_buffer. */
++  int			 cache_avail;
++  ssize_t		 avail_in;
++  const unsigned char *next_in;
++};
+ struct rar
+ {
+   /* Entries from main RAR header */
+@@ -300,16 +313,7 @@
+   /*
+    * Bit stream reader.
+    */
+-  struct rar_br {
+-#define CACHE_TYPE	uint64_t
+-#define CACHE_BITS	(8 * sizeof(CACHE_TYPE))
+-    /* Cache buffer. */
+-    CACHE_TYPE		 cache_buffer;
+-    /* Indicates how many bits avail in cache_buffer. */
+-    int			 cache_avail;
+-    ssize_t		 avail_in;
+-    const unsigned char *next_in;
+-  } br;
++  struct rar_br  br;
+ 
+   /*
+    * Custom field to denote that this archive contains encrypted entries
+Only in libarchive/: archive_read_support_format_raw.c
+Only in libarchive/: archive_read_support_format_tar.c
+Only in libarchive/: archive_read_support_format_warc.c
+Only in libarchive/: archive_read_support_format_xar.c
+diff -ru libarchive/archive_read_support_format_zip.c libarchive_no_inline_structs/archive_read_support_format_zip.c
+--- libarchive/archive_read_support_format_zip.c	2020-01-02 19:20:32.000000000 -0500
++++ libarchive_no_inline_structs/archive_read_support_format_zip.c	2021-04-13 14:45:44.584103449 -0400
+@@ -75,6 +75,19 @@
+ #include "archive_crc32.h"
+ #endif
+ 
++/* WinZip AES encryption extra field should be available
++ * when compression is 99. */
++struct zip_entry_aes {
++  /* Vendor version: AE-1 - 0x0001, AE-2 - 0x0002 */
++  unsigned	vendor;
++#define AES_VENDOR_AE_1	0x0001
++#define AES_VENDOR_AE_2	0x0002
++  /* AES encryption strength:
++   * 1 - 128 bits, 2 - 192 bits, 2 - 256 bits. */
++  unsigned	strength;
++  /* Actual compression method. */
++  unsigned char	compression;
++};
+ struct zip_entry {
+ 	struct archive_rb_node	node;
+ 	struct zip_entry	*next;
+@@ -97,17 +110,7 @@
+ 
+ 	/* WinZip AES encryption extra field should be available
+ 	 * when compression is 99. */
+-	struct {
+-		/* Vendor version: AE-1 - 0x0001, AE-2 - 0x0002 */
+-		unsigned	vendor;
+-#define AES_VENDOR_AE_1	0x0001
+-#define AES_VENDOR_AE_2	0x0002
+-		/* AES encryption strength:
+-		 * 1 - 128 bits, 2 - 192 bits, 2 - 256 bits. */
+-		unsigned	strength;
+-		/* Actual compression method. */
+-		unsigned char	compression;
+-	}			aes_extra;
++	struct zip_entry_aes 	aes_extra;
+ };
+ 
+ struct trad_enc_ctx {
+Only in libarchive/: archive_string.c
+Only in libarchive/: archive_string_composition.h
+Only in libarchive/: archive_string.h
+Only in libarchive/: archive_string_sprintf.c
+Only in libarchive/: archive_util.3
+Only in libarchive/: archive_util.c
+Only in libarchive/: archive_version_details.c
+Only in libarchive/: archive_virtual.c
+Only in libarchive/: archive_windows.c
+Only in libarchive/: archive_windows.h
+Only in libarchive/: archive_write.3
+Only in libarchive/: archive_write_add_filter_b64encode.c
+Only in libarchive/: archive_write_add_filter_by_name.c
+Only in libarchive/: archive_write_add_filter_bzip2.c
+Only in libarchive/: archive_write_add_filter.c
+Only in libarchive/: archive_write_add_filter_compress.c
+Only in libarchive/: archive_write_add_filter_grzip.c
+Only in libarchive/: archive_write_add_filter_gzip.c
+Only in libarchive/: archive_write_add_filter_lrzip.c
+Only in libarchive/: archive_write_add_filter_lz4.c
+Only in libarchive/: archive_write_add_filter_lzop.c
+Only in libarchive/: archive_write_add_filter_none.c
+Only in libarchive/: archive_write_add_filter_program.c
+Only in libarchive/: archive_write_add_filter_uuencode.c
+Only in libarchive/: archive_write_add_filter_xz.c
+Only in libarchive/: archive_write_add_filter_zstd.c
+Only in libarchive/: archive_write_blocksize.3
+Only in libarchive/: archive_write.c
+Only in libarchive/: archive_write_data.3
+Only in libarchive/: archive_write_disk.3
+Only in libarchive/: archive_write_disk_posix.c
+Only in libarchive/: archive_write_disk_private.h
+Only in libarchive/: archive_write_disk_set_standard_lookup.c
+Only in libarchive/: archive_write_disk_windows.c
+Only in libarchive/: archive_write_filter.3
+Only in libarchive/: archive_write_finish_entry.3
+Only in libarchive/: archive_write_format.3
+Only in libarchive/: archive_write_free.3
+Only in libarchive/: archive_write_header.3
+Only in libarchive/: archive_write_new.3
+Only in libarchive/: archive_write_open.3
+Only in libarchive/: archive_write_open_fd.c
+Only in libarchive/: archive_write_open_file.c
+Only in libarchive/: archive_write_open_filename.c
+Only in libarchive/: archive_write_open_memory.c
+Only in libarchive/: archive_write_private.h
+diff -ru libarchive/archive_write_set_format_7zip.c libarchive_no_inline_structs/archive_write_set_format_7zip.c
+--- libarchive/archive_write_set_format_7zip.c	2020-01-27 18:19:39.000000000 -0500
++++ libarchive_no_inline_structs/archive_write_set_format_7zip.c	2021-04-13 15:03:25.155122320 -0400
+@@ -139,7 +139,10 @@
+ 	size_t			 prop_size;
+ 	uint8_t			*props;
+ };
+-
++struct file_times {
++  time_t		 time;
++  long		 time_ns;
++};
+ struct file {
+ 	struct archive_rb_node	 rbnode;
+ 
+@@ -154,10 +157,7 @@
+ #define CRC32_IS_SET	(1<<3)
+ #define HAS_STREAM	(1<<4)
+ 
+-	struct {
+-		time_t		 time;
+-		long		 time_ns;
+-	}			 times[3];
++	struct file_times      times[3];
+ #define MTIME 0
+ #define ATIME 1
+ #define CTIME 2
+@@ -168,6 +168,15 @@
+ 	signed int		 dir:1;
+ };
+ 
++/*
++ * The list of the file entries which has its contents is used to
++ * manage struct file objects.
++ * We use 'next' (a member of struct file) to chain.
++ */
++struct _7zip_list {
++  struct file *first;
++  struct file **last;
++};
+ struct _7zip {
+ 	int			 temp_fd;
+ 	uint64_t		 temp_offset;
+@@ -208,10 +217,7 @@
+ 	 * manage struct file objects.
+ 	 * We use 'next' (a member of struct file) to chain.
+ 	 */
+-	struct {
+-		struct file	*first;
+-		struct file	**last;
+-	}			 file_list, empty_list;
++	struct _7zip_list	 file_list, empty_list;
+ 	struct archive_rb_tree	 rbtree;/* for empty files */
+ };
+ 
+Only in libarchive/: archive_write_set_format_ar.c
+Only in libarchive/: archive_write_set_format_by_name.c
+Only in libarchive/: archive_write_set_format.c
+diff -ru libarchive/archive_write_set_format_cpio.c libarchive_no_inline_structs/archive_write_set_format_cpio.c
+--- libarchive/archive_write_set_format_cpio.c	2020-01-27 18:19:39.000000000 -0500
++++ libarchive_no_inline_structs/archive_write_set_format_cpio.c	2021-04-13 15:05:41.742109809 -0400
+@@ -58,12 +58,13 @@
+ static int64_t	format_octal_recursive(int64_t, char *, int);
+ static int	write_header(struct archive_write *, struct archive_entry *);
+ 
++struct	cpio_ino_list	 { int64_t old; int new;};
+ struct cpio {
+ 	uint64_t	  entry_bytes_remaining;
+ 
+ 	int64_t		  ino_next;
+ 
+-	struct		 { int64_t old; int new;} *ino_list;
++	struct	cpio_ino_list *ino_list;
+ 	size_t		  ino_list_size;
+ 	size_t		  ino_list_next;
+ 
+Only in libarchive/: archive_write_set_format_cpio_newc.c
+Only in libarchive/: archive_write_set_format_filter_by_ext.c
+Only in libarchive/: archive_write_set_format_gnutar.c
+diff -ru libarchive/archive_write_set_format_iso9660.c libarchive_no_inline_structs/archive_write_set_format_iso9660.c
+--- libarchive/archive_write_set_format_iso9660.c	2020-01-31 19:09:37.000000000 -0500
++++ libarchive_no_inline_structs/archive_write_set_format_iso9660.c	2021-04-13 15:34:20.881104671 -0400
+@@ -157,6 +157,26 @@
+  * struct isoent has specific information for volume.
+  */
+ 
++struct content {
++  int64_t		 offset_of_temp;
++  int64_t		 size;
++  int		 blocks;
++  uint32_t 	 location;
++  /*
++   * One extent equals one content.
++   * If this entry has multi extent, `next' variable points
++   * next content data.
++   */
++  struct content	*next;		/* next content	*/
++};
++/*
++ * Used for a zisofs.
++ */
++struct isofile_zisofs {
++  unsigned char	 header_size;
++  unsigned char	 log2_bs;
++  uint32_t	 uncompressed_size;
++};
+ struct isofile {
+ 	/* Used for managing struct isofile list. */
+ 	struct isofile		*allnext;
+@@ -180,18 +200,7 @@
+ 	/*
+ 	 * Used for a Directory Record.
+ 	 */
+-	struct content {
+-		int64_t		 offset_of_temp;
+-		int64_t		 size;
+-		int		 blocks;
+-		uint32_t 	 location;
+-		/*
+-		 * One extent equals one content.
+-		 * If this entry has multi extent, `next' variable points
+-		 * next content data.
+-		 */
+-		struct content	*next;		/* next content	*/
+-	} content, *cur_content;
++	struct content           content, *cur_content;
+ 	int			 write_content;
+ 
+ 	enum {
+@@ -203,13 +212,37 @@
+ 	/*
+ 	 * Used for a zisofs.
+ 	 */
+-	struct {
+-		unsigned char	 header_size;
+-		unsigned char	 log2_bs;
+-		uint32_t	 uncompressed_size;
+-	} zisofs;
++	struct isofile_zisofs zisofs;
+ };
+ 
++struct isoent_children {
++  struct isoent *first;
++  struct isoent **last;
++  int cnt;
++};
++/* A list of sub directories.(use drnext) */
++struct isoent_subdirs {
++  struct isoent *first;
++  struct isoent **last;
++  int cnt;
++};
++struct isoent_dr {
++  int		 vd;
++  int		 self;
++  int		 parent;
++  int		 normal;
++};
++/* Extra Record.(which we call in this source file)
++ * A maximum size of the Directory Record is 254.
++ * so, if generated RRIP data of a file cannot into a Directory
++ * Record because of its size, that surplus data relocate this
++ * Extra Record.
++ */
++struct isoent_rec {
++  struct extr_rec *first;
++  struct extr_rec **last;
++  struct extr_rec *current;
++};
+ struct isoent {
+ 	/* Keep `rbnode' at the first member of struct isoent. */
+ 	struct archive_rb_node	 rbnode;
+@@ -218,19 +251,11 @@
+ 
+ 	struct isoent		*parent;
+ 	/* A list of children.(use chnext) */
+-	struct {
+-		struct isoent	*first;
+-		struct isoent	**last;
+-		int		 cnt;
+-	}			 children;
++	struct isoent_children	 children;
+ 	struct archive_rb_tree	 rbtree;
+ 
+ 	/* A list of sub directories.(use drnext) */
+-	struct {
+-		struct isoent	*first;
+-		struct isoent	**last;
+-		int		 cnt;
+-	}			 subdirs;
++	struct isoent_subdirs 	 subdirs;
+ 	/* A sorted list of sub directories. */
+ 	struct isoent		**children_sorted;
+ 	/* Used for managing struct isoent list. */
+@@ -242,12 +267,7 @@
+ 	 * Used for making a Directory Record.
+ 	 */
+ 	int			 dir_number;
+-	struct {
+-		int		 vd;
+-		int		 self;
+-		int		 parent;
+-		int		 normal;
+-	}			 dr_len;
++	struct isoent_dr 	 dr_len;
+ 	uint32_t 		 dir_location;
+ 	int			 dir_block;
+ 
+@@ -283,11 +303,7 @@
+ 	 * Record because of its size, that surplus data relocate this
+ 	 * Extra Record.
+ 	 */
+-	struct {
+-		struct extr_rec	*first;
+-		struct extr_rec	**last;
+-		struct extr_rec	*current;
+-	}			 extr_rec_list;
++	struct isoent_rec	 extr_rec_list;
+ 
+ 	signed int		 virtual:1;
+ 	/* If set to one, this file type is a directory.
+@@ -297,13 +313,14 @@
+ 	signed int		 dir:1;
+ };
+ 
++struct hardlink_list {
++  struct isofile *first;
++  struct isofile **last;
++};
+ struct hardlink {
+ 	struct archive_rb_node	 rbnode;
+ 	int			 nlink;
+-	struct {
+-		struct isofile	*first;
+-		struct isofile	**last;
+-	}			 file_list;
++	struct hardlink_list	 file_list;
+ };
+ 
+ /*
+@@ -676,6 +693,100 @@
+ 
+ };
+ 
++/* A list of all of struct isofile entries. */
++struct iso9660_isofiles {
++  struct isofile *first;
++  struct isofile **last;
++};
++/* A list of struct isofile entries which have its
++ * contents and are not a directory, a hardlinked file
++ * and a symlink file. */
++struct iso9660_data {
++  struct isofile	*first;
++  struct isofile	**last;
++};
++/* Used for making the Path Table Record. */
++struct path_table {
++  struct isoent		*first;
++  struct isoent		**last;
++  struct isoent		**sorted;
++  int			 cnt;
++};
++struct vdd {
++  /* the root of entry tree. */
++  struct isoent	*rootent;
++  enum vdd_type {
++    VDD_PRIMARY,
++    VDD_JOLIET,
++    VDD_ENHANCED
++  } vdd_type;
++
++  struct path_table      *pathtbl;
++  int				 max_depth;
++
++  int		 path_table_block;
++  int		 path_table_size;
++  int		 location_type_L_path_table;
++  int		 location_type_M_path_table;
++  int		 total_dir_block;
++};
++/* Used for making zisofs. */
++struct iso9660_zisofs {
++  signed int	 detect_magic:1;
++  signed int	 making:1;
++  signed int	 allzero:1;
++  unsigned char	 magic_buffer[64];
++  int		 magic_cnt;
++
++#ifdef HAVE_ZLIB_H
++  /*
++		 * Copy a compressed file to iso9660.zisofs.temp_fd
++		 * and also copy a uncompressed file(original file) to
++		 * iso9660.temp_fd . If the number of logical block
++		 * of the compressed file is less than the number of
++		 * logical block of the uncompressed file, use it and
++		 * remove the copy of the uncompressed file.
++		 * but if not, we use uncompressed file and remove
++		 * the copy of the compressed file.
++		 */
++		uint32_t	*block_pointers;
++		size_t		 block_pointers_allocated;
++		int		 block_pointers_cnt;
++		int		 block_pointers_idx;
++		int64_t		 total_size;
++		int64_t		 block_offset;
++
++		z_stream	 stream;
++		int		 stream_valid;
++		int64_t		 remaining;
++		int		 compression_level;
++#endif
++};
++/* 'El Torito' boot data. */
++struct iso9660_elt {
++  /* boot catalog file */
++  struct archive_string	 catalog_filename;
++  struct isoent		*catalog;
++  /* boot image file */
++  struct archive_string	 boot_filename;
++  struct isoent		*boot;
++
++  unsigned char		 platform_id;
++#define BOOT_PLATFORM_X86	0
++#define BOOT_PLATFORM_PPC	1
++#define BOOT_PLATFORM_MAC	2
++  struct archive_string	 id;
++  unsigned char		 media_type;
++#define BOOT_MEDIA_NO_EMULATION		0
++#define BOOT_MEDIA_1_2M_DISKETTE	1
++#define BOOT_MEDIA_1_44M_DISKETTE	2
++#define BOOT_MEDIA_2_88M_DISKETTE	3
++#define BOOT_MEDIA_HARD_DISK		4
++  unsigned char		 system_type;
++  uint16_t		 boot_load_seg;
++  uint16_t		 boot_load_size;
++#define BOOT_LOAD_SIZE		4
++};
+ struct iso9660 {
+ 	/* The creation time of ISO image. */
+ 	time_t			 birth_time;
+@@ -697,46 +808,18 @@
+ 	struct archive_string_conv *sconv_from_utf16be;
+ 
+ 	/* A list of all of struct isofile entries. */
+-	struct {
+-		struct isofile	*first;
+-		struct isofile	**last;
+-	}			 all_file_list;
++	struct iso9660_isofiles   all_file_list;
+ 
+ 	/* A list of struct isofile entries which have its
+ 	 * contents and are not a directory, a hardlinked file
+ 	 * and a symlink file. */
+-	struct {
+-		struct isofile	*first;
+-		struct isofile	**last;
+-	}			 data_file_list;
++	struct iso9660_data	 data_file_list;
+ 
+ 	/* Used for managing to find hardlinking files. */
+ 	struct archive_rb_tree	 hardlink_rbtree;
+ 
+ 	/* Used for making the Path Table Record. */
+-	struct vdd {
+-		/* the root of entry tree. */
+-		struct isoent	*rootent;
+-		enum vdd_type {
+-			VDD_PRIMARY,
+-			VDD_JOLIET,
+-			VDD_ENHANCED
+-		} vdd_type;
+-
+-		struct path_table {
+-			struct isoent		*first;
+-			struct isoent		**last;
+-			struct isoent		**sorted;
+-			int			 cnt;
+-		} *pathtbl;
+-		int				 max_depth;
+-
+-		int		 path_table_block;
+-		int		 path_table_size;
+-		int		 location_type_L_path_table;
+-		int		 location_type_M_path_table;
+-		int		 total_dir_block;
+-	} primary, joliet;
++	struct vdd               primary, joliet;
+ 
+ 	/* Used for making a Volume Descriptor. */
+ 	int			 volume_space_size;
+@@ -754,37 +837,7 @@
+ 	int			 location_rrip_er;
+ 
+ 	/* Used for making zisofs. */
+-	struct {
+-		signed int	 detect_magic:1;
+-		signed int	 making:1;
+-		signed int	 allzero:1;
+-		unsigned char	 magic_buffer[64];
+-		int		 magic_cnt;
+-
+-#ifdef HAVE_ZLIB_H
+-		/*
+-		 * Copy a compressed file to iso9660.zisofs.temp_fd
+-		 * and also copy a uncompressed file(original file) to
+-		 * iso9660.temp_fd . If the number of logical block
+-		 * of the compressed file is less than the number of
+-		 * logical block of the uncompressed file, use it and
+-		 * remove the copy of the uncompressed file.
+-		 * but if not, we use uncompressed file and remove
+-		 * the copy of the compressed file.
+-		 */
+-		uint32_t	*block_pointers;
+-		size_t		 block_pointers_allocated;
+-		int		 block_pointers_cnt;
+-		int		 block_pointers_idx;
+-		int64_t		 total_size;
+-		int64_t		 block_offset;
+-
+-		z_stream	 stream;
+-		int		 stream_valid;
+-		int64_t		 remaining;
+-		int		 compression_level;
+-#endif
+-	} zisofs;
++	struct iso9660_zisofs    zisofs;
+ 
+ 	struct isoent		*directories_too_deep;
+ 	int			 dircnt_max;
+@@ -805,30 +858,7 @@
+ 	int64_t			 wbuff_tail;
+ 
+ 	/* 'El Torito' boot data. */
+-	struct {
+-		/* boot catalog file */
+-		struct archive_string	 catalog_filename;
+-		struct isoent		*catalog;
+-		/* boot image file */
+-		struct archive_string	 boot_filename;
+-		struct isoent		*boot;
+-
+-		unsigned char		 platform_id;
+-#define BOOT_PLATFORM_X86	0
+-#define BOOT_PLATFORM_PPC	1
+-#define BOOT_PLATFORM_MAC	2
+-		struct archive_string	 id;
+-		unsigned char		 media_type;
+-#define BOOT_MEDIA_NO_EMULATION		0
+-#define BOOT_MEDIA_1_2M_DISKETTE	1
+-#define BOOT_MEDIA_1_44M_DISKETTE	2
+-#define BOOT_MEDIA_2_88M_DISKETTE	3
+-#define BOOT_MEDIA_HARD_DISK		4
+-		unsigned char		 system_type;
+-		uint16_t		 boot_load_seg;
+-		uint16_t		 boot_load_size;
+-#define BOOT_LOAD_SIZE		4
+-	} el_torito;
++	struct iso9660_elt       el_torito;
+ 
+ 	struct iso_option	 opt;
+ };
+@@ -867,25 +897,27 @@
+  * IDentifier Resolver.
+  * Used for resolving duplicated filenames.
+  */
++struct idrent {
++  struct archive_rb_node	rbnode;
++  /* Used in wait_list. */
++  struct idrent		*wnext;
++  struct idrent		*avail;
++
++  struct isoent		*isoent;
++  int			 weight;
++  int			 noff;
++  int			 rename_num;
++};
++struct idr_wait {
++  struct idrent		*first;
++  struct idrent		**last;
++} wait_list;
+ struct idr {
+-	struct idrent {
+-		struct archive_rb_node	rbnode;
+-		/* Used in wait_list. */
+-		struct idrent		*wnext;
+-		struct idrent		*avail;
+-
+-		struct isoent		*isoent;
+-		int			 weight;
+-		int			 noff;
+-		int			 rename_num;
+-	} *idrent_pool;
++	struct idrent    *idrent_pool;
+ 
+ 	struct archive_rb_tree		 rbtree;
+ 
+-	struct {
+-		struct idrent		*first;
+-		struct idrent		**last;
+-	} wait_list;
++	struct idr_wait  wait_list;
+ 
+ 	int				 pool_size;
+ 	int				 pool_idx;
+diff -ru libarchive/archive_write_set_format_mtree.c libarchive_no_inline_structs/archive_write_set_format_mtree.c
+--- libarchive/archive_write_set_format_mtree.c	2019-12-14 16:13:52.000000000 -0500
++++ libarchive_no_inline_structs/archive_write_set_format_mtree.c	2021-04-13 15:37:36.258181517 -0400
+@@ -133,6 +133,19 @@
+ 	int64_t ino;
+ };
+ 
++/*
++ * Set global value.
++ */
++struct mtree_writer_set {
++  int		processing;
++  mode_t		type;
++  int		keys;
++  int64_t		uid;
++  int64_t		gid;
++  mode_t		mode;
++  unsigned long	fflags_set;
++  unsigned long	fflags_clear;
++};
+ struct mtree_writer {
+ 	struct mtree_entry *mtree_entry;
+ 	struct mtree_entry *root;
+@@ -148,16 +161,7 @@
+ 	/*
+ 	 * Set global value.
+ 	 */
+-	struct {
+-		int		processing;
+-		mode_t		type;
+-		int		keys;
+-		int64_t		uid;
+-		int64_t		gid;
+-		mode_t		mode;
+-		unsigned long	fflags_set;
+-		unsigned long	fflags_clear;
+-	} set;
++	struct mtree_writer_set set;
+ 	struct att_counter_set	acs;
+ 	int classic;
+ 	int depth;
+Only in libarchive/: archive_write_set_format_pax.c
+Only in libarchive/: archive_write_set_format_private.h
+Only in libarchive/: archive_write_set_format_raw.c
+Only in libarchive/: archive_write_set_format_shar.c
+Only in libarchive/: archive_write_set_format_ustar.c
+Only in libarchive/: archive_write_set_format_v7tar.c
+Only in libarchive/: archive_write_set_format_warc.c
+diff -ru libarchive/archive_write_set_format_xar.c libarchive_no_inline_structs/archive_write_set_format_xar.c
+--- libarchive/archive_write_set_format_xar.c	2020-02-12 19:07:31.000000000 -0500
++++ libarchive_no_inline_structs/archive_write_set_format_xar.c	2021-04-13 15:45:41.706360084 -0400
+@@ -176,6 +176,18 @@
+ 	struct chksumval	 e_sum;		/* extracted checksum.	*/
+ };
+ 
++/*
++ * To manage sub directory files.
++ * We use 'chnext' (a member of struct file) to chain.
++ */
++struct file_children {
++  struct file *first;
++  struct file **last;
++};
++struct file_xattr {
++        struct heap_data *first;
++        struct heap_data **last;
++};			 xattr;
+ struct file {
+ 	struct archive_rb_node	 rbnode;
+ 
+@@ -194,10 +206,7 @@
+ 	 * To manage sub directory files.
+ 	 * We use 'chnext' (a member of struct file) to chain.
+ 	 */
+-	struct {
+-		struct file	*first;
+-		struct file	**last;
+-	}			 children;
++	struct file_children 	 children;
+ 
+ 	/* For making a directory tree. */
+         struct archive_string    parentdir;
+@@ -205,10 +214,7 @@
+         struct archive_string    symlink;
+ 
+ 	int			 ea_idx;
+-	struct {
+-		struct heap_data *first;
+-		struct heap_data **last;
+-	}			 xattr;
++	struct file_xattr 	 xattr;
+ 	struct heap_data	 data;
+         struct archive_string    script;
+ 
+@@ -216,15 +222,25 @@
+ 	signed int		 dir:1;
+ };
+ 
++struct hardlink_list {
++  struct file *first;
++  struct file **last;
++};
+ struct hardlink {
+ 	struct archive_rb_node	 rbnode;
+ 	int			 nlink;
+-	struct {
+-		struct file	*first;
+-		struct file	**last;
+-	}			 file_list;
++	struct hardlink_list	 file_list;
+ };
+ 
++/*
++ * The list of all file entries is used to manage struct file
++ * objects.
++ * We use 'next' (a member of struct file) to chain.
++ */
++struct xar_list {
++  struct file *first;
++  struct file **last;
++};
+ struct xar {
+ 	int			 temp_fd;
+ 	uint64_t		 temp_offset;
+@@ -260,10 +276,7 @@
+ 	 * objects.
+ 	 * We use 'next' (a member of struct file) to chain.
+ 	 */
+-	struct {
+-		struct file	*first;
+-		struct file	**last;
+-	}			 file_list;
++	struct xar_list 	 file_list;
+ 	/*
+ 	 * The list of hard-linked file entries.
+ 	 * We use 'hlnext' (a member of struct file) to chain.
+Only in libarchive/: archive_write_set_format_zip.c
+Only in libarchive/: archive_write_set_options.3
+Only in libarchive/: archive_write_set_options.c
+Only in libarchive/: archive_write_set_passphrase.3
+Only in libarchive/: archive_write_set_passphrase.c
+Only in libarchive/: archive_xxhash.h
+Only in libarchive/: CMakeLists.txt
+Only in libarchive/: config_freebsd.h
+Only in libarchive/: cpio.5
+Only in libarchive/: filter_fork.h
+Only in libarchive/: filter_fork_posix.c
+Only in libarchive/: filter_fork_windows.c
+Only in libarchive/: libarchive.3
+Only in libarchive/: libarchive_changes.3
+Only in libarchive/: libarchive-formats.5
+Only in libarchive/: libarchive_internals.3
+Only in libarchive/: mtree.5
+Only in libarchive/: tar.5
+Only in libarchive/: test
+Only in libarchive/: xxhash.c

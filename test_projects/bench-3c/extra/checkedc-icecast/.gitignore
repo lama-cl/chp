@@ -1,0 +1,24 @@
+# autoconf / configure outputs
+/autom4te.cache
+/config.status
+/config.log
+/config.h
+/stamp-h1
+/libtool
+Makefile
+
+# Build outputs
+*.o
+*.lo
+*.la
+.deps
+.libs
+/src/icecast
+/conf/icecast*.xml.dist
+/compile_commands.json
+
+# 3C outputs
+/out.checked
+# Hope this only matches -dump-stats output files.
+# TODO: Somehow get 3C to put them all in a subdirectory?
+/*Stats*.json

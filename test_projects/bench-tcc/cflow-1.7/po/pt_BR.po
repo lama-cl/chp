@@ -1,0 +1,929 @@
+# Brazilian Portuguese translations for cflow package
+# Traduções em português brasileiro para o pacote cflow
+# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021 Sergey Poznyakoff
+# This file is distributed under the same license as the cflow package.
+# Rafael Fontenelle <rafaelff@gnome.org>, 2016-2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cflow 1.6.91\n"
+"Report-Msgid-Bugs-To: bug-cflow@gnu.org\n"
+"POT-Creation-Date: 2021-12-30 12:13+0200\n"
+"PO-Revision-Date: 2021-04-03 10:52-0300\n"
+"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
+"Language-Team: Brazilian Portuguese <ldpbr-translation@lists.sourceforge."
+"net>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"X-Generator: Gtranslator 40.0\n"
+
+#: src/c.l:150
+msgid "unterminated string?"
+msgstr "string não terminada?"
+
+#: src/c.l:336
+#, c-format
+msgid "Command line: %s\n"
+msgstr "Linha de comando: %s\n"
+
+#: src/c.l:339
+#, c-format
+msgid "cannot execute `%s'"
+msgstr "não foi possível executar \"%s\""
+
+#: src/c.l:394 src/rc.c:58
+#, c-format
+msgid "cannot open `%s'"
+msgstr "não foi possível abrir \"%s\""
+
+#: src/c.l:475
+#, c-format
+msgid "New location: %s:%d\n"
+msgstr "Nova localização: %s:%d\n"
+
+#: src/main.c:25
+msgid "generate a program flowgraph"
+msgstr "gera o grafo de fluxo de um programa"
+
+#: src/main.c:57
+msgid "General options:"
+msgstr "Opções gerais:"
+
+#: src/main.c:58 src/main.c:96
+msgid "NUMBER"
+msgstr "NÚMERO"
+
+# Espaço adicionado para alinhar; veja "cflow --help"
+#: src/main.c:59
+msgid "set the depth at which the flowgraph is cut off"
+msgstr " define a profundidade limite do grafo de fluxo"
+
+#: src/main.c:60
+msgid "CLASSES"
+msgstr "CLASSES"
+
+#: src/main.c:61
+msgid ""
+"include specified classes of symbols (see below); prepend CLASSES with ^ or "
+"- to exclude them from the output"
+msgstr ""
+"inclui as classes de símbolos especificadas (veja abaixo); preceda CLASSES "
+"com ^ ou - para excluí-las da saída"
+
+#: src/main.c:62 src/main.c:103 src/main.c:150 src/main.c:158
+#: gnu/argp-parse.c:85
+msgid "NAME"
+msgstr "NOME"
+
+#: src/main.c:63
+#, fuzzy
+msgid ""
+"use given output format NAME; valid names are `gnu' (default), `posix', and "
+"`dot'"
+msgstr ""
+"usa o NOME de formato de saída fornecido; nomes válidos são \"gnu\" (padrão) "
+"e \"posix\""
+
+#: src/main.c:66
+msgid "print reverse call tree"
+msgstr "imprime árvore de chamada reversa"
+
+#: src/main.c:68
+msgid "produce cross-reference listing only"
+msgstr "produz apenas listagem de referência cruzada"
+
+#: src/main.c:69
+msgid "FILE"
+msgstr "ARQUIVO"
+
+#: src/main.c:70
+msgid "set output file name (default -, meaning stdout)"
+msgstr ""
+"define nome de arquivo de saída (padrão -, significando a saída padrão)"
+
+#: src/main.c:73
+msgid "Symbol classes for --include argument"
+msgstr "classes de símbolos para o argumento --include"
+
+#: src/main.c:75
+msgid "all data symbols, both external and static"
+msgstr "todos símbolos de dados, ambos externos e estáticos"
+
+#: src/main.c:77
+msgid "symbols whose names begin with an underscore"
+msgstr "símbolos cujos nomes iniciam com um sublinhado"
+
+#: src/main.c:79
+msgid "static symbols"
+msgstr "símbolos estáticos"
+
+#: src/main.c:81
+msgid "typedefs (for cross-references only)"
+msgstr "typedefs (apenas para referências cruzadas)"
+
+#: src/main.c:87
+msgid "Parser control:"
+msgstr "Controle do interpretador:"
+
+#: src/main.c:89
+msgid "rely on indentation"
+msgstr "Leva em conta o recuo"
+
+#: src/main.c:91
+msgid "don't rely on indentation (default)"
+msgstr "não leva em conta o recuo (padrão)"
+
+#: src/main.c:93
+msgid "accept only sources in ANSI C"
+msgstr "aceita apenas fontes em ANSI C"
+
+#: src/main.c:95
+msgid "accept both ANSI and K&R C (default)"
+msgstr "aceita ambos C ANSI e K&R (padrão)"
+
+# Espaço adicionado para alinhar; veja "cflow --help"
+#: src/main.c:97
+msgid "set initial token stack size to NUMBER"
+msgstr " define um tamanho da pilha de token inicial com NÚMERO"
+
+#: src/main.c:98
+msgid "SYMBOL:[=]TYPE"
+msgstr "SÍMBOLO:[=]TIPO"
+
+#. TRANSLATORS: Don't translate type names.
+#: src/main.c:100
+msgid ""
+"register SYMBOL with given TYPE, or define an alias (if := is used); valid "
+"types are: keyword (or kw), modifier, qualifier, identifier, type, wrapper, "
+"or any unambiguous abbreviation thereof"
+msgstr ""
+"registra SÍMBOLO com o TIPO dado, ou define um apelido (se := for usado); "
+"tipos válidos: keyword (ou kw), modifier, qualifier, identifier, type, "
+"wrapper ou qualquer abreviação não ambígua delas"
+
+#: src/main.c:101
+msgid "NAME[=DEFN]"
+msgstr "NOME[=DEFN]"
+
+#: src/main.c:102
+msgid "predefine NAME as a macro"
+msgstr "predefine NOME como uma macro"
+
+#: src/main.c:104
+msgid "cancel any previous definition of NAME"
+msgstr "cancela qualquer definição anterior de NOME"
+
+#: src/main.c:105
+msgid "DIR"
+msgstr "DIR"
+
+#: src/main.c:106
+msgid ""
+"add the directory DIR to the list of directories to be searched for header "
+"files"
+msgstr ""
+"adiciona o diretório DIR à lista de diretórios a ser pesquisados por "
+"arquivos de cabeçalho"
+
+#: src/main.c:107
+msgid "COMMAND"
+msgstr "COMANDO"
+
+#: src/main.c:108
+msgid "run the specified preprocessor command"
+msgstr "executa o comando de preprocessador especificado"
+
+#: src/main.c:111
+msgid "disable preprocessor"
+msgstr "desabilita preprocessador"
+
+#: src/main.c:116
+msgid "Output control:"
+msgstr "Controle de saída:"
+
+#: src/main.c:118
+msgid "show all functions, not only those reachable from main"
+msgstr ""
+"mostra todas as funções, não apenas aquelas alcançáveis a partir do \"main\""
+
+#: src/main.c:121
+msgid "print line numbers"
+msgstr "imprime números de linhas"
+
+#: src/main.c:123
+msgid "don't print line numbers (default)"
+msgstr "não imprime números de linhas (padrão)"
+
+#: src/main.c:125
+msgid "print nesting level along with the call tree"
+msgstr "imprime nível de aninhamento junto com a árvore de chamada"
+
+#: src/main.c:127
+msgid "don't print nesting levels (default)"
+msgstr "não imprime níveis de aninhamento (padrão)"
+
+#: src/main.c:129
+msgid "control graph appearance; see [1] for details"
+msgstr "controla a aparência do grafo; veja [1] para detalhes"
+
+#: src/main.c:131
+msgid "draw ASCII art tree"
+msgstr "desenha a árvore de arte em ASCII"
+
+#: src/main.c:133
+msgid "don't draw ASCII art tree (default)"
+msgstr "não desenha a árvore de arte em ASCII (padrão)"
+
+#: src/main.c:135
+msgid "brief output"
+msgstr "saída breve"
+
+#: src/main.c:137
+msgid "full output (default)"
+msgstr "saída completa (padrão)"
+
+#: src/main.c:139
+msgid "additionally format output for use with GNU Emacs"
+msgstr "adicionalmente, formata de saída para usar com GNU Emacs"
+
+#: src/main.c:141
+msgid "don't format output for Emacs (default)"
+msgstr "não formata a saída para o Emacs (padrão)"
+
+#: src/main.c:143
+msgid "don't print argument lists in function declarations"
+msgstr "não imprime listas de argumentos nas declarações de função"
+
+#: src/main.c:145
+msgid "print argument lists in function declarations (default)"
+msgstr "imprime listas de argumentos nas declarações de função (padrão)"
+
+#: src/main.c:147
+msgid "don't print symbol names in declaration strings"
+msgstr "não imprime nomes de símbolos nas strings de declaração"
+
+#: src/main.c:149
+msgid "print symbol names in declaration strings (default)"
+msgstr "imprime nomes de símbolos nas strings de declaração (padrão)"
+
+#: src/main.c:151
+#, fuzzy
+msgid "start graph at this function; multiple options are allowed"
+msgstr ""
+"mostra apenas grafos levando a símbolos iniciais para esta função; várias "
+"opções são permitidas"
+
+#: src/main.c:157
+msgid "there's no main function; print graphs for all functions in the program"
+msgstr ""
+"não há função \"main\"; imprime grafos para todas as funções no programa"
+
+#: src/main.c:159
+#, fuzzy
+msgid ""
+"show only graphs leading from start symbols to this function; multiple "
+"options are allowed"
+msgstr ""
+"mostra apenas grafos levando a símbolos iniciais para esta função; várias "
+"opções são permitidas"
+
+#: src/main.c:164
+msgid "Informational options:"
+msgstr "Opções informativas:"
+
+#: src/main.c:166
+msgid "verbose error diagnostics"
+msgstr "diagnósticos detalhados de erros"
+
+#: src/main.c:168
+msgid "disable verbose diagnostics (default)"
+msgstr "desabilita diagnósticos detalhados (padrão)"
+
+# Espaço adicionado para alinhar; veja "cflow --help"
+#: src/main.c:170
+msgid "set debugging level"
+msgstr " define o nível de depuração"
+
+#: src/main.c:172 gnu/argp-parse.c:83
+msgid "give this help list"
+msgstr "fornece esta lista de ajuda"
+
+#: src/main.c:275
+#, c-format
+msgid "%s: no symbol type supplied"
+msgstr "%s nenhum tipo de símbolo fornecido"
+
+#: src/main.c:285
+#, c-format
+msgid "cyclic alias: %s -> %s"
+msgstr ""
+
+#: src/main.c:291
+#, c-format
+msgid "cyclic alias: %s -> %s -> %s"
+msgstr ""
+
+#: src/main.c:309
+#, c-format
+msgid "unknown symbol type: %s"
+msgstr "tipo de símbolo desconhecido: %s"
+
+#: src/main.c:438 src/main.c:445
+#, c-format
+msgid "level indent string is too long"
+msgstr "string de recuo de nível é muito longa"
+
+#: src/main.c:471
+#, c-format
+msgid "level-indent syntax"
+msgstr "sintaxe de recuo de nível"
+
+#: src/main.c:493
+#, c-format
+msgid "unknown level indent option: %s"
+msgstr "opção de recuo de nível desconhecida: %s"
+
+#: src/main.c:541
+msgid "References:"
+msgstr "Referências:"
+
+#: src/main.c:604
+#, c-format
+msgid "%s: No such output driver"
+msgstr "%s: Driver de saída inexistente"
+
+#: src/main.c:632
+#, c-format
+msgid "Unknown symbol class: %c"
+msgstr "Classe de símbolo desconhecida: %c"
+
+#: src/main.c:723
+msgid "[FILE]..."
+msgstr "[ARQUIVO]..."
+
+#: src/main.c:773
+#, c-format
+msgid "Exiting"
+msgstr "Saindo"
+
+#: src/main.c:820
+#, c-format
+msgid "INTERNAL ERROR: %s: No such output driver"
+msgstr "ERRO INTERNO: %s: Driver de saída inexistente"
+
+#: src/main.c:870
+#, c-format
+msgid "no input files"
+msgstr "nenhum arquivo de entrada"
+
+#: src/parser.c:209
+#, c-format
+msgid " near "
+msgstr " próximo a "
+
+#: src/parser.c:312
+#, c-format
+msgid "INTERNAL ERROR: cannot return token to stream"
+msgstr "ERRO INTERNO: não foi possível retornar token para o fluxo"
+
+#: src/parser.c:403
+msgid "unrecognized definition"
+msgstr "definição não reconhecida"
+
+#: src/parser.c:558 src/parser.c:715 src/parser.c:805
+msgid "unexpected end of file in declaration"
+msgstr "fim de arquivo inesperado na declaração"
+
+#: src/parser.c:599 src/parser.c:617 src/parser.c:650 src/parser.c:656
+msgid "unexpected end of file in expression"
+msgstr "fim de arquivo inesperado na expressão"
+
+#: src/parser.c:695 src/parser.c:781
+msgid "expected `;'"
+msgstr "esperava \";\""
+
+#: src/parser.c:734
+msgid "missing `;' after struct declaration"
+msgstr "faltando \";\" após declaração da struct"
+
+#: src/parser.c:827
+msgid "unexpected end of file in initializer list"
+msgstr "fim de arquivo inesperado na lista inicializadora"
+
+#: src/parser.c:857 src/parser.c:864
+msgid "unexpected end of file in struct"
+msgstr "fim de arquivo inesperado no struct"
+
+#: src/parser.c:913 src/parser.c:979
+msgid "unexpected end of file in function declaration"
+msgstr "fim de arquivo inesperado na declaração de função"
+
+#: src/parser.c:946 src/parser.c:969
+msgid "expected `)'"
+msgstr "esperava \")\""
+
+#: src/parser.c:1041
+msgid "unexpected token in parameter list"
+msgstr "token inesperado na lista de parâmetro"
+
+#: src/parser.c:1057
+msgid "unexpected end of file in parameter list"
+msgstr "fim de arquivo inesperado na lista de parâmetro"
+
+#: src/parser.c:1095
+msgid "forced function body close"
+msgstr "fechamento forçado do corpo da função"
+
+#: src/parser.c:1109
+msgid "unexpected end of file in function body"
+msgstr "fim de arquivo inesperado no corpo da função"
+
+#: src/parser.c:1209
+#, c-format
+msgid "%s/%d redefined"
+msgstr "%s/%d redefinido"
+
+#: src/parser.c:1213
+#, c-format
+msgid "%s redefined"
+msgstr "%s redefinido"
+
+#: src/parser.c:1216
+#, c-format
+msgid "this is the place of previous definition"
+msgstr "este é o local da definição anterior"
+
+#: src/parser.c:1230
+#, c-format
+msgid "%s:%d: %s/%d defined to %s\n"
+msgstr "%s:%d: %s/%d definido para %s\n"
+
+#: src/parser.c:1255
+#, c-format
+msgid "%s:%d: type %s\n"
+msgstr "%s:%d: tipo %s\n"
+
+#: src/output.c:432
+#, c-format
+msgid "cannot open file `%s'"
+msgstr "não foi possível abrir o arquivo \"%s\""
+
+#: src/posix.c:59
+#, c-format
+msgid "--format=posix is not compatible with --emacs"
+msgstr "--format=posix não é compatível com --emacs"
+
+#: gnu/argp-help.c:153
+#, c-format
+msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgstr "ARGP_HELP_FMT: O valor %s é menor do que ou igual a %s"
+
+#: gnu/argp-help.c:229
+#, c-format
+msgid "%.*s: ARGP_HELP_FMT parameter requires a value"
+msgstr "%.*s: O parâmetro ARGP_HELP_FMT exige um valor"
+
+#: gnu/argp-help.c:239
+#, c-format
+msgid "%.*s: Unknown ARGP_HELP_FMT parameter"
+msgstr "%.*s: Parâmetro ARGP_HELP_FMT desconhecido"
+
+#: gnu/argp-help.c:252
+#, c-format
+msgid "Garbage in ARGP_HELP_FMT: %s"
+msgstr "Lixo em ARGP_HELP_FMT: %s"
+
+#: gnu/argp-help.c:1365
+msgid ""
+"Mandatory or optional arguments to long options are also mandatory or "
+"optional for any corresponding short options."
+msgstr ""
+"Argumentos obrigatórios ou opcionais para opções longas também o são para "
+"quaisquer opções curtas correspondentes."
+
+#: gnu/argp-help.c:1731
+msgid "Usage:"
+msgstr "Uso:"
+
+#: gnu/argp-help.c:1735
+msgid "  or: "
+msgstr " ou: "
+
+#: gnu/argp-help.c:1747
+msgid " [OPTION...]"
+msgstr " [OPÇÃO...]"
+
+#: gnu/argp-help.c:1774
+#, c-format
+msgid "Try '%s --help' or '%s --usage' for more information.\n"
+msgstr "Tente \"%s --help\" ou \"%s --usage\" para mais informações.\n"
+
+#: gnu/argp-help.c:1802
+#, c-format
+msgid "Report bugs to %s.\n"
+msgstr "Relate erros para %s.\n"
+
+#: gnu/argp-help.c:2003 gnu/error.c:197
+msgid "Unknown system error"
+msgstr "Erro desconhecido de sistema"
+
+#: gnu/argp-parse.c:84
+msgid "give a short usage message"
+msgstr "fornece uma mensagem curta de uso"
+
+#: gnu/argp-parse.c:86
+msgid "set the program name"
+msgstr "define o nome do programa"
+
+#: gnu/argp-parse.c:87
+msgid "SECS"
+msgstr "SEGS"
+
+#: gnu/argp-parse.c:88
+msgid "hang for SECS seconds (default 3600)"
+msgstr "segura por SEGS segundos (padrão 3600)"
+
+#: gnu/argp-parse.c:145
+msgid "print program version"
+msgstr "mostra a versão do programa"
+
+#: gnu/argp-parse.c:162
+msgid "(PROGRAM ERROR) No version known!?"
+msgstr "(ERRO NO PROGRAMA) Nenhuma versão conhecida!?"
+
+#: gnu/argp-parse.c:615
+#, c-format
+msgid "%s: Too many arguments\n"
+msgstr "%s: Número excessivo de argumentos\n"
+
+#: gnu/argp-parse.c:761
+msgid "(PROGRAM ERROR) Option should have been recognized!?"
+msgstr "(ERRO NO PROGRAMA) A opção deveria ter sido reconhecida!?"
+
+#: gnu/getopt.c:280
+#, c-format
+msgid "%s: option '%s%s' is ambiguous\n"
+msgstr "%s: a opção \"%s%s\" é ambígua\n"
+
+#: gnu/getopt.c:286
+#, c-format
+msgid "%s: option '%s%s' is ambiguous; possibilities:"
+msgstr "%s: a opção \"%s%s\" é ambígua; possibilidades:"
+
+#: gnu/getopt.c:321
+#, c-format
+msgid "%s: unrecognized option '%s%s'\n"
+msgstr "%s: opção desconhecida \"%s%s\"\n"
+
+#: gnu/getopt.c:347
+#, c-format
+msgid "%s: option '%s%s' doesn't allow an argument\n"
+msgstr "%s: a opção \"%s%s\" não aceita argumentos\n"
+
+#: gnu/getopt.c:362
+#, c-format
+msgid "%s: option '%s%s' requires an argument\n"
+msgstr "%s: a opção \"%s%s\" exige um argumento\n"
+
+#: gnu/getopt.c:623
+#, c-format
+msgid "%s: invalid option -- '%c'\n"
+msgstr "%s: opção inválida -- \"%c\"\n"
+
+#: gnu/getopt.c:638 gnu/getopt.c:684
+#, c-format
+msgid "%s: option requires an argument -- '%c'\n"
+msgstr "%s: a opção exige um argumento -- \"%c\"\n"
+
+#: gnu/obstack.c:340 gnu/obstack.c:342 gnu/xalloc-die.c:36
+#: src/wordsplit/wordsplit.c:76 src/wordsplit/wordsplit.c:2851
+msgid "memory exhausted"
+msgstr "memória esgotada"
+
+#: gnu/version-etc.c:75
+#, c-format
+msgid "Packaged by %s (%s)\n"
+msgstr "Empacotado por %s (%s)\n"
+
+#: gnu/version-etc.c:78
+#, c-format
+msgid "Packaged by %s\n"
+msgstr "Empacotado por %s\n"
+
+#. TRANSLATORS: Translate "(C)" to the copyright symbol
+#. (C-in-a-circle), if this symbol is available in the user's
+#. locale.  Otherwise, do not translate "(C)"; leave it as-is.
+#: gnu/version-etc.c:85
+msgid "(C)"
+msgstr "(C)"
+
+#. TRANSLATORS: The %s placeholder is the web address of the GPL license.
+#: gnu/version-etc.c:90
+#, c-format
+msgid ""
+"License GPLv3+: GNU GPL version 3 or later <%s>.\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n"
+msgstr ""
+"Licença GPLv3+: GNU GPL versão 3 ou posterior <%s>\n"
+"Este é um software livre: você é livre para alterá-lo e redistribuí-lo.\n"
+"NÃO HÁ QUALQUER GARANTIA, na máxima extensão permitida em lei.\n"
+
+#. TRANSLATORS: %s denotes an author name.
+#: gnu/version-etc.c:107
+#, c-format
+msgid "Written by %s.\n"
+msgstr "Escrito por %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#: gnu/version-etc.c:111
+#, c-format
+msgid "Written by %s and %s.\n"
+msgstr "Escrito por %s e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#: gnu/version-etc.c:115
+#, c-format
+msgid "Written by %s, %s, and %s.\n"
+msgstr "Escrito por %s, %s e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:122
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"and %s.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:129
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, and %s.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"%s e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:136
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, and %s.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"%s, %s e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:144
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, and %s.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"%s, %s, %s e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:152
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"and %s.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"%s, %s, %s, %s\n"
+"e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:161
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, and %s.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"%s, %s, %s, %s\n"
+"%s e %s.\n"
+
+#. TRANSLATORS: Each %s denotes an author name.
+#. You can use line breaks, estimating that each author name occupies
+#. ca. 16 screen columns and that a screen line has ca. 80 columns.
+#: gnu/version-etc.c:172
+#, c-format
+msgid ""
+"Written by %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, %s, and others.\n"
+msgstr ""
+"Escrito por %s, %s, %s\n"
+"%s, %s, %s, %s,\n"
+"%s, %s e outros.\n"
+
+#. TRANSLATORS: The placeholder indicates the bug-reporting address
+#. for this package.  Please add _another line_ saying
+#. "Report translation bugs to <...>\n" with the address for translation
+#. bugs (typically your translation team's web or email address).
+#: gnu/version-etc.c:251
+#, c-format
+msgid "Report bugs to: %s\n"
+msgstr ""
+"Relate erros para: %s\n"
+"Relate erros de tradução para <http://translationproject.org/team/pt_BR."
+"html>\n"
+
+#: gnu/version-etc.c:253
+#, c-format
+msgid "Report %s bugs to: %s\n"
+msgstr "Relate erros de %s para: %s\n"
+
+#: gnu/version-etc.c:257 gnu/version-etc.c:259
+#, c-format
+msgid "%s home page: <%s>\n"
+msgstr "Página do %s: <%s>\n"
+
+#: gnu/version-etc.c:262
+#, c-format
+msgid "General help using GNU software: <%s>\n"
+msgstr "Ajuda em geral no uso de software GNU: <%s>\n"
+
+#: src/wordsplit/wordsplit.c:130
+msgid "memory exhausted while trying to store error context"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:881
+msgid "Restarting"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:1607
+#, c-format
+msgid "%.*s: variable null or not set"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:1637
+#, c-format
+msgid "warning: undefined variable `%.*s'"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2138
+#, c-format
+msgid "no files match pattern %s"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2599
+msgid "WS trimming"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2601
+msgid "command substitution"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2603 src/wordsplit/wordsplit.c:2611
+msgid "coalesce list"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2605
+msgid "tilde expansion"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2607
+msgid "variable expansion"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2609
+msgid "quote removal"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2613
+msgid "path expansion"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2638
+#, c-format
+msgid "(%02d) Input:%.*s;"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2664
+msgid "Initial list:"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2679
+msgid "Coalesced list:"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2849
+msgid "no error"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2850
+msgid "missing closing quote"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2852
+msgid "invalid wordsplit usage"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2853
+msgid "unbalanced curly brace"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2854
+msgid "undefined variable"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2855
+#, fuzzy
+msgid "input exhausted"
+msgstr "memória esgotada"
+
+#: src/wordsplit/wordsplit.c:2856
+msgid "unbalanced parenthesis"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2857
+msgid "globbing error"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2858
+#, fuzzy
+msgid "user-defined error"
+msgstr "%s redefinido"
+
+#: src/wordsplit/wordsplit.c:2859
+msgid "invalid parameter number in assignment"
+msgstr ""
+
+#: src/wordsplit/wordsplit.c:2871
+#, fuzzy
+msgid "unknown error"
+msgstr "Erro desconhecido de sistema"
+
+#: src/wordsplit/wordsplit.c:2880
+#, c-format
+msgid "missing closing %c (start near #%lu)"
+msgstr ""
+
+#~ msgid "assume main function to be called NAME; multiple options are allowed"
+#~ msgstr ""
+#~ "presume que a função \"main\" chamada de NOME; vários valores são "
+#~ "permitidos"
+
+#~ msgid ""
+#~ "* The effect of each option marked with an asterisk is reversed if the "
+#~ "option's long name is prefixed with `no-'. For example, --no-cpp cancels "
+#~ "--cpp."
+#~ msgstr ""
+#~ "* O efeito de cada opção marcada com um asterisco é revertido se o nome "
+#~ "longo da opção é prefixada com \"no-\". Por exemplo, --no-cpp cancela --"
+#~ "cpp."
+
+#~ msgid "OPT"
+#~ msgstr "OPÇÃO"
+
+#~ msgid ""
+#~ "Set printing option to OPT. Valid OPT values are: xref (or cross-ref), "
+#~ "tree. Any unambiguous abbreviation of the above is also accepted"
+#~ msgstr ""
+#~ "Define a opção de impressão com OPÇÃO. Valores válidos de OPÇÃO são xref "
+#~ "(ou cross-ref), tree. Qualquer abreviação não ambígua dos itens acima "
+#~ "também é aceita"
+
+#~ msgid "unknown print option: %s"
+#~ msgstr "opção de impressão desconhecida: %s"
+
+#~ msgid "%.*s: ARGP_HELP_FMT parameter must be positive"
+#~ msgstr "%.*s: O parâmetro ARGP_HELP_FMT deve ser positivo"
+
+#~ msgid "%s: option '--%s' doesn't allow an argument\n"
+#~ msgstr "%s: a opção \"--%s\" não permite um argumento\n"
+
+#~ msgid "%s: unrecognized option '--%s'\n"
+#~ msgstr "%s: opção desconhecida \"--%s\"\n"
+
+#~ msgid "%s: option '-W %s' doesn't allow an argument\n"
+#~ msgstr "%s: a opção \"-W %s\" não permite um argumento\n"
+
+#~ msgid "%s: option '-W %s' requires an argument\n"
+#~ msgstr "%s: a opção \"-W %s\" exige um argumento\n"

@@ -1,0 +1,453 @@
+Command:
+./cast-history-tool --enable-summary-import --summary-index /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test-output/multitu/p01_higher_order_callback_dependencies/import-round-01-index-input.json --summary-dir /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test-output/multitu/p01_higher_order_callback_dependencies/.tmp-intermediates/import-round-01-summaries -p /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/c4a_dependency_edges/p01_higher_order_callback_dependencies /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/c4a_dependency_edges/p01_higher_order_callback_dependencies/demo4.c 
+
+Output:
+pvf : void * => char *    [scope=fret]    [implicit-cast]    @ demo4.c:2:14
+x : void * => int *    [scope=idv]    [implicit-cast]    @ demo4.c:8:15
+pidv : void * => int * => void *    [scope=idv]    [implicit-cast]    @ demo4.c:10:10
+pvho : void * => char *    [scope=ho]    [implicit-cast]    @ demo4.c:14:16
+pcho : void * => char * => void * => void * => pf.$0    [scope=ho]    [higher-order-call]    @ demo4.c:15:3
+pcho : void * => char * => void *    [scope=ho]    [implicit-cast]    @ demo4.c:15:6
+pi1 : int * => void *    [scope=main]    [implicit-cast]    @ demo4.c:21:14
+pfunc : void *(void *) => void *(*)(void *)    [scope=main]    [call-arg]    @ demo4.c:24:3
+pv : int * => void * => ho⌜char * => void * => int *⌝ho    [scope=main]    [call-arg]    @ demo4.c:24:3
+pfunc : void *(void *) => void *(*)(void *)    [scope=main]    [call-arg]    @ demo4.c:27:3
+pv : int * => void * => ho⌜char * => void * => char *⌝ho    [scope=main]    [call-arg]    @ demo4.c:27:3
+
+Function summaries:
+  fret($0 : void * => char *) -> void * [$0]    [ret aliases $0]
+  idv($0 : void * => int *) -> void * [$0 => int * => void *]    [ret aliases $0]
+  ho($0 : void *(*)(void *), $1 : void * => char * => void * => $0.$0)
+  main() -> int [int]
+
+Recursive named-call fixpoint:
+  iterations: 1 / 16
+  status: converged
+
+Direct cast histories (entity-oriented):
+  fret::pvf : void * => char *
+  idv::x : void * => int *
+  ho::pvho : void * => char * => void * => $0.$0
+  ho::pcho : char * => void * => $0.$0
+  main::pi1 : int * => ⟨| void * => ho⌜char * => void * => int *⌝ho, void * => ho⌜char * => void * => char *⌝ho |⟩
+  main::pv : void * => ⟨| ho⌜char * => void * => int *⌝ho, ho⌜char * => void * => char *⌝ho |⟩
+
+Function pointer flows:
+  fret : void *(void *) => void *(*)(void *)    [function-designator decay]
+  idv : void *(void *) => void *(*)(void *)    [function-designator decay]
+
+Cross-TU summary SCC awareness:
+  <none>
+
+Project-solved call-site provenance:
+  <none>
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Cross-TU SCC parameter-summary fixpoint:
+  iterations: 0 / 16
+  status: converged
+  recursive SCC edges: 0
+  changed edges: 0
+  note: no-cross-tu-recursive-import-edges
+  domains: parameter-cast-histories
+
+Cross-TU direct-call summary lookup:
+  <none>
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  fret::pvf : void * => char *
+  idv::x : void * => int *
+  ho::pvho : void * => char * => void * => $0.$0
+  ho::pcho : void * => char * => void * => $0.$0
+  main::pi1 : int * => ⟨| void * => ho⌜char * => void * => int *⌝ho, void * => ho⌜char * => void * => char *⌝ho |⟩
+  main::pv : int * => void * => ⟨| ho⌜char * => void * => int *⌝ho, ho⌜char * => void * => char *⌝ho |⟩
+
+Observed later interpretations (raw evidence):
+  fret::pvf
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+  fret
+    - [always] void *(*)(void *)    {assign-projection, role=Intermediate}
+  idv::x
+    - [always] int *    {init-projection, role=Intermediate}
+    - [always] int *    {init-projection-origin, role=Intermediate}
+  idv
+    - [always] void *(*)(void *)    {init-projection, role=Intermediate}
+  ho::pvho
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+    - [always] attach=char *, obs=void * => $0.$0    {higher-order-call-alias-parent, role=Semantic}
+  ho::pcho
+    - [always] void * => $0.$0    {higher-order-call, role=Semantic}
+  main::pi1
+    - [always] void *    {init-projection, role=Intermediate}
+    - [always] attach=void *, obs=ho⌜char * => void * => int *⌝ho    {call-through-ho-alias-parent, role=Semantic}
+    - [always] attach=void *, obs=ho⌜char * => void * => char *⌝ho    {call-through-ho-alias-parent, role=Semantic}
+  main::pv
+    - [always] ho⌜char * => void * => int *⌝ho    {call-through-ho, role=Semantic}
+    - [always] ho⌜char * => void * => char *⌝ho    {call-through-ho, role=Semantic}
+
+Derived observation summaries:
+  fret::pvf
+    branch-cast: <none>
+    grouped: {char * @ always}
+  fret
+    branch-cast: <none>
+    grouped: {void *(*)(void *) @ always}
+  idv::x
+    branch-cast: <none>
+    grouped: {int * @ always}
+  idv
+    branch-cast: <none>
+    grouped: {void *(*)(void *) @ always}
+  ho::pvho
+    branch-cast: <none>
+    grouped: {$0.$0 @ always; char * @ always}
+  ho::pcho
+    branch-cast: <none>
+    grouped: {$0.$0 @ always}
+  main::pi1
+    branch-cast: <none>
+    grouped: {ho⌜char * => void * => char *⌝ho @ always; ho⌜char * => void * => int *⌝ho @ always; void * @ always}
+  main::pv
+    branch-cast: <none>
+    grouped: {ho⌜char * => void * => char *⌝ho @ always; ho⌜char * => void * => int *⌝ho @ always}
+
+Pointer use summaries:
+  fret::pvf
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    @ demo4.c:2:14
+    - [always] attach=char *, as=char *, access=char : deref-readwrite    {assignment-lhs-*-alias-parent}    @ demo4.c:3:7
+    - [always] attach=<id>, as=void * : returned    {return}    @ demo4.c:4:3
+  fret
+    - [always] attach=void *(*)(void *), as=void *(*)(void *) : call-arg    {arg0 to ho-alias-parent}    @ demo4.c:27:3
+  fret::pc
+    - [always] attach=<id>, as=char *, access=char : deref-readwrite    {assignment-lhs-*}    @ demo4.c:3:7
+  idv::x
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to int *}    @ demo4.c:8:15
+    - [always] attach=int *, as=int *, access=int : deref-write    {assignment-lhs-*-alias-parent}    @ demo4.c:9:9
+    - [always] attach=int *, as=int *, access=int : deref    {unary-*-alias-parent}    @ demo4.c:9:11
+    - [always] attach=int *, as=int * : returned    {return-alias-parent}    @ demo4.c:10:3
+  idv
+    - [always] attach=void *(*)(void *), as=void *(*)(void *) : call-arg    {arg0 to ho-alias-parent}    @ demo4.c:24:3
+  idv::pidv
+    - [always] attach=<id>, as=int *, access=int : deref-write    {assignment-lhs-*}    @ demo4.c:9:9
+    - [always] attach=<id>, as=int *, access=int : deref    {unary-*}    @ demo4.c:9:11
+    - [always] attach=<id>, as=int * : returned    {return}    @ demo4.c:10:3
+  ho::pvho
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    @ demo4.c:14:16
+    - [always] attach=char *, as=char * : call-arg    {arg0 to <indirect>-alias-parent}    @ demo4.c:15:3
+  ho::pcho
+    - [always] attach=<id>, as=char * : call-arg    {arg0 to <indirect>}    @ demo4.c:15:3
+  main::pi1
+    - [always] attach=<id>, as=int * : init-rhs    {init-rhs to void *}    @ demo4.c:21:14
+    - [always] attach=void *, as=void * : call-arg    {arg1 to ho-alias-parent}    @ demo4.c:24:3
+    - [always] attach=void *, as=void * : init-rhs    {via ho.$1; init-rhs to char *}    @ demo4.c:24:3
+    - [always] attach=void * => char *, as=char * : call-arg    {via ho.$1; arg0 to <indirect>-alias-parent}    @ demo4.c:24:3
+    - [always] attach=void * => char * => void *, as=void * : init-rhs    {via ho.$1 -> idv.$0; init-rhs to int *}    @ demo4.c:24:3
+    - [always] attach=void * => char * => void * => int *, as=int *, access=int : deref-write    {via ho.$1 -> idv.$0; assignment-lhs-*-alias-parent}    @ demo4.c:24:3
+    - [always] attach=void * => char * => void * => int *, as=int * : returned    {via ho.$1 -> idv.$0; return-alias-parent}    @ demo4.c:24:3
+    - [always] attach=void *, as=void * : call-arg    {arg1 to ho-alias-parent}    @ demo4.c:27:3
+    - [always] attach=void *, as=void * : init-rhs    {via ho.$1; init-rhs to char *}    @ demo4.c:27:3
+    - [always] attach=void * => char *, as=char * : call-arg    {via ho.$1; arg0 to <indirect>-alias-parent}    @ demo4.c:27:3
+    - [always] attach=void * => char * => void *, as=void * : init-rhs    {via ho.$1 -> fret.$0; init-rhs to char *}    @ demo4.c:27:3
+    - [always] attach=void * => char * => void * => char *, as=char *, access=char : deref-readwrite    {via ho.$1 -> fret.$0; assignment-lhs-*-alias-parent}    @ demo4.c:27:3
+    - [always] attach=void * => char * => void *, as=void * : returned    {via ho.$1 -> fret.$0; return}    @ demo4.c:27:3
+  main::pv
+    - [always] attach=<id>, as=void * : call-arg    {arg1 to ho}    @ demo4.c:24:3
+    - [always] attach=<id>, as=void * : call-arg    {arg1 to ho}    @ demo4.c:27:3
+  main::pfunc
+    - [always] attach=<id>, as=void *(*)(void *) : call-arg    {arg0 to ho}    @ demo4.c:24:3
+    - [always] attach=<id>, as=void *(*)(void *) : call-arg    {arg0 to ho}    @ demo4.c:27:3
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  fret::pvf
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewWrite
+    wildLike: yes
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=yes, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: char *
+      writeDerefTypes: char *
+  idv::x
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    wildLike: yes
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {int *, void *}
+      pointerTypes: 2 {int *, void *}
+      nonVoidPointerTypes: 1 {int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: int *
+      writeDerefTypes: int *
+  ho::pvho
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    wildLike: yes
+    history:
+      seqDepth: 3
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=2, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      callbackInputView: byteView(char *) before callback
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  ho::pcho
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    wildLike: yes
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      callbackInputView: byteView(char *) before callback
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  main::pi1
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: MultiTypeWrite
+    wildLike: yes
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=6, parallel=1, branch=0, callwrap=2, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 3 {char *, int *, void *}
+      pointerTypes: 3 {char *, int *, void *}
+      nonVoidPointerTypes: 2 {char *, int *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=yes, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=yes, write=yes, branchSplit=no
+      derefTypes: char *, int *
+      writeDerefTypes: char *, int *
+  main::pv
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    wildLike: yes
+    history:
+      seqDepth: 4
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=4, parallel=1, branch=0, callwrap=2, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 3 {char *, int *, void *}
+      pointerTypes: 3 {char *, int *, void *}
+      nonVoidPointerTypes: 2 {char *, int *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=yes, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  fret::pvf
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  idv::x
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {int *, void *}
+    pointerTypes: 2 {int *, void *}
+    nonVoidPointerTypes: 1 {int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  ho::pvho
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=2, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  ho::pcho
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  main::pi1
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=6, parallel=1, branch=0, callwrap=2, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  main::pv
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=4, parallel=1, branch=0, callwrap=2, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  fret.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewWrite
+    wildLike: yes
+    summary: char *
+    pointerTypes: char *, void *
+    nonVoidPointerTypes: char *
+    derefTypes: char *
+    writeDerefTypes: char *
+    flags: higherOrder=no, branchSplit=no, byteWrite=yes, multiTypeWrite=no
+  idv.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    wildLike: yes
+    summary: int *
+    pointerTypes: int *, void *
+    nonVoidPointerTypes: int *
+    derefTypes: int *
+    writeDerefTypes: int *
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  ho.$0 : void *(*)(void *)
+    paramRole: CallbackBehaviorProvider
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: NotWildLike
+    wildLike: no
+    summary: <none>
+    pointerTypes: void *(*)(void *)
+    nonVoidPointerTypes: void *(*)(void *)
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: function-pointer parameter provides callback behavior; it is not an ordinary wild data pointer
+  ho.$1 : void *
+    paramRole: CallbackDependentDataPointer
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    wildLike: yes
+    summary: char * => void * => $0.$0
+    pointerTypes: char *, void *
+    nonVoidPointerTypes: char *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    callbackInputView: byteView(char *) before callback
+    roleNote: data pointer behavior depends on a callback/function-pointer parameter
+
+Function behavior classifications:
+  fret
+    class: ReinterpretingWriteFunction
+    evidenceFlags: callbackProvider=no, callbackDependent=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=yes, byteWrite=yes, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ByteViewWrite, summary=char *
+  idv
+    class: ReinterpretingWriteFunction
+    evidenceFlags: callbackProvider=no, callbackDependent=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=yes, byteWrite=no, concreteWrite=yes, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecializedWrite, summary=int *
+  ho
+    class: CallbackAdapterFunction
+    evidenceFlags: callbackProvider=yes, callbackDependent=yes, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=CallbackBehaviorProvider, behavior=NotWildLike
+      - $1 role=CallbackDependentDataPointer, behavior=CallbackDependentByteViewPointer, summary=char * => void * => $0.$0
+
+Unsupported / approximated language features:
+  <none>

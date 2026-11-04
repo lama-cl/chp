@@ -1,0 +1,3 @@
+[submodule "c/pocketlang"]
+	path = c/pocketlang
+	url = https://github.com/ThakeeNathees/pocketlang

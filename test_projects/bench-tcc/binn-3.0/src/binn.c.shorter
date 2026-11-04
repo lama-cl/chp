@@ -1,0 +1,293 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <memory.h>
+#include "binn.h"
+
+#define UNUSED(x) (void)(x)
+#define roundval(dbl) dbl >= 0.0 ? (int)(dbl + 0.5) : ((dbl - (double)(int)dbl) <= -0.5 ? (int)dbl : (int)(dbl - 0.5))
+
+// magic number:  0x1F 0xb1 0x22 0x1F  =>  0x1FB1221F or 0x1F22B11F
+// because the BINN_STORAGE_NOBYTES (binary 000) may not have so many sub-types (BINN_STORAGE_HAS_MORE = 0x10)
+#define BINN_MAGIC            0x1F22B11F
+
+#define MAX_BINN_HEADER       9  // [1:type][4:size][4:count]
+#define MIN_BINN_SIZE         3  // [1:type][1:size][1:count]
+#define CHUNK_SIZE            256  // 1024
+
+#define BINN_STRUCT        1
+#define BINN_BUFFER        2
+
+void* (*malloc_fn)(size_t len) = 0;
+void* (*realloc_fn)(void *ptr, size_t len) = 0;
+void  (*free_fn)(void *ptr) = 0;
+
+/***************************************************************************/
+
+#if defined(__alpha__) || defined(__hppa__) || defined(__mips__) || defined(__powerpc__) || defined(__sparc__)
+#define BINN_ONLY_ALIGNED_ACCESS
+#elif ( defined(__arm__) || defined(__aarch64__) ) && !defined(__ARM_FEATURE_UNALIGNED)
+#define BINN_ONLY_ALIGNED_ACCESS
+#endif
+
+#if defined(_WIN32)
+#define BIG_ENDIAN      0x1000
+#define LITTLE_ENDIAN   0x0001
+#define BYTE_ORDER      LITTLE_ENDIAN
+#elif defined(__APPLE__)
+/* macros already defined */
+#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
+#include <sys/endian.h>
+#elif defined(_AIX)
+#include <sys/machine.h>
+#else
+#include <endian.h>
+#endif
+
+#ifndef BYTE_ORDER
+#error "BYTE_ORDER not defined"
+#endif
+#ifndef BIG_ENDIAN
+#error "BIG_ENDIAN not defined"
+#endif
+#ifndef LITTLE_ENDIAN
+#error "LITTLE_ENDIAN not defined"
+#endif
+#if BIG_ENDIAN == LITTLE_ENDIAN
+#error "BIG_ENDIAN == LITTLE_ENDIAN"
+#endif
+#if BYTE_ORDER!=BIG_ENDIAN && BYTE_ORDER!=LITTLE_ENDIAN
+#error "BYTE_ORDER not supported"
+#endif
+
+typedef unsigned short int     u16;
+typedef unsigned int           u32;
+typedef unsigned long long int u64;
+
+BINN_PRIVATE void copy_be16(u16 *pdest, u16 *psource) {
+#if BYTE_ORDER == LITTLE_ENDIAN
+  unsigned char *source = (unsigned char *) psource;
+  unsigned char *dest = (unsigned char *) pdest;
+  dest[0] = source[1];
+  dest[1] = source[0];
+#else // if BYTE_ORDER == BIG_ENDIAN
+#ifdef BINN_ONLY_ALIGNED_ACCESS
+  if ((uintptr_t)psource % 2 == 0){  // address aligned to 16 bit
+    *pdest = *psource;
+  } else {
+    unsigned char *source = (unsigned char *) psource;
+    unsigned char *dest = (unsigned char *) pdest;
+    dest[0] = source[0];  // indexes are the same
+    dest[1] = source[1];
+  }
+#else
+  *pdest = *psource;
+#endif
+#endif
+}
+
+BINN_PRIVATE void copy_be32(u32 *pdest, u32 *psource) {
+#if BYTE_ORDER == LITTLE_ENDIAN
+  unsigned char *source = (unsigned char *) psource;
+  unsigned char *dest = (unsigned char *) pdest;
+  dest[0] = source[3];
+  dest[1] = source[2];
+  dest[2] = source[1];
+  dest[3] = source[0];
+#else // if BYTE_ORDER == BIG_ENDIAN
+#ifdef BINN_ONLY_ALIGNED_ACCESS
+  if ((uintptr_t)psource % 4 == 0){  // address aligned to 32 bit
+    *pdest = *psource;
+  } else {
+    unsigned char *source = (unsigned char *) psource;
+    unsigned char *dest = (unsigned char *) pdest;
+    dest[0] = source[0];  // indexes are the same
+    dest[1] = source[1];
+    dest[2] = source[2];
+    dest[3] = source[3];
+  }
+#else
+  *pdest = *psource;
+#endif
+#endif
+}
+
+BINN_PRIVATE void copy_be64(u64 *pdest, u64 *psource) {
+#if BYTE_ORDER == LITTLE_ENDIAN
+  unsigned char *source = (unsigned char *) psource;
+  unsigned char *dest = (unsigned char *) pdest;
+  int i;
+  for (i=0; i < 8; i++) {
+    dest[i] = source[7-i];
+  }
+#else // if BYTE_ORDER == BIG_ENDIAN
+#ifdef BINN_ONLY_ALIGNED_ACCESS
+  if ((uintptr_t)psource % 8 == 0){  // address aligned to 64 bit
+    *pdest = *psource;
+  } else {
+    unsigned char *source = (unsigned char *) psource;
+    unsigned char *dest = (unsigned char *) pdest;
+    int i;
+    for (i=0; i < 8; i++) {
+      dest[i] = source[i];  // indexes are the same
+    }
+  }
+#else
+  *pdest = *psource;
+#endif
+#endif
+}
+
+/***************************************************************************/
+
+#ifndef _MSC_VER
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+#endif
+
+void * APIENTRY binn_ptr(void *ptr) {
+  binn *item;
+
+  switch (binn_get_ptr_type(ptr)) {
+  case BINN_STRUCT:
+    {item = (binn*) ptr;
+    if (item->writable && item->dirty) {
+      binn_save_header(item);
+    }
+    return item->ptr;} ;
+  case BINN_BUFFER:
+    {return ptr;} ;
+  default:
+    {return NULL;} ;
+  }
+
+}
+
+binn * APIENTRY binn_copy(void *old) {
+  int type, count, size, header_size;
+  unsigned char *old_ptr = binn_ptr(old);
+  binn *item;
+
+  size = 0;
+  if (!IsValidBinnHeader(old_ptr, &type, &count, &size, &header_size)) { return NULL;
+}
+
+  item = binn_new(type, size - header_size + MAX_BINN_HEADER, NULL);
+  if( item ){
+    unsigned char *dest;
+    dest = ((unsigned char *) item->pbuf) + MAX_BINN_HEADER;
+    memcpy(dest, old_ptr + header_size, size - header_size);
+    item->used_size = MAX_BINN_HEADER + size - header_size;
+    item->count = count;
+  }
+  return item;
+
+}
+
+void * APIENTRY binn_release(binn *item) {
+  void *data;
+
+  if (item == NULL) { return NULL;
+}
+
+  data = binn_ptr(item);
+
+  if (data > item->pbuf) {
+    memmove(item->pbuf, data, item->size);
+    data = item->pbuf;
+  }
+
+  if (item->allocated) {
+    free_fn(item);
+  } else {
+    memset(item, 0, sizeof(binn));
+    item->header = BINN_MAGIC;
+  }
+
+  return data;
+
+}
+
+BOOL APIENTRY binn_is_valid_ex(void *ptr, int *ptype, int *pcount, int *psize) {
+  int  i, type, count, size, header_size;
+  unsigned char *p, *plimit, *base, len;
+  void *pbuf;
+
+  pbuf = binn_ptr(ptr);
+  if (pbuf == NULL) { return FALSE;
+}
+
+  // is there an informed size?
+  if (psize && *psize > 0) {
+    size = *psize;
+  } else {
+    size = 0;
+  }
+
+  if (!IsValidBinnHeader(pbuf, &type, &count, &size, &header_size)) { return FALSE;
+}
+
+  // is there an informed size?
+  if (psize && *psize > 0) {
+    // is it the same as the one in the buffer?
+    if (size != *psize) { return FALSE;
+}
+  }
+  // is there an informed count?
+  if (pcount && *pcount > 0) {
+    // is it the same as the one in the buffer?
+    if (count != *pcount) { return FALSE;
+}
+  }
+  // is there an informed type?
+  if (ptype && *ptype != 0) {
+    // is it the same as the one in the buffer?
+    if (type != *ptype) { return FALSE;
+}
+  }
+
+  // it could compare the content size with the size informed on the header
+
+  p = (unsigned char *)pbuf;
+  base = p;
+  plimit = p + size;
+
+  p += header_size;
+
+  // process all the arguments.
+  for (i = 0; i < count; i++) {
+    switch (type) {
+      case BINN_OBJECT:
+        // gets the string size (argument name)
+        {len = *p;
+        p++;
+        //if (len == 0) goto Invalid;
+        // increment the used space
+        p += len;
+        break;} ;
+      case BINN_MAP:
+        // increment the used space
+        {read_map_id(&p, plimit);
+        break;} ;
+      //case BINN_LIST:
+      //  break;
+    }
+    // xxx
+    p = AdvanceDataPos(p, plimit);
+    if ((p == 0) || (p < base)) { goto Invalid;
+}
+  }
+
+  if (ptype  && *ptype==0) {  *ptype  = type;
+}
+  if (pcount && *pcount==0) { *pcount = count;
+}
+  if (psize  && *psize==0) {  *psize  = size;
+}
+  return TRUE;
+
+Invalid:
+  return FALSE;
+
+}

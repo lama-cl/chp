@@ -1,0 +1,147 @@
+{
+  "schemaName": "cast-history-project-summary-index",
+  "schemaVersion": 2,
+  "projectKind": "real",
+  "summaryRoot": "test_projects/projects/p01_direct_cross_tu/json-summaries",
+  "numSummaryFiles": 2,
+  "numFunctions": 3,
+  "translationUnits": [
+    {
+      "summaryFile": "a.cast-summary.json",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+      "configurationId": "",
+      "compileCommandHash": "",
+      "numFunctionSummaries": 2
+    },
+    {
+      "summaryFile": "b.cast-summary.json",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/b.c",
+      "configurationId": "",
+      "compileCommandHash": "",
+      "numFunctionSummaries": 1
+    }
+  ],
+  "functions": [
+    {
+      "function": "f",
+      "name": "f",
+      "qualifiedName": "f",
+      "signatureKey": "fn:(ptr:void)->void",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+      "location": {
+        "column": 6,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+        "line": 12
+      },
+      "summaryFile": "a.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "OpaquePolymorphicFunction",
+      "lookupKey": "external::f::fn:(ptr:void)->void",
+      "publicLookupKey": "f::fn:(ptr:void)->void",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c:12:6",
+      "status": "unambiguous",
+      "resolution": "safe"
+    },
+    {
+      "function": "g",
+      "name": "g",
+      "qualifiedName": "g",
+      "signatureKey": "fn:(ptr:void)->void",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/b.c",
+      "location": {
+        "column": 6,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/b.c",
+        "line": 7
+      },
+      "summaryFile": "b.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/b.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "MixedPointerBehaviorFunction",
+      "lookupKey": "external::g::fn:(ptr:void)->void",
+      "publicLookupKey": "g::fn:(ptr:void)->void",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/b.c:7:6",
+      "status": "unambiguous",
+      "resolution": "safe"
+    },
+    {
+      "function": "main",
+      "name": "main",
+      "qualifiedName": "main",
+      "signatureKey": "fn:()->int:int",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+      "location": {
+        "column": 5,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+        "line": 16
+      },
+      "summaryFile": "a.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "OrdinaryFunction",
+      "lookupKey": "external::main::fn:()->int:int",
+      "publicLookupKey": "main::fn:()->int:int",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p01_direct_cross_tu/a.c:16:5",
+      "status": "unambiguous",
+      "resolution": "safe"
+    }
+  ],
+  "lookups": {
+    "byLookupKey": {
+      "external::f::fn:(ptr:void)->void": [
+        0
+      ],
+      "external::g::fn:(ptr:void)->void": [
+        1
+      ],
+      "external::main::fn:()->int:int": [
+        2
+      ]
+    },
+    "byPublicLookupKey": {
+      "f::fn:(ptr:void)->void": [
+        0
+      ],
+      "g::fn:(ptr:void)->void": [
+        1
+      ],
+      "main::fn:()->int:int": [
+        2
+      ]
+    },
+    "byQualifiedName": {
+      "f": [
+        0
+      ],
+      "g": [
+        1
+      ],
+      "main": [
+        2
+      ]
+    }
+  },
+  "statusCounts": {
+    "unambiguous": 3
+  },
+  "resolutionCounts": {
+    "safe": 3
+  },
+  "duplicateGroups": [],
+  "ambiguityGroups": [],
+  "problemGroups": [],
+  "scopedNameGroups": [],
+  "groupCounts": {
+    "duplicates": 0,
+    "ambiguities": 0,
+    "problems": 0,
+    "scopedNameGroups": 0
+  },
+  "issues": []
+}

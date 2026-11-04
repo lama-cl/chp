@@ -1,0 +1,24 @@
+# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+      - doc
+    authors:
+      - octocat
+  categories:
+    - title: Improvements
+      labels:
+        - enhancement
+        - feature
+    - title: Deprecations
+      labels:
+        - deprecations
+    - title: Bugfixes
+      labels:
+        - bug
+        - bugfix
+    - title: Other Changes
+      labels:
+        - "*"

@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cast-history/stable-classification.schema.json",
+  "title": "Cast History Stable Classification (C6g5f4)",
+  "description": "Stable C6g5f4 classification contract for pointer entities and function parameters, including callback mediation state and field-function-pointer carrier facts. Unknown future labels should be handled by the label validator; this schema primarily fixes field shape and types.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "subjectKind",
+    "subject",
+    "behavior",
+    "mediation",
+    "family",
+    "risk",
+    "evidenceSourceKind",
+    "flags"
+  ],
+  "properties": {
+    "subjectKind": {
+      "type": "string",
+      "description": "Stable subject category. Current values are usually entity or param.",
+      "enum": [
+        "entity",
+        "param",
+        "function",
+        "storage",
+        "unknown"
+      ]
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "behavior": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Existing operation-oriented behavior label, e.g. ConcreteSpecializedWrite, ByteViewWrite, CallbackDependentByteViewPointer.",
+      "x-c6f-known-values": [
+        "NotWildLike",
+        "ConcreteSpecializedRead",
+        "ConcreteSpecializedWrite",
+        "ByteViewPointer",
+        "ByteViewWrite",
+        "CallbackDependentByteViewPointer",
+        "BranchTypeSplitNoDeref",
+        "MultiTypeConcreteDeref",
+        "ExternalUnknown",
+        "OpaqueTransport"
+      ]
+    },
+    "mediation": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Paper-facing mediation kind. Use validate_classification_labels.py for strict vocabulary checking.",
+      "x-c6f-known-values": [
+        "Direct",
+        "DataField",
+        "NestedDataField",
+        "Callback",
+        "GuardedCallback",
+        "DataFieldCallback",
+        "NestedDataFieldCallback",
+        "ReturnAlias",
+        "ExternalBoundary",
+        "Mixed",
+        "Unknown",
+        "FieldCallback",
+        "ResolvedCallback",
+        "ResolvedFieldCallback",
+        "GuardedResolvedFieldCallback"
+      ]
+    },
+    "family": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Paper-facing semantic family. Use validate_classification_labels.py for strict vocabulary checking.",
+      "x-c6f-known-values": [
+        "NotWildLike",
+        "ByteView",
+        "ConcreteSpecialization",
+        "DirectConcreteSpecialization",
+        "GuardedConcreteSpecialization",
+        "DataFieldMediatedConcreteSpecialization",
+        "NestedDataFieldMediatedConcreteSpecialization",
+        "CallbackMediatedConcreteSpecialization",
+        "GuardedCallbackMediatedSpecialization",
+        "DataFieldCallbackMediatedConcreteSpecialization",
+        "NestedDataFieldCallbackMediatedConcreteSpecialization",
+        "CallbackDependent",
+        "ReturnAliasMediatedConcreteSpecialization",
+        "ExternalUnknownBoundary",
+        "OpaqueTransport",
+        "MixedMediatedConcreteSpecialization",
+        "UnknownMediation",
+        "ResolvedCallbackMediatedByteView",
+        "ResolvedCallbackMediatedConcreteSpecialization",
+        "ResolvedCallbackMediatedGuardedSpecialization",
+        "ResolvedCallbackMediatedOpaqueTransport",
+        "ResolvedCallbackMediatedByteMediatedReinterpretation",
+        "ResolvedCallbackMediatedMultiTargetReinterpretation",
+        "ResolvedCallbackMediatedPointer",
+        "ResolvedFieldCallbackMediatedByteView",
+        "ResolvedFieldCallbackMediatedConcreteSpecialization",
+        "ResolvedFieldCallbackMediatedGuardedSpecialization",
+        "ResolvedFieldCallbackMediatedOpaqueTransport",
+        "ResolvedFieldCallbackMediatedByteMediatedReinterpretation",
+        "ResolvedFieldCallbackMediatedMultiTargetReinterpretation",
+        "ResolvedFieldCallbackMediatedPointer",
+        "GuardedResolvedFieldCallbackMediatedByteView",
+        "GuardedResolvedFieldCallbackMediatedConcreteSpecialization",
+        "GuardedResolvedFieldCallbackMediatedGuardedSpecialization",
+        "GuardedResolvedFieldCallbackMediatedOpaqueTransport",
+        "GuardedResolvedFieldCallbackMediatedByteMediatedReinterpretation",
+        "GuardedResolvedFieldCallbackMediatedMultiTargetReinterpretation",
+        "GuardedResolvedFieldCallbackMediatedPointer",
+        "FieldCallbackDependent"
+      ]
+    },
+    "risk": {
+      "type": "string",
+      "minLength": 1,
+      "x-c6f-known-values": [
+        "Low",
+        "Moderate",
+        "High",
+        "FunctionParameterDependent",
+        "Unknown"
+      ]
+    },
+    "evidenceSourceKind": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Coarse provenance bucket such as local-only, same-tu-call, imported, project-scc, no-pointer-use-evidence."
+    },
+    "location": {
+      "type": "object",
+      "description": "Source location of the subject's defining declaration. The span ends at the end of the declaration. When the subject is named by a plain identifier (e.g. a variable, parameter, or function), the start is anchored at the identifier token; otherwise it is the start of the declaration. Omitted when no valid location is available (e.g. for imported or synthesized subjects).",
+      "additionalProperties": false,
+      "required": ["file", "startLine", "startColumn", "endLine", "endColumn"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Path of the source file containing the definition."
+        },
+        "startLine": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based line of the start of the definition: the identifier token when the subject is an identifier, otherwise the first character of the declaration."
+         },
+        "startColumn": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based column of the start of the definition: the identifier token when the subject is an identifier, otherwise the first character of the declaration."
+        },
+        "endLine": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based line just past the last token of the definition."
+        },
+        "endColumn": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based column just past the last token of the definition."
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "callbacks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "flags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "required": [
+        "dataField",
+        "nestedDataField",
+        "callback",
+        "externalBoundary",
+        "returnAlias"
+      ],
+      "properties": {
+        "dataField": {
+          "type": "boolean"
+        },
+        "nestedDataField": {
+          "type": "boolean"
+        },
+        "callback": {
+          "type": "boolean"
+        },
+        "externalBoundary": {
+          "type": "boolean"
+        },
+        "returnAlias": {
+          "type": "boolean"
+        },
+        "imported": {
+          "type": "boolean"
+        },
+        "sameTUCall": {
+          "type": "boolean"
+        },
+        "fieldCallbackCarrier": {
+          "type": "boolean"
+        },
+        "resolvedCallbackTarget": {
+          "type": "boolean"
+        },
+        "guardedCallbackSelection": {
+          "type": "boolean"
+        }
+      }
+    },
+    "callbackMediationState": {
+      "type": "string",
+      "description": "Callback mediation disposition separate from history shape and operation behavior.",
+      "x-c6g5f4-known-values": [
+        "None",
+        "FormalCallbackParameter",
+        "UnresolvedCallback",
+        "FieldCallback",
+        "ResolvedCallback",
+        "ResolvedFieldCallback",
+        "GuardedResolvedFieldCallback",
+        "Unknown"
+      ]
+    },
+    "callbackFields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "default": [],
+      "description": "Field-function-pointer carrier paths, distinct from data fields."
+    }
+  }
+}
+

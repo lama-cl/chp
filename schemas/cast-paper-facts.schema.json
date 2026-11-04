@@ -1,0 +1,1473 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cast-history/cast-paper-facts.schema.json",
+  "title": "Cast History Compact Paper Facts (C6g5f4j)",
+  "description": "Per-translation-unit compact paper-facts sidecar for paper aggregation and external-tool alignment. Schema version 9 separates raw API-shape declaration inventory from implementation-level semantic and callback-slot relational eligibility. Versions 1 through 8 remain accepted for legacy validation only.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaName",
+    "schemaVersion",
+    "tu",
+    "coverage",
+    "subjects",
+    "callbackUseRecords"
+  ],
+  "properties": {
+    "schemaName": {
+      "const": "cast-history-tu-paper-facts"
+    },
+    "schemaVersion": {
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "description": "Version 9 is current. Versions 1 through 8 are accepted for legacy validation only."
+    },
+    "toolVersion": {
+      "type": "string"
+    },
+    "tu": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sourceFile"
+      ],
+      "properties": {
+        "sourceFile": {
+          "type": "string"
+        },
+        "configurationId": {
+          "type": "string"
+        },
+        "compileCommandHash": {
+          "type": "string"
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "subjectRows",
+        "subjectsWithFinalHistory",
+        "callbackUseRecords",
+        "arrayIndexDirectionModel"
+      ],
+      "properties": {
+        "subjectRows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "subjectsWithFinalHistory": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "callbackUseRecords": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "arrayIndexDirectionModel": {
+          "type": "string"
+        },
+        "declaredOuterPointerKindModel": {
+          "type": "string",
+          "description": "Version 2 producer model; clang-qualtype-outer-pointer-kind-v1 for the current implementation."
+        },
+        "callbackMediationModel": {
+          "type": "string",
+          "description": "Version 3 producer model; callback-mediation-state-v1 for the current implementation."
+        },
+        "declaredPointerInventoryModel": {
+          "type": "string",
+          "description": "Version 4 producer model; project-owned-local-parameter-direct-pointer-v1."
+        },
+        "declaredPointerInventoryScope": {
+          "enum": [
+            "project-root-v1",
+            "main-tu-fallback-v1"
+          ]
+        },
+        "declaredPointerInventoryScopeComplete": {
+          "type": "boolean"
+        },
+        "declaredPointerInventoryRows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declaredEligibleDataPointerRows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declaredEligibleVoidPointerRows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declaredEligibleVoidPointerSubjectFacts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declaredEligibleVoidPointerFinalHistory": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declaredEligibleVoidPointerClassified": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "declaredEligibleVoidPointerNoObservedFacts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "finalHistoryWithoutSubjectRow": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fieldStorageClassificationModel": {
+          "type": "string",
+          "description": "Version 5 producer model; resolved-instance-field-storage-v1."
+        },
+        "observedNoFinalHistoryPatternModel": {
+          "type": "string",
+          "description": "Version 7 producer model; retained-pointer-use-and-syntactic-usage-v1."
+        },
+        "allocationOriginDerivedAliasUses": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Version 8 producer count of recognized allocator-origin / typed-derived-alias-use rows."
+        },
+        "allocationOriginDerivedAliasModel": {
+          "type": "string",
+          "description": "Version 8 producer model; recognized-allocator-origin-and-may-derived-alias-use-v1."
+        },
+        "declaredDirectVoidPointerInventoryRows": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Version 9 raw direct outer void-pointer local/parameter inventory count, including unavailable API declarations."
+        },
+        "declaredExcludedUnavailableApiVoidPointerRows": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Version 9 direct void-pointer parameters retained as API shape but excluded because no project-owned owner-function body is available."
+        },
+        "eligibleNestedCallbackSlotRelations": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Version 9 nested callback slots eligible for relational analysis."
+        },
+        "excludedUnavailableApiNestedCallbackSlots": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Version 9 nested callback slots retained as prototype API shape but excluded because the owner function body is unavailable."
+        }
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/subject"
+      }
+    },
+    "callbackUseRecords": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/callbackUse"
+      }
+    },
+    "declaredPointerInventory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/declaredPointerInventoryEntry"
+      }
+    },
+    "nestedCallbackSlotRelations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nestedCallbackSlotRelation"
+      }
+    },
+    "voidPointerUsageFingerprints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/voidPointerUsageFingerprint"
+      }
+    },
+    "allocationOriginDerivedAliasUses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/allocationOriginDerivedAliasUse"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 2
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel"
+            ]
+          },
+          "subjects": {
+            "items": {
+              "properties": {
+                "declaredType": {
+                  "required": [
+                    "outerPointerKind"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 3
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel",
+              "callbackMediationModel"
+            ]
+          },
+          "subjects": {
+            "items": {
+              "required": [
+                "callbackMediation"
+              ],
+              "properties": {
+                "declaredType": {
+                  "required": [
+                    "outerPointerKind"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 4
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "declaredPointerInventory"
+        ],
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel",
+              "callbackMediationModel",
+              "declaredPointerInventoryModel",
+              "declaredPointerInventoryScope",
+              "declaredPointerInventoryScopeComplete",
+              "declaredPointerInventoryRows",
+              "declaredEligibleDataPointerRows",
+              "declaredEligibleVoidPointerRows",
+              "declaredEligibleVoidPointerSubjectFacts",
+              "declaredEligibleVoidPointerFinalHistory",
+              "declaredEligibleVoidPointerClassified",
+              "declaredEligibleVoidPointerNoObservedFacts",
+              "finalHistoryWithoutSubjectRow"
+            ]
+          },
+          "subjects": {
+            "items": {
+              "required": [
+                "callbackMediation"
+              ],
+              "properties": {
+                "declaredType": {
+                  "required": [
+                    "outerPointerKind"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 5
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "declaredPointerInventory"
+        ],
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel",
+              "callbackMediationModel",
+              "fieldStorageClassificationModel",
+              "declaredPointerInventoryModel",
+              "declaredPointerInventoryScope",
+              "declaredPointerInventoryScopeComplete",
+              "declaredPointerInventoryRows",
+              "declaredEligibleDataPointerRows",
+              "declaredEligibleVoidPointerRows",
+              "declaredEligibleVoidPointerSubjectFacts",
+              "declaredEligibleVoidPointerFinalHistory",
+              "declaredEligibleVoidPointerClassified",
+              "declaredEligibleVoidPointerNoObservedFacts",
+              "finalHistoryWithoutSubjectRow"
+            ]
+          },
+          "subjects": {
+            "items": {
+              "required": [
+                "callbackMediation"
+              ],
+              "properties": {
+                "declaredType": {
+                  "required": [
+                    "outerPointerKind"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 7
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "declaredPointerInventory",
+          "nestedCallbackSlotRelations",
+          "voidPointerUsageFingerprints"
+        ],
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel",
+              "callbackMediationModel",
+              "fieldStorageClassificationModel",
+              "declaredPointerInventoryModel",
+              "declaredPointerInventoryScope",
+              "declaredPointerInventoryScopeComplete",
+              "declaredPointerInventoryRows",
+              "declaredEligibleDataPointerRows",
+              "declaredEligibleVoidPointerRows",
+              "declaredEligibleVoidPointerSubjectFacts",
+              "declaredEligibleVoidPointerFinalHistory",
+              "declaredEligibleVoidPointerClassified",
+              "declaredEligibleVoidPointerNoObservedFacts",
+              "finalHistoryWithoutSubjectRow",
+              "nestedCallbackSlotRelations",
+              "voidPointerUsageFingerprints",
+              "nestedCallbackSlotRelationModel",
+              "voidPointerUsageFingerprintModel",
+              "observedNoFinalHistoryPatternModel"
+            ]
+          },
+          "voidPointerUsageFingerprints": {
+            "items": {
+              "required": [
+                "observedNoFinalHistory"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 8
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "declaredPointerInventory",
+          "nestedCallbackSlotRelations",
+          "voidPointerUsageFingerprints",
+          "allocationOriginDerivedAliasUses"
+        ],
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel",
+              "callbackMediationModel",
+              "fieldStorageClassificationModel",
+              "declaredPointerInventoryModel",
+              "declaredPointerInventoryScope",
+              "declaredPointerInventoryScopeComplete",
+              "declaredPointerInventoryRows",
+              "declaredEligibleDataPointerRows",
+              "declaredEligibleVoidPointerRows",
+              "declaredEligibleVoidPointerSubjectFacts",
+              "declaredEligibleVoidPointerFinalHistory",
+              "declaredEligibleVoidPointerClassified",
+              "declaredEligibleVoidPointerNoObservedFacts",
+              "finalHistoryWithoutSubjectRow",
+              "nestedCallbackSlotRelations",
+              "voidPointerUsageFingerprints",
+              "nestedCallbackSlotRelationModel",
+              "voidPointerUsageFingerprintModel",
+              "observedNoFinalHistoryPatternModel",
+              "allocationOriginDerivedAliasUses",
+              "allocationOriginDerivedAliasModel"
+            ]
+          },
+          "voidPointerUsageFingerprints": {
+            "items": {
+              "required": [
+                "observedNoFinalHistory"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 9
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "declaredPointerInventory",
+          "nestedCallbackSlotRelations",
+          "voidPointerUsageFingerprints",
+          "allocationOriginDerivedAliasUses"
+        ],
+        "properties": {
+          "coverage": {
+            "required": [
+              "declaredOuterPointerKindModel",
+              "callbackMediationModel",
+              "fieldStorageClassificationModel",
+              "declaredPointerInventoryModel",
+              "declaredPointerInventoryScope",
+              "declaredPointerInventoryScopeComplete",
+              "declaredPointerInventoryRows",
+              "declaredEligibleDataPointerRows",
+              "declaredEligibleVoidPointerRows",
+              "declaredEligibleVoidPointerSubjectFacts",
+              "declaredEligibleVoidPointerFinalHistory",
+              "declaredEligibleVoidPointerClassified",
+              "declaredEligibleVoidPointerNoObservedFacts",
+              "finalHistoryWithoutSubjectRow",
+              "nestedCallbackSlotRelations",
+              "voidPointerUsageFingerprints",
+              "nestedCallbackSlotRelationModel",
+              "voidPointerUsageFingerprintModel",
+              "observedNoFinalHistoryPatternModel",
+              "allocationOriginDerivedAliasUses",
+              "allocationOriginDerivedAliasModel",
+              "declaredDirectVoidPointerInventoryRows",
+              "declaredExcludedUnavailableApiVoidPointerRows",
+              "eligibleNestedCallbackSlotRelations",
+              "excludedUnavailableApiNestedCallbackSlots"
+            ]
+          },
+          "voidPointerUsageFingerprints": {
+            "items": {
+              "required": [
+                "observedNoFinalHistory"
+              ]
+            }
+          },
+          "declaredPointerInventory": {
+            "items": {
+              "required": [
+                "semanticClassificationScope",
+                "ownerDefinitionAvailable",
+                "eligibilityExclusionReason"
+              ]
+            }
+          },
+          "nestedCallbackSlotRelations": {
+            "items": {
+              "required": [
+                "eligibleForRelationalClassification",
+                "ownerDefinitionAvailable",
+                "relationalClassificationScope",
+                "eligibilityExclusionReason"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "line",
+        "column"
+      ],
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "historyInstance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "historyId",
+        "view",
+        "hasFinalHistory",
+        "metrics"
+      ],
+      "properties": {
+        "historyId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "view": {
+          "enum": [
+            "direct",
+            "storage"
+          ]
+        },
+        "hasFinalHistory": {
+          "type": "boolean"
+        },
+        "metrics": {
+          "type": "object"
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "subjectId",
+        "rootSubjectId",
+        "entity",
+        "subjectKind",
+        "location",
+        "function",
+        "declaredType",
+        "hasFinalHistory",
+        "historyInstances",
+        "history",
+        "operations",
+        "refinementFacts",
+        "primaryCategory"
+      ],
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rootSubjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entity": {
+          "type": "string"
+        },
+        "subjectKind": {
+          "enum": [
+            "global",
+            "local",
+            "parameter",
+            "field",
+            "field-storage",
+            "return",
+            "value",
+            "unknown"
+          ]
+        },
+        "location": {
+          "$ref": "#/$defs/source"
+        },
+        "function": {
+          "type": "object"
+        },
+        "declaredType": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "text",
+            "canonicalText",
+            "outerVoidPointer"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "canonicalText": {
+              "type": "string"
+            },
+            "outerVoidPointer": {
+              "type": "boolean"
+            },
+            "outerPointerKind": {
+              "enum": [
+                "void-data-pointer",
+                "nonvoid-data-pointer",
+                "function-pointer",
+                "not-pointer",
+                "unknown"
+              ],
+              "description": "AST-derived outer QualType classification. In schema version 2 it is required by the dependency-free validator."
+            }
+          }
+        },
+        "hasFinalHistory": {
+          "type": "boolean"
+        },
+        "canonicalHistoryId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "historyInstances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/historyInstance"
+          }
+        },
+        "history": {
+          "type": "object"
+        },
+        "operations": {
+          "type": "object"
+        },
+        "refinementFacts": {
+          "type": "object"
+        },
+        "primaryCategory": {
+          "enum": [
+            "OpaqueTransportOrViewOnly",
+            "MonomorphicActiveSpecialization",
+            "ByteOrientedActiveAccess",
+            "GuardedActiveReinterpretation",
+            "UnguardedMultiTargetActiveReinterpretation",
+            "MixedOrProvenanceSensitive",
+            "ExternalUnknown"
+          ]
+        },
+        "callbackMediation": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "state",
+            "flags"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "None",
+                "FormalCallbackParameter",
+                "UnresolvedCallback",
+                "FieldCallback",
+                "ResolvedCallback",
+                "ResolvedFieldCallback",
+                "GuardedResolvedFieldCallback",
+                "Unknown"
+              ]
+            },
+            "flags": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "callback",
+                "resolvedTarget",
+                "fieldCarrier",
+                "guardedSelection"
+              ],
+              "properties": {
+                "callback": {
+                  "type": "boolean"
+                },
+                "resolvedTarget": {
+                  "type": "boolean"
+                },
+                "fieldCarrier": {
+                  "type": "boolean"
+                },
+                "guardedSelection": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "fieldStorage": {
+          "$ref": "#/$defs/fieldStorage"
+        }
+      }
+    },
+    "callbackUse": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "callbackUseId",
+        "subjectId",
+        "callSite",
+        "targetFunctions",
+        "operationKind",
+        "activeOperation",
+        "flags"
+      ],
+      "properties": {
+        "callbackUseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "callSite": {
+          "$ref": "#/$defs/source"
+        },
+        "targetFunctions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operationKind": {
+          "type": "string"
+        },
+        "activeOperation": {
+          "type": "boolean"
+        },
+        "flags": {
+          "type": "object"
+        }
+      }
+    },
+    "declaredPointerInventoryEntry": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "declarationId",
+        "subjectId",
+        "subjectKind",
+        "location",
+        "function",
+        "declaredType",
+        "eligibleForCastHistoryClassification",
+        "subjectFactEmitted",
+        "hasFinalHistory",
+        "classificationStatus"
+      ],
+      "properties": {
+        "declarationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectKind": {
+          "enum": [
+            "local",
+            "parameter"
+          ]
+        },
+        "location": {
+          "$ref": "#/$defs/source"
+        },
+        "function": {
+          "type": "object"
+        },
+        "declaredType": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "text",
+            "canonicalText",
+            "outerVoidPointer",
+            "outerPointerKind"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "canonicalText": {
+              "type": "string"
+            },
+            "outerVoidPointer": {
+              "type": "boolean"
+            },
+            "outerPointerKind": {
+              "enum": [
+                "void-data-pointer",
+                "nonvoid-data-pointer",
+                "function-pointer",
+                "not-pointer",
+                "unknown"
+              ]
+            }
+          }
+        },
+        "eligibleForCastHistoryClassification": {
+          "type": "boolean"
+        },
+        "subjectFactEmitted": {
+          "type": "boolean"
+        },
+        "hasFinalHistory": {
+          "type": "boolean"
+        },
+        "classificationStatus": {
+          "enum": [
+            "classified",
+            "observed-no-final-history",
+            "final-history-not-emitted",
+            "declared-no-observed-facts",
+            "out-of-scope-unavailable-api-parameter"
+          ]
+        },
+        "semanticClassificationScope": {
+          "enum": [
+            "implementation-body",
+            "external-or-unavailable-api",
+            "unknown"
+          ]
+        },
+        "ownerDefinitionAvailable": {
+          "type": "boolean"
+        },
+        "eligibilityExclusionReason": {
+          "enum": [
+            "not-applicable",
+            "unavailable-owner-function-body",
+            "not-local-or-parameter"
+          ]
+        }
+      }
+    },
+    "fieldStorage": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "classificationScope",
+        "baseEntity",
+        "baseSubjectId",
+        "storageLocation",
+        "fieldPath",
+        "fieldPathText",
+        "declaringField"
+      ],
+      "properties": {
+        "classificationScope": {
+          "const": "instance"
+        },
+        "baseEntity": {
+          "type": "string"
+        },
+        "baseSubjectId": {
+          "type": "string"
+        },
+        "storageLocation": {
+          "$ref": "#/$defs/source"
+        },
+        "fieldPath": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "fieldPathText": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declaringField": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "name",
+            "qualifiedName",
+            "recordName",
+            "location",
+            "type",
+            "canonicalType"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "qualifiedName": {
+              "type": "string"
+            },
+            "recordName": {
+              "type": "string"
+            },
+            "location": {
+              "$ref": "#/$defs/source"
+            },
+            "type": {
+              "type": "string"
+            },
+            "canonicalType": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "correlatedDirectSubject": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "subjectId",
+        "entity",
+        "declarationId"
+      ],
+      "properties": {
+        "subjectId": {
+          "type": "string"
+        },
+        "entity": {
+          "type": "string"
+        },
+        "declarationId": {
+          "type": "string"
+        }
+      }
+    },
+    "nestedCallbackSlotRelation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "slotId",
+        "ownerDeclarationId",
+        "ownerDeclarationKind",
+        "ownerName",
+        "ownerFunction",
+        "relationVariable",
+        "callbackRole",
+        "positionKind",
+        "positionPath",
+        "declaredType",
+        "canonicalType",
+        "correlatedDirectSubjects",
+        "correlationEvidence",
+        "callSites",
+        "invocation"
+      ],
+      "properties": {
+        "slotId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerDeclarationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownerDeclarationKind": {
+          "enum": [
+            "parameter",
+            "local",
+            "global",
+            "field",
+            "other",
+            "unknown"
+          ]
+        },
+        "ownerName": {
+          "type": "string"
+        },
+        "ownerFunction": {
+          "type": "object"
+        },
+        "ownerParameterIndex": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "relationVariable": {
+          "type": "string",
+          "minLength": 1
+        },
+        "callbackRole": {
+          "type": "string",
+          "minLength": 1
+        },
+        "positionKind": {
+          "enum": [
+            "function-parameter",
+            "function-return"
+          ]
+        },
+        "positionPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "callbackArgumentIndex": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "declaredType": {
+          "type": "string"
+        },
+        "canonicalType": {
+          "type": "string"
+        },
+        "correlatedDirectSubjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/correlatedDirectSubject"
+          }
+        },
+        "correlationEvidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "callSites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invocation": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "invoked",
+            "hasKnownTarget",
+            "hasUnresolvedTarget"
+          ],
+          "properties": {
+            "invoked": {
+              "type": "boolean"
+            },
+            "hasKnownTarget": {
+              "type": "boolean"
+            },
+            "hasUnresolvedTarget": {
+              "type": "boolean"
+            }
+          }
+        },
+        "eligibleForRelationalClassification": {
+          "type": "boolean"
+        },
+        "ownerDefinitionAvailable": {
+          "type": "boolean"
+        },
+        "relationalClassificationScope": {
+          "enum": [
+            "implementation-body",
+            "field-or-aggregate-interface",
+            "global-callback-carrier",
+            "external-or-unavailable-api",
+            "unknown"
+          ]
+        },
+        "eligibilityExclusionReason": {
+          "enum": [
+            "not-applicable",
+            "unavailable-owner-function-body",
+            "not-local-or-parameter"
+          ]
+        }
+      }
+    },
+    "voidPointerUsageFingerprint": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "usageId",
+        "subjectId",
+        "declarationId",
+        "subjectKind",
+        "entity",
+        "location",
+        "function",
+        "declaredType",
+        "subjectFactEmitted",
+        "hasFinalHistory",
+        "classificationStatus",
+        "noFactPrimaryReason",
+        "genericCandidateConfidence",
+        "usageFlags",
+        "evidenceKinds",
+        "callSites"
+      ],
+      "properties": {
+        "usageId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declarationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjectKind": {
+          "enum": [
+            "local",
+            "parameter"
+          ]
+        },
+        "entity": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/source"
+        },
+        "function": {
+          "type": "object"
+        },
+        "declaredType": {
+          "type": "object"
+        },
+        "subjectFactEmitted": {
+          "type": "boolean"
+        },
+        "hasFinalHistory": {
+          "type": "boolean"
+        },
+        "classificationStatus": {
+          "enum": [
+            "classified",
+            "observed-no-final-history",
+            "final-history-not-emitted",
+            "declared-no-observed-facts"
+          ]
+        },
+        "noFactPrimaryReason": {
+          "enum": [
+            "not-applicable",
+            "unused",
+            "declaration-only-no-body",
+            "external-or-unresolved-call-escape",
+            "callback-or-function-pointer-escape",
+            "returned-or-stored-without-local-interpretation",
+            "known-internal-forwarding-only",
+            "transparent-local-transport-only",
+            "untracked-or-unsupported-use-pattern"
+          ]
+        },
+        "genericCandidateConfidence": {
+          "enum": [
+            "not-applicable",
+            "strong",
+            "conditional",
+            "blocked",
+            "insufficient-evidence"
+          ]
+        },
+        "usageFlags": {
+          "type": "object"
+        },
+        "evidenceKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "callSites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "observedNoFinalHistory": {
+          "$ref": "#/$defs/observedNoFinalHistoryFacts"
+        }
+      }
+    },
+    "observedNoFinalHistoryFacts": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "primaryPattern",
+        "hasRetainedPointerUse",
+        "hasRetainedObservation",
+        "hasDerefOrArrayIndex",
+        "hasPointerArithmetic",
+        "hasPointerComparisonOrNullTest",
+        "hasKnownInternalForwarding",
+        "hasExternalOrUnresolvedEscape",
+        "hasCallbackMediatedForwarding",
+        "hasReturnOrStorageFlow",
+        "hasCopyAssignmentOrCastEvidence",
+        "pointerUseKinds",
+        "semanticOperationKinds"
+      ],
+      "properties": {
+        "primaryPattern": {
+          "enum": [
+            "not-applicable",
+            "active-dereference-or-array-index",
+            "external-or-unresolved-escape",
+            "callback-mediated-forwarding",
+            "known-internal-forwarding",
+            "return-or-storage-flow",
+            "pointer-arithmetic-without-dereference",
+            "pointer-comparison-or-null-test-only",
+            "copy-assignment-or-cast-only",
+            "observation-only-no-pointer-use",
+            "mixed-or-other-retained-evidence"
+          ]
+        },
+        "hasRetainedPointerUse": {
+          "type": "boolean"
+        },
+        "hasRetainedObservation": {
+          "type": "boolean"
+        },
+        "hasDerefOrArrayIndex": {
+          "type": "boolean"
+        },
+        "hasPointerArithmetic": {
+          "type": "boolean"
+        },
+        "hasPointerComparisonOrNullTest": {
+          "type": "boolean"
+        },
+        "hasKnownInternalForwarding": {
+          "type": "boolean"
+        },
+        "hasExternalOrUnresolvedEscape": {
+          "type": "boolean"
+        },
+        "hasCallbackMediatedForwarding": {
+          "type": "boolean"
+        },
+        "hasReturnOrStorageFlow": {
+          "type": "boolean"
+        },
+        "hasCopyAssignmentOrCastEvidence": {
+          "type": "boolean"
+        },
+        "pointerUseKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "semanticOperationKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allocationOriginDerivedAliasUse": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "reportId",
+        "originSubjectId",
+        "originDeclarationId",
+        "originEntity",
+        "originLocation",
+        "originFunction",
+        "originDeclaredType",
+        "allocatorFamilies",
+        "allocatorFunctions",
+        "allocationCallSites",
+        "originBindingKinds",
+        "aliasDeclarationId",
+        "aliasEntity",
+        "aliasName",
+        "aliasLocation",
+        "aliasFunction",
+        "aliasDeclaredType",
+        "derivationKinds",
+        "derivationSites",
+        "mayAlias",
+        "usageFlags",
+        "evidenceKinds",
+        "useSites"
+      ],
+      "properties": {
+        "reportId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "originSubjectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "originDeclarationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "originEntity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "originLocation": {
+          "$ref": "#/$defs/source"
+        },
+        "originFunction": {
+          "type": "object"
+        },
+        "originDeclaredType": {
+          "type": "object"
+        },
+        "allocatorFamilies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allocatorFunctions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allocationCallSites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "originBindingKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "aliasDeclarationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aliasEntity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aliasName": {
+          "type": "string"
+        },
+        "aliasLocation": {
+          "$ref": "#/$defs/source"
+        },
+        "aliasFunction": {
+          "type": "object"
+        },
+        "aliasDeclaredType": {
+          "type": "object"
+        },
+        "derivationKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "derivationSites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mayAlias": {
+          "type": "boolean"
+        },
+        "usageFlags": {
+          "type": "object"
+        },
+        "evidenceKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "useSites": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

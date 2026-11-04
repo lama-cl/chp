@@ -1,0 +1,13 @@
+/hiredis-test
+/examples/hiredis-example*
+/*.o
+/*.so
+/*.dylib
+/*.a
+/*.pc
+*.dSYM
+tags
+compile_commands.json
+sed-4.9/gnulib-tests/current-locale
+sed-4.9/gnulib-tests/test-localcharset
+sed-4.9/sed/sed

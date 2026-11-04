@@ -1,0 +1,1713 @@
+{
+  "crossTUDirectCallLookups": [
+    {
+      "callee": "g",
+      "caller": "f",
+      "composed": true,
+      "functionBehavior": "BytewiseGenericFunction",
+      "importedPointerUses": 2,
+      "location": {
+        "column": 10,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+        "line": 10
+      },
+      "message": "C3a imported callee parameter summaries and pointer-use summaries onto actual arguments",
+      "pointerUsesComposed": true,
+      "publicLookupKey": "g::fn:(ptr:void)->ptr:void",
+      "qualifiedName": "g",
+      "returnComposed": false,
+      "signatureKey": "fn:(ptr:void)->ptr:void",
+      "status": "found",
+      "summaryFile": "b.cast-summary.json"
+    }
+  ],
+  "derivedObservationSummaries": [
+    {
+      "branchCast": null,
+      "entity": "f::x",
+      "grouped": "{g⌜char *⌝g @ always}"
+    }
+  ],
+  "directCastHistories": [
+    {
+      "components": {
+        "baseAtom": {
+          "canonical": "void *",
+          "compatibilityKey": "ptr:void",
+          "functionHasPrototype": false,
+          "functionIsVariadic": false,
+          "functionParamCanonical": [],
+          "functionReturnCanonical": "",
+          "isArray": false,
+          "isCharPointer": false,
+          "isConstQualified": false,
+          "isFloating": false,
+          "isFunctionPointer": false,
+          "isInteger": false,
+          "isNullPointer": false,
+          "isPointer": true,
+          "isRecordPointer": false,
+          "isVoid": false,
+          "isVoidPointer": true,
+          "isVolatileQualified": false,
+          "kind": "void-pointer",
+          "pointeeCanonical": "void",
+          "pointeeConst": false,
+          "pointeeText": "void",
+          "pointeeVolatile": false,
+          "recordName": "",
+          "recordTag": "",
+          "semanticKey": "ptr:void",
+          "text": "void *"
+        },
+        "baseText": "void *",
+        "tail": {
+          "ir": {
+            "callee": "g",
+            "inner": {
+              "kind": "asType",
+              "type": {
+                "canonical": "char *",
+                "compatibilityKey": "ptr:byte",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": true,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": true,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": false,
+                "isVolatileQualified": false,
+                "kind": "char-pointer",
+                "pointeeCanonical": "char",
+                "pointeeConst": false,
+                "pointeeText": "char",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "ptr:byte",
+                "text": "char *"
+              }
+            },
+            "kind": "callWrap"
+          },
+          "rendered": "g⌜char *⌝g"
+        }
+      },
+      "entity": "f::x",
+      "history": "void * => g⌜char *⌝g"
+    }
+  ],
+  "featureDiagnostics": [],
+  "flowRecords": [
+    {
+      "column": 10,
+      "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+      "history": "void * => g⌜char *⌝g",
+      "line": 10,
+      "note": "imported-call-arg",
+      "scope": "f",
+      "subject": "x"
+    },
+    {
+      "column": 10,
+      "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+      "history": "void *",
+      "line": 10,
+      "note": "call-arg",
+      "scope": "f",
+      "subject": "x"
+    },
+    {
+      "column": 13,
+      "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+      "history": "int * => void * => f⌜void * => g⌜char *⌝g⌝f",
+      "line": 15,
+      "note": "call-arg",
+      "scope": "main",
+      "subject": "&i"
+    },
+    {
+      "column": 15,
+      "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+      "history": "int * => void *",
+      "line": 15,
+      "note": "implicit-cast",
+      "scope": "main",
+      "subject": "&i"
+    },
+    {
+      "column": 15,
+      "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+      "history": "int => void *",
+      "line": 16,
+      "note": "implicit-cast",
+      "scope": "main",
+      "subject": "0"
+    }
+  ],
+  "functionBehaviorClassifications": [
+    {
+      "class": "BytewiseGenericFunction",
+      "evidence": [
+        {
+          "behavior": "ByteViewNoDeref",
+          "paramIndex": 0,
+          "role": "OrdinaryParameter",
+          "summary": {
+            "ir": {
+              "callee": "g",
+              "inner": {
+                "kind": "asType",
+                "type": {
+                  "canonical": "char *",
+                  "compatibilityKey": "ptr:byte",
+                  "functionHasPrototype": false,
+                  "functionIsVariadic": false,
+                  "functionParamCanonical": [],
+                  "functionReturnCanonical": "",
+                  "isArray": false,
+                  "isCharPointer": true,
+                  "isConstQualified": false,
+                  "isFloating": false,
+                  "isFunctionPointer": false,
+                  "isInteger": false,
+                  "isNullPointer": false,
+                  "isPointer": true,
+                  "isRecordPointer": false,
+                  "isVoid": false,
+                  "isVoidPointer": false,
+                  "isVolatileQualified": false,
+                  "kind": "char-pointer",
+                  "pointeeCanonical": "char",
+                  "pointeeConst": false,
+                  "pointeeText": "char",
+                  "pointeeVolatile": false,
+                  "recordName": "",
+                  "recordTag": "",
+                  "semanticKey": "ptr:byte",
+                  "text": "char *"
+                }
+              },
+              "kind": "callWrap"
+            },
+            "rendered": "g⌜char *⌝g"
+          }
+        }
+      ],
+      "evidenceFlags": {
+        "byteWrite": false,
+        "bytewise": true,
+        "callbackDependent": false,
+        "callbackProvider": false,
+        "concreteSpecializer": false,
+        "concreteWrite": false,
+        "multiTargetReinterpretation": false,
+        "reinterpretingWrite": false,
+        "taggedUnionLike": false,
+        "typeErasure": false,
+        "unsafeReinterpretation": false
+      },
+      "function": "f",
+      "identity": {
+        "linkage": "external",
+        "location": {
+          "column": 7,
+          "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+          "line": 9
+        },
+        "name": "f",
+        "qualifiedName": "f",
+        "signatureKey": "fn:(ptr:void)->ptr:void",
+        "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+        "usr": ""
+      }
+    }
+  ],
+  "functionParameterBehaviorMetrics": [
+    {
+      "behavior": "ByteViewNoDeref",
+      "declaredType": "void *",
+      "declaredTypeAtom": {
+        "canonical": "void *",
+        "compatibilityKey": "ptr:void",
+        "functionHasPrototype": false,
+        "functionIsVariadic": false,
+        "functionParamCanonical": [],
+        "functionReturnCanonical": "",
+        "isArray": false,
+        "isCharPointer": false,
+        "isConstQualified": false,
+        "isFloating": false,
+        "isFunctionPointer": false,
+        "isInteger": false,
+        "isNullPointer": false,
+        "isPointer": true,
+        "isRecordPointer": false,
+        "isVoid": false,
+        "isVoidPointer": true,
+        "isVolatileQualified": false,
+        "kind": "void-pointer",
+        "pointeeCanonical": "void",
+        "pointeeConst": false,
+        "pointeeText": "void",
+        "pointeeVolatile": false,
+        "recordName": "",
+        "recordTag": "",
+        "semanticKey": "ptr:void",
+        "text": "void *"
+      },
+      "function": "f",
+      "historyRisk": "Low",
+      "historyShape": "StableViaVoid",
+      "metrics": {
+        "behavior": "ByteViewNoDeref",
+        "distinctTypes": [
+          "char *",
+          "void *"
+        ],
+        "flags": {
+          "hasByteMediatedReinterpretation": false,
+          "hasByteOffsetRoundTrip": false,
+          "hasByteOffsetToDifferentConcrete": false,
+          "hasByteViewToConcrete": false,
+          "hasCharPtr": true,
+          "hasExternalSink": false,
+          "hasIndirectCallUse": false,
+          "hasIntToPtr": false,
+          "hasPointerArithmetic": false,
+          "hasPtrToInt": false,
+          "hasSequentialConcreteReinterpretation": false,
+          "hasVoid": true
+        },
+        "historyRisk": "Low",
+        "historyShape": "StableViaVoid",
+        "maxBranchBreadth": 0,
+        "maxParallelBreadth": 0,
+        "nonVoidPointerTypes": [
+          "char *"
+        ],
+        "numBranchNodes": 0,
+        "numCallWraps": 1,
+        "numDistinctTypes": 2,
+        "numHigherOrderRefs": 0,
+        "numNonVoidPointerTypes": 1,
+        "numParallelNodes": 0,
+        "numPointerTypes": 2,
+        "numPtrArithNodes": 0,
+        "numSeqNodes": 0,
+        "pointerTypes": [
+          "char *",
+          "void *"
+        ],
+        "seqDepth": 2
+      },
+      "paramIndex": 0,
+      "paramName": "x",
+      "paramRole": "OrdinaryParameter",
+      "summary": {
+        "ir": {
+          "callee": "g",
+          "inner": {
+            "kind": "asType",
+            "type": {
+              "canonical": "char *",
+              "compatibilityKey": "ptr:byte",
+              "functionHasPrototype": false,
+              "functionIsVariadic": false,
+              "functionParamCanonical": [],
+              "functionReturnCanonical": "",
+              "isArray": false,
+              "isCharPointer": true,
+              "isConstQualified": false,
+              "isFloating": false,
+              "isFunctionPointer": false,
+              "isInteger": false,
+              "isNullPointer": false,
+              "isPointer": true,
+              "isRecordPointer": false,
+              "isVoid": false,
+              "isVoidPointer": false,
+              "isVolatileQualified": false,
+              "kind": "char-pointer",
+              "pointeeCanonical": "char",
+              "pointeeConst": false,
+              "pointeeText": "char",
+              "pointeeVolatile": false,
+              "recordName": "",
+              "recordTag": "",
+              "semanticKey": "ptr:byte",
+              "text": "char *"
+            }
+          },
+          "kind": "callWrap"
+        },
+        "rendered": "g⌜char *⌝g"
+      },
+      "view": "FullView",
+      "wildLike": true,
+      "wildPointerMetrics": {
+        "derefTypes": [],
+        "hasAnyPointerUse": true,
+        "hasBranchTypeSplit": false,
+        "hasByteView": true,
+        "hasByteViewRead": false,
+        "hasByteViewWrite": false,
+        "hasCallOrReturnUse": true,
+        "hasCastLikeReinterpretation": true,
+        "hasConcreteDeref": false,
+        "hasConcreteWrite": false,
+        "hasDerefLikeUse": false,
+        "hasExternalUnknown": false,
+        "hasHigherOrderForwarding": false,
+        "hasMultiTypeDeref": false,
+        "hasMultiTypeWrite": false,
+        "hasVoidInterface": true,
+        "hasWriteLikeUse": false,
+        "numDerefTypes": 0,
+        "numWriteDerefTypes": 0,
+        "wildLike": true,
+        "writeDerefTypes": []
+      }
+    }
+  ],
+  "functionPointerFlows": [],
+  "functionSummaries": [
+    {
+      "coverage": {
+        "diagnostics": [],
+        "hasApproximatedFeature": false,
+        "hasApproximatedLoop": false,
+        "hasGoto": false,
+        "hasSwitchApproximation": false,
+        "hasUnsupportedFeature": false,
+        "hasUnsupportedIndirectCall": false
+      },
+      "detailRef": "functionSummaryDetails[f]",
+      "function": "f",
+      "functionBehavior": "BytewiseGenericFunction",
+      "location": {
+        "column": 7,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+        "line": 9
+      },
+      "params": [
+        {
+          "behavior": "ByteViewNoDeref",
+          "declaredType": "void *",
+          "declaredTypeKey": "ptr:void",
+          "historyRisk": "Low",
+          "historyShape": "StableViaVoid",
+          "index": 0,
+          "metrics": {
+            "derefTypes": [],
+            "flags": {
+              "byteWrite": false,
+              "charPtr": true,
+              "concreteWrite": false,
+              "externalSink": false,
+              "higherOrder": false,
+              "intToPtr": false,
+              "multiTypeWrite": false,
+              "ptrArith": false,
+              "ptrToInt": false,
+              "void": true
+            },
+            "nonVoidPointerTypes": [
+              "char *"
+            ],
+            "numDistinctTypes": 2,
+            "numNonVoidPointerTypes": 1,
+            "numPointerTypes": 2,
+            "pointerTypes": [
+              "char *",
+              "void *"
+            ],
+            "seqDepth": 2,
+            "writeDerefTypes": []
+          },
+          "name": "x",
+          "pointerUses": [
+            {
+              "accessType": null,
+              "attachPath": "g⌜char * => void *⌝g",
+              "detail": "return-origin",
+              "guard": null,
+              "kind": "returned",
+              "location": {
+                "column": 3,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              },
+              "pointerType": "void *"
+            },
+            {
+              "accessType": null,
+              "attachPath": "<id>",
+              "detail": "arg0 to g",
+              "guard": null,
+              "kind": "call-arg",
+              "location": {
+                "column": 10,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              },
+              "pointerType": "void *"
+            },
+            {
+              "accessType": null,
+              "attachPath": "<id>",
+              "detail": "imported via g.$0; init-rhs to char *",
+              "guard": null,
+              "kind": "init-rhs",
+              "location": {
+                "column": 10,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              },
+              "pointerType": "void *"
+            },
+            {
+              "accessType": null,
+              "attachPath": "char *",
+              "detail": "imported via g.$0; return-alias-parent",
+              "guard": null,
+              "kind": "returned",
+              "location": {
+                "column": 10,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              },
+              "pointerType": "char *"
+            }
+          ],
+          "role": "OrdinaryParameter",
+          "summary": "g⌜char *⌝g",
+          "summaryIrKind": "callWrap",
+          "view": "FullView",
+          "wildLike": true
+        }
+      ],
+      "return": {
+        "aliasedParamIndex": 0,
+        "declaredType": "void *",
+        "declaredTypeKey": "ptr:void",
+        "mayAliasParam": true,
+        "summary": "g⌜$0 => char * => void *⌝g",
+        "summaryIrKind": "callWrap"
+      },
+      "signature": "void * f(void * x)",
+      "story": "void * f(void * x); $0 x: void * => g⌜char *⌝g [ByteViewNoDeref]; return: g⌜$0 => char * => void *⌝g (aliases $0)"
+    },
+    {
+      "coverage": {
+        "diagnostics": [],
+        "hasApproximatedFeature": false,
+        "hasApproximatedLoop": false,
+        "hasGoto": false,
+        "hasSwitchApproximation": false,
+        "hasUnsupportedFeature": false,
+        "hasUnsupportedIndirectCall": false
+      },
+      "detailRef": "functionSummaryDetails[main]",
+      "function": "main",
+      "functionBehavior": "OrdinaryFunction",
+      "location": {
+        "column": 5,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+        "line": 13
+      },
+      "params": [],
+      "return": {
+        "aliasedParamIndex": null,
+        "declaredType": "int",
+        "declaredTypeKey": "int:int",
+        "mayAliasParam": false,
+        "summary": "int",
+        "summaryIrKind": "asType"
+      },
+      "signature": "int main()",
+      "story": "int main(); return: int"
+    }
+  ],
+  "functionSummaryDetails": [
+    {
+      "coverage": {
+        "diagnostics": [],
+        "hasApproximatedFeature": false,
+        "hasApproximatedLoop": false,
+        "hasGoto": false,
+        "hasSwitchApproximation": false,
+        "hasUnsupportedFeature": false,
+        "hasUnsupportedIndirectCall": false
+      },
+      "function": "f",
+      "functionBehavior": "BytewiseGenericFunction",
+      "identity": {
+        "linkage": "external",
+        "location": {
+          "column": 7,
+          "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+          "line": 9
+        },
+        "name": "f",
+        "qualifiedName": "f",
+        "signatureKey": "fn:(ptr:void)->ptr:void",
+        "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+        "usr": ""
+      },
+      "params": [
+        {
+          "behavior": "ByteViewNoDeref",
+          "declaredType": "void *",
+          "declaredTypeAtom": {
+            "canonical": "void *",
+            "compatibilityKey": "ptr:void",
+            "functionHasPrototype": false,
+            "functionIsVariadic": false,
+            "functionParamCanonical": [],
+            "functionReturnCanonical": "",
+            "isArray": false,
+            "isCharPointer": false,
+            "isConstQualified": false,
+            "isFloating": false,
+            "isFunctionPointer": false,
+            "isInteger": false,
+            "isNullPointer": false,
+            "isPointer": true,
+            "isRecordPointer": false,
+            "isVoid": false,
+            "isVoidPointer": true,
+            "isVolatileQualified": false,
+            "kind": "void-pointer",
+            "pointeeCanonical": "void",
+            "pointeeConst": false,
+            "pointeeText": "void",
+            "pointeeVolatile": false,
+            "recordName": "",
+            "recordTag": "",
+            "semanticKey": "ptr:void",
+            "text": "void *"
+          },
+          "index": 0,
+          "metrics": {
+            "behavior": "ByteViewNoDeref",
+            "distinctTypes": [
+              "char *",
+              "void *"
+            ],
+            "flags": {
+              "hasByteMediatedReinterpretation": false,
+              "hasByteOffsetRoundTrip": false,
+              "hasByteOffsetToDifferentConcrete": false,
+              "hasByteViewToConcrete": false,
+              "hasCharPtr": true,
+              "hasExternalSink": false,
+              "hasIndirectCallUse": false,
+              "hasIntToPtr": false,
+              "hasPointerArithmetic": false,
+              "hasPtrToInt": false,
+              "hasSequentialConcreteReinterpretation": false,
+              "hasVoid": true
+            },
+            "historyRisk": "Low",
+            "historyShape": "StableViaVoid",
+            "maxBranchBreadth": 0,
+            "maxParallelBreadth": 0,
+            "nonVoidPointerTypes": [
+              "char *"
+            ],
+            "numBranchNodes": 0,
+            "numCallWraps": 1,
+            "numDistinctTypes": 2,
+            "numHigherOrderRefs": 0,
+            "numNonVoidPointerTypes": 1,
+            "numParallelNodes": 0,
+            "numPointerTypes": 2,
+            "numPtrArithNodes": 0,
+            "numSeqNodes": 0,
+            "pointerTypes": [
+              "char *",
+              "void *"
+            ],
+            "seqDepth": 2
+          },
+          "name": "x",
+          "pointerUses": [
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "callee": "g",
+                  "inner": {
+                    "first": {
+                      "kind": "asType",
+                      "type": {
+                        "canonical": "",
+                        "compatibilityKey": "text:char *",
+                        "functionHasPrototype": false,
+                        "functionIsVariadic": false,
+                        "functionParamCanonical": [],
+                        "functionReturnCanonical": "",
+                        "isArray": false,
+                        "isCharPointer": false,
+                        "isConstQualified": false,
+                        "isFloating": false,
+                        "isFunctionPointer": false,
+                        "isInteger": false,
+                        "isNullPointer": false,
+                        "isPointer": false,
+                        "isRecordPointer": false,
+                        "isVoid": false,
+                        "isVoidPointer": false,
+                        "isVolatileQualified": false,
+                        "kind": "unknown",
+                        "pointeeCanonical": "",
+                        "pointeeConst": false,
+                        "pointeeText": "",
+                        "pointeeVolatile": false,
+                        "recordName": "",
+                        "recordTag": "",
+                        "semanticKey": "text:char *",
+                        "text": "char *"
+                      }
+                    },
+                    "kind": "seq",
+                    "second": {
+                      "kind": "asType",
+                      "type": {
+                        "canonical": "void *",
+                        "compatibilityKey": "ptr:void",
+                        "functionHasPrototype": false,
+                        "functionIsVariadic": false,
+                        "functionParamCanonical": [],
+                        "functionReturnCanonical": "",
+                        "isArray": false,
+                        "isCharPointer": false,
+                        "isConstQualified": false,
+                        "isFloating": false,
+                        "isFunctionPointer": false,
+                        "isInteger": false,
+                        "isNullPointer": false,
+                        "isPointer": true,
+                        "isRecordPointer": false,
+                        "isVoid": false,
+                        "isVoidPointer": true,
+                        "isVolatileQualified": false,
+                        "kind": "void-pointer",
+                        "pointeeCanonical": "void",
+                        "pointeeConst": false,
+                        "pointeeText": "void",
+                        "pointeeVolatile": false,
+                        "recordName": "",
+                        "recordTag": "",
+                        "semanticKey": "ptr:void",
+                        "text": "void *"
+                      }
+                    }
+                  },
+                  "kind": "callWrap"
+                },
+                "rendered": "g⌜char * => void *⌝g"
+              },
+              "detail": "return-origin",
+              "guard": null,
+              "kind": "returned",
+              "pointerType": "void *",
+              "span": {
+                "column": 3,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                },
+                "rendered": "<none>"
+              },
+              "detail": "arg0 to g",
+              "guard": null,
+              "kind": "call-arg",
+              "pointerType": "void *",
+              "span": {
+                "column": 10,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                },
+                "rendered": "<none>"
+              },
+              "detail": "imported via g.$0; init-rhs to char *",
+              "guard": null,
+              "kind": "init-rhs",
+              "pointerType": "void *",
+              "span": {
+                "column": 10,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:char *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:char *",
+                    "text": "char *"
+                  }
+                },
+                "rendered": "char *"
+              },
+              "detail": "imported via g.$0; return-alias-parent",
+              "guard": null,
+              "kind": "returned",
+              "pointerType": "char *",
+              "span": {
+                "column": 10,
+                "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+                "line": 10
+              }
+            }
+          ],
+          "role": "OrdinaryParameter",
+          "summary": {
+            "ir": {
+              "callee": "g",
+              "inner": {
+                "kind": "asType",
+                "type": {
+                  "canonical": "char *",
+                  "compatibilityKey": "ptr:byte",
+                  "functionHasPrototype": false,
+                  "functionIsVariadic": false,
+                  "functionParamCanonical": [],
+                  "functionReturnCanonical": "",
+                  "isArray": false,
+                  "isCharPointer": true,
+                  "isConstQualified": false,
+                  "isFloating": false,
+                  "isFunctionPointer": false,
+                  "isInteger": false,
+                  "isNullPointer": false,
+                  "isPointer": true,
+                  "isRecordPointer": false,
+                  "isVoid": false,
+                  "isVoidPointer": false,
+                  "isVolatileQualified": false,
+                  "kind": "char-pointer",
+                  "pointeeCanonical": "char",
+                  "pointeeConst": false,
+                  "pointeeText": "char",
+                  "pointeeVolatile": false,
+                  "recordName": "",
+                  "recordTag": "",
+                  "semanticKey": "ptr:byte",
+                  "text": "char *"
+                }
+              },
+              "kind": "callWrap"
+            },
+            "rendered": "g⌜char *⌝g"
+          }
+        }
+      ],
+      "return": {
+        "aliasedParamIndex": 0,
+        "declaredType": "void *",
+        "declaredTypeAtom": {
+          "canonical": "void *",
+          "compatibilityKey": "ptr:void",
+          "functionHasPrototype": false,
+          "functionIsVariadic": false,
+          "functionParamCanonical": [],
+          "functionReturnCanonical": "",
+          "isArray": false,
+          "isCharPointer": false,
+          "isConstQualified": false,
+          "isFloating": false,
+          "isFunctionPointer": false,
+          "isInteger": false,
+          "isNullPointer": false,
+          "isPointer": true,
+          "isRecordPointer": false,
+          "isVoid": false,
+          "isVoidPointer": true,
+          "isVolatileQualified": false,
+          "kind": "void-pointer",
+          "pointeeCanonical": "void",
+          "pointeeConst": false,
+          "pointeeText": "void",
+          "pointeeVolatile": false,
+          "recordName": "",
+          "recordTag": "",
+          "semanticKey": "ptr:void",
+          "text": "void *"
+        },
+        "mayAliasParam": true,
+        "summary": {
+          "ir": {
+            "callee": "g",
+            "inner": {
+              "first": {
+                "first": {
+                  "index": 0,
+                  "kind": "paramRef"
+                },
+                "kind": "seq",
+                "second": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:char *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:char *",
+                    "text": "char *"
+                  }
+                }
+              },
+              "kind": "seq",
+              "second": {
+                "kind": "asType",
+                "type": {
+                  "canonical": "void *",
+                  "compatibilityKey": "ptr:void",
+                  "functionHasPrototype": false,
+                  "functionIsVariadic": false,
+                  "functionParamCanonical": [],
+                  "functionReturnCanonical": "",
+                  "isArray": false,
+                  "isCharPointer": false,
+                  "isConstQualified": false,
+                  "isFloating": false,
+                  "isFunctionPointer": false,
+                  "isInteger": false,
+                  "isNullPointer": false,
+                  "isPointer": true,
+                  "isRecordPointer": false,
+                  "isVoid": false,
+                  "isVoidPointer": true,
+                  "isVolatileQualified": false,
+                  "kind": "void-pointer",
+                  "pointeeCanonical": "void",
+                  "pointeeConst": false,
+                  "pointeeText": "void",
+                  "pointeeVolatile": false,
+                  "recordName": "",
+                  "recordTag": "",
+                  "semanticKey": "ptr:void",
+                  "text": "void *"
+                }
+              }
+            },
+            "kind": "callWrap"
+          },
+          "rendered": "g⌜$0 => char * => void *⌝g"
+        }
+      }
+    },
+    {
+      "coverage": {
+        "diagnostics": [],
+        "hasApproximatedFeature": false,
+        "hasApproximatedLoop": false,
+        "hasGoto": false,
+        "hasSwitchApproximation": false,
+        "hasUnsupportedFeature": false,
+        "hasUnsupportedIndirectCall": false
+      },
+      "function": "main",
+      "functionBehavior": "OrdinaryFunction",
+      "identity": {
+        "linkage": "external",
+        "location": {
+          "column": 5,
+          "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+          "line": 13
+        },
+        "name": "main",
+        "qualifiedName": "main",
+        "signatureKey": "fn:()->int:int",
+        "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+        "usr": ""
+      },
+      "params": [],
+      "return": {
+        "aliasedParamIndex": null,
+        "declaredType": "int",
+        "declaredTypeAtom": {
+          "canonical": "int",
+          "compatibilityKey": "int:int",
+          "functionHasPrototype": false,
+          "functionIsVariadic": false,
+          "functionParamCanonical": [],
+          "functionReturnCanonical": "",
+          "isArray": false,
+          "isCharPointer": false,
+          "isConstQualified": false,
+          "isFloating": false,
+          "isFunctionPointer": false,
+          "isInteger": true,
+          "isNullPointer": false,
+          "isPointer": false,
+          "isRecordPointer": false,
+          "isVoid": false,
+          "isVoidPointer": false,
+          "isVolatileQualified": false,
+          "kind": "integer",
+          "pointeeCanonical": "",
+          "pointeeConst": false,
+          "pointeeText": "",
+          "pointeeVolatile": false,
+          "recordName": "",
+          "recordTag": "",
+          "semanticKey": "int:int",
+          "text": "int"
+        },
+        "mayAliasParam": false,
+        "summary": {
+          "ir": {
+            "kind": "asType",
+            "type": {
+              "canonical": "int",
+              "compatibilityKey": "int:int",
+              "functionHasPrototype": false,
+              "functionIsVariadic": false,
+              "functionParamCanonical": [],
+              "functionReturnCanonical": "",
+              "isArray": false,
+              "isCharPointer": false,
+              "isConstQualified": false,
+              "isFloating": false,
+              "isFunctionPointer": false,
+              "isInteger": true,
+              "isNullPointer": false,
+              "isPointer": false,
+              "isRecordPointer": false,
+              "isVoid": false,
+              "isVoidPointer": false,
+              "isVolatileQualified": false,
+              "kind": "integer",
+              "pointeeCanonical": "",
+              "pointeeConst": false,
+              "pointeeText": "",
+              "pointeeVolatile": false,
+              "recordName": "",
+              "recordTag": "",
+              "semanticKey": "int:int",
+              "text": "int"
+            }
+          },
+          "rendered": "int"
+        }
+      }
+    }
+  ],
+  "observedInterpretations": [
+    {
+      "entity": "f::x",
+      "observations": [
+        {
+          "attachPath": {
+            "ir": {
+              "kind": "none"
+            },
+            "rendered": "<none>"
+          },
+          "guard": null,
+          "location": {
+            "column": 10,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 10
+          },
+          "observation": {
+            "ir": {
+              "callee": "g",
+              "inner": {
+                "kind": "asType",
+                "type": {
+                  "canonical": "char *",
+                  "compatibilityKey": "ptr:byte",
+                  "functionHasPrototype": false,
+                  "functionIsVariadic": false,
+                  "functionParamCanonical": [],
+                  "functionReturnCanonical": "",
+                  "isArray": false,
+                  "isCharPointer": true,
+                  "isConstQualified": false,
+                  "isFloating": false,
+                  "isFunctionPointer": false,
+                  "isInteger": false,
+                  "isNullPointer": false,
+                  "isPointer": true,
+                  "isRecordPointer": false,
+                  "isVoid": false,
+                  "isVoidPointer": false,
+                  "isVolatileQualified": false,
+                  "kind": "char-pointer",
+                  "pointeeCanonical": "char",
+                  "pointeeConst": false,
+                  "pointeeText": "char",
+                  "pointeeVolatile": false,
+                  "recordName": "",
+                  "recordTag": "",
+                  "semanticKey": "ptr:byte",
+                  "text": "char *"
+                }
+              },
+              "kind": "callWrap"
+            },
+            "rendered": "g⌜char *⌝g"
+          },
+          "provenance": "imported-call-through-g",
+          "role": "Semantic"
+        },
+        {
+          "attachPath": {
+            "ir": {
+              "kind": "none"
+            },
+            "rendered": "<none>"
+          },
+          "guard": null,
+          "location": {
+            "column": 10,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 10
+          },
+          "observation": {
+            "ir": {
+              "callee": "g",
+              "inner": {
+                "kind": "asType",
+                "type": {
+                  "canonical": "char *",
+                  "compatibilityKey": "ptr:byte",
+                  "functionHasPrototype": false,
+                  "functionIsVariadic": false,
+                  "functionParamCanonical": [],
+                  "functionReturnCanonical": "",
+                  "isArray": false,
+                  "isCharPointer": true,
+                  "isConstQualified": false,
+                  "isFloating": false,
+                  "isFunctionPointer": false,
+                  "isInteger": false,
+                  "isNullPointer": false,
+                  "isPointer": true,
+                  "isRecordPointer": false,
+                  "isVoid": false,
+                  "isVoidPointer": false,
+                  "isVolatileQualified": false,
+                  "kind": "char-pointer",
+                  "pointeeCanonical": "char",
+                  "pointeeConst": false,
+                  "pointeeText": "char",
+                  "pointeeVolatile": false,
+                  "recordName": "",
+                  "recordTag": "",
+                  "semanticKey": "ptr:byte",
+                  "text": "char *"
+                }
+              },
+              "kind": "callWrap"
+            },
+            "rendered": "g⌜char *⌝g"
+          },
+          "provenance": "imported-call-through-g-origin",
+          "role": "Semantic"
+        }
+      ]
+    }
+  ],
+  "pointerBehaviorMetrics": [
+    {
+      "behavior": "ByteViewNoDeref",
+      "components": {
+        "baseAtom": {
+          "canonical": "void *",
+          "compatibilityKey": "ptr:void",
+          "functionHasPrototype": false,
+          "functionIsVariadic": false,
+          "functionParamCanonical": [],
+          "functionReturnCanonical": "",
+          "isArray": false,
+          "isCharPointer": false,
+          "isConstQualified": false,
+          "isFloating": false,
+          "isFunctionPointer": false,
+          "isInteger": false,
+          "isNullPointer": false,
+          "isPointer": true,
+          "isRecordPointer": false,
+          "isVoid": false,
+          "isVoidPointer": true,
+          "isVolatileQualified": false,
+          "kind": "void-pointer",
+          "pointeeCanonical": "void",
+          "pointeeConst": false,
+          "pointeeText": "void",
+          "pointeeVolatile": false,
+          "recordName": "",
+          "recordTag": "",
+          "semanticKey": "ptr:void",
+          "text": "void *"
+        },
+        "baseText": "void *",
+        "tail": {
+          "ir": {
+            "callee": "g",
+            "inner": {
+              "kind": "asType",
+              "type": {
+                "canonical": "char *",
+                "compatibilityKey": "ptr:byte",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": true,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": true,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": false,
+                "isVolatileQualified": false,
+                "kind": "char-pointer",
+                "pointeeCanonical": "char",
+                "pointeeConst": false,
+                "pointeeText": "char",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "ptr:byte",
+                "text": "char *"
+              }
+            },
+            "kind": "callWrap"
+          },
+          "rendered": "g⌜char *⌝g"
+        }
+      },
+      "entity": "f::x",
+      "history": "void * => g⌜char *⌝g",
+      "historyRisk": "Low",
+      "historyShape": "StableViaVoid",
+      "metrics": {
+        "behavior": "ByteViewNoDeref",
+        "distinctTypes": [
+          "char *",
+          "void *"
+        ],
+        "flags": {
+          "hasByteMediatedReinterpretation": false,
+          "hasByteOffsetRoundTrip": false,
+          "hasByteOffsetToDifferentConcrete": false,
+          "hasByteViewToConcrete": false,
+          "hasCharPtr": true,
+          "hasExternalSink": false,
+          "hasIndirectCallUse": false,
+          "hasIntToPtr": false,
+          "hasPointerArithmetic": false,
+          "hasPtrToInt": false,
+          "hasSequentialConcreteReinterpretation": false,
+          "hasVoid": true
+        },
+        "historyRisk": "Low",
+        "historyShape": "StableViaVoid",
+        "maxBranchBreadth": 0,
+        "maxParallelBreadth": 0,
+        "nonVoidPointerTypes": [
+          "char *"
+        ],
+        "numBranchNodes": 0,
+        "numCallWraps": 1,
+        "numDistinctTypes": 2,
+        "numHigherOrderRefs": 0,
+        "numNonVoidPointerTypes": 1,
+        "numParallelNodes": 0,
+        "numPointerTypes": 2,
+        "numPtrArithNodes": 0,
+        "numSeqNodes": 0,
+        "pointerTypes": [
+          "char *",
+          "void *"
+        ],
+        "seqDepth": 2
+      },
+      "view": "FullView",
+      "wildLike": true,
+      "wildPointerMetrics": {
+        "derefTypes": [],
+        "hasAnyPointerUse": true,
+        "hasBranchTypeSplit": false,
+        "hasByteView": true,
+        "hasByteViewRead": false,
+        "hasByteViewWrite": false,
+        "hasCallOrReturnUse": true,
+        "hasCastLikeReinterpretation": true,
+        "hasConcreteDeref": false,
+        "hasConcreteWrite": false,
+        "hasDerefLikeUse": false,
+        "hasExternalUnknown": false,
+        "hasHigherOrderForwarding": false,
+        "hasMultiTypeDeref": false,
+        "hasMultiTypeWrite": false,
+        "hasVoidInterface": true,
+        "hasWriteLikeUse": false,
+        "numDerefTypes": 0,
+        "numWriteDerefTypes": 0,
+        "wildLike": true,
+        "writeDerefTypes": []
+      }
+    }
+  ],
+  "pointerUseSummaries": [
+    {
+      "entity": "f::x",
+      "uses": [
+        {
+          "accessType": null,
+          "attachPath": {
+            "ir": {
+              "callee": "g",
+              "inner": {
+                "first": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:char *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:char *",
+                    "text": "char *"
+                  }
+                },
+                "kind": "seq",
+                "second": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "void *",
+                    "compatibilityKey": "ptr:void",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": true,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": true,
+                    "isVolatileQualified": false,
+                    "kind": "void-pointer",
+                    "pointeeCanonical": "void",
+                    "pointeeConst": false,
+                    "pointeeText": "void",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "ptr:void",
+                    "text": "void *"
+                  }
+                }
+              },
+              "kind": "callWrap"
+            },
+            "rendered": "g⌜char * => void *⌝g"
+          },
+          "detail": "return-origin",
+          "guard": null,
+          "kind": "returned",
+          "pointerType": "void *",
+          "span": {
+            "column": 3,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 10
+          }
+        },
+        {
+          "accessType": null,
+          "attachPath": {
+            "ir": {
+              "kind": "none"
+            },
+            "rendered": "<none>"
+          },
+          "detail": "arg0 to g",
+          "guard": null,
+          "kind": "call-arg",
+          "pointerType": "void *",
+          "span": {
+            "column": 10,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 10
+          }
+        },
+        {
+          "accessType": null,
+          "attachPath": {
+            "ir": {
+              "kind": "none"
+            },
+            "rendered": "<none>"
+          },
+          "detail": "imported via g.$0; init-rhs to char *",
+          "guard": null,
+          "kind": "init-rhs",
+          "pointerType": "void *",
+          "span": {
+            "column": 10,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 10
+          }
+        },
+        {
+          "accessType": null,
+          "attachPath": {
+            "ir": {
+              "kind": "asType",
+              "type": {
+                "canonical": "",
+                "compatibilityKey": "text:char *",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": false,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": false,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": false,
+                "isVolatileQualified": false,
+                "kind": "unknown",
+                "pointeeCanonical": "",
+                "pointeeConst": false,
+                "pointeeText": "",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "text:char *",
+                "text": "char *"
+              }
+            },
+            "rendered": "char *"
+          },
+          "detail": "imported via g.$0; return-alias-parent",
+          "guard": null,
+          "kind": "returned",
+          "pointerType": "char *",
+          "span": {
+            "column": 10,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 10
+          }
+        }
+      ]
+    },
+    {
+      "entity": "main::r",
+      "uses": [
+        {
+          "accessType": null,
+          "attachPath": {
+            "ir": {
+              "kind": "none"
+            },
+            "rendered": "<none>"
+          },
+          "detail": "binary-pointer-comparison",
+          "guard": null,
+          "kind": "pointer-comparison",
+          "pointerType": "void *",
+          "span": {
+            "column": 12,
+            "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c",
+            "line": 16
+          }
+        }
+      ]
+    }
+  ],
+  "schemaName": "cast-history-tu-summary",
+  "schemaVersion": 1,
+  "storageCastHistories": [
+    {
+      "components": {
+        "baseAtom": null,
+        "baseText": "void *",
+        "tail": {
+          "ir": {
+            "callee": "g",
+            "inner": {
+              "kind": "asType",
+              "type": {
+                "canonical": "char *",
+                "compatibilityKey": "ptr:byte",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": true,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": true,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": false,
+                "isVolatileQualified": false,
+                "kind": "char-pointer",
+                "pointeeCanonical": "char",
+                "pointeeConst": false,
+                "pointeeText": "char",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "ptr:byte",
+                "text": "char *"
+              }
+            },
+            "kind": "callWrap"
+          },
+          "rendered": "g⌜char *⌝g"
+        }
+      },
+      "entity": "f::x",
+      "history": "void * => g⌜char *⌝g"
+    }
+  ],
+  "storageHistoryMetrics": [
+    {
+      "branchMetrics": {
+        "branchAltSeqLen": "<none>",
+        "branchClass": "NoBranchCast",
+        "branchNonVoidTypes": [],
+        "branchPosition": "<none>",
+        "branchTypes": [],
+        "branchWriteTypes": [],
+        "earliestBranchDepth": -1,
+        "flags": {
+          "byteWrite": false,
+          "concreteWrite": false,
+          "differentTypes": false,
+          "missingElse": false,
+          "negatedPair": false,
+          "sameTypeAllBranches": false,
+          "tagLike": false,
+          "voidOnlyBranch": false,
+          "write": false
+        },
+        "guards": [],
+        "latestBranchDepth": -1,
+        "maxAltSeqDepth": 0,
+        "maxBranchBreadth": 0,
+        "maxBranchDepth": 0,
+        "maxTypesPerBranchNode": 0,
+        "minAltSeqDepth": -1,
+        "numBranchNodes": 0,
+        "numDistinctBranchNonVoidTypes": 0,
+        "numDistinctBranchTypes": 0,
+        "totalAlternatives": 0
+      },
+      "components": {
+        "baseAtom": null,
+        "baseText": "void *",
+        "tail": {
+          "ir": {
+            "callee": "g",
+            "inner": {
+              "kind": "asType",
+              "type": {
+                "canonical": "char *",
+                "compatibilityKey": "ptr:byte",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": true,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": true,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": false,
+                "isVolatileQualified": false,
+                "kind": "char-pointer",
+                "pointeeCanonical": "char",
+                "pointeeConst": false,
+                "pointeeText": "char",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "ptr:byte",
+                "text": "char *"
+              }
+            },
+            "kind": "callWrap"
+          },
+          "rendered": "g⌜char *⌝g"
+        }
+      },
+      "entity": "f::x",
+      "history": "void * => g⌜char *⌝g",
+      "historyRisk": "Low",
+      "historyShape": "StableViaVoid",
+      "metrics": {
+        "behavior": "ByteViewNoDeref",
+        "distinctTypes": [
+          "char *",
+          "void *"
+        ],
+        "flags": {
+          "hasByteMediatedReinterpretation": false,
+          "hasByteOffsetRoundTrip": false,
+          "hasByteOffsetToDifferentConcrete": false,
+          "hasByteViewToConcrete": false,
+          "hasCharPtr": true,
+          "hasExternalSink": false,
+          "hasIndirectCallUse": false,
+          "hasIntToPtr": false,
+          "hasPointerArithmetic": false,
+          "hasPtrToInt": false,
+          "hasSequentialConcreteReinterpretation": false,
+          "hasVoid": true
+        },
+        "historyRisk": "Low",
+        "historyShape": "StableViaVoid",
+        "maxBranchBreadth": 0,
+        "maxParallelBreadth": 0,
+        "nonVoidPointerTypes": [
+          "char *"
+        ],
+        "numBranchNodes": 0,
+        "numCallWraps": 1,
+        "numDistinctTypes": 2,
+        "numHigherOrderRefs": 0,
+        "numNonVoidPointerTypes": 1,
+        "numParallelNodes": 0,
+        "numPointerTypes": 2,
+        "numPtrArithNodes": 0,
+        "numSeqNodes": 0,
+        "pointerTypes": [
+          "char *",
+          "void *"
+        ],
+        "seqDepth": 2
+      }
+    }
+  ],
+  "toolVersion": "cast-history-dev",
+  "tu": {
+    "compileCommandHash": "",
+    "configurationId": "",
+    "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p02_cross_tu_return_extra/a.c"
+  }
+}

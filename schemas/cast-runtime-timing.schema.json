@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/cast-history/cast-runtime-timing.schema.json",
+  "title": "Cast History Translation-Unit Runtime Timing",
+  "description": "Compact C6g5g sidecar for paper runtime tables. Durations are monotonic-clock milliseconds measured by the analyzer process; the timing sidecar's own write is excluded from totalElapsed to avoid self-referential accounting.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaName", "schemaVersion", "tu", "timingsMilliseconds", "notes"],
+  "properties": {
+    "schemaName": {"const": "cast-history-tu-runtime-timing"},
+    "schemaVersion": {"const": 1},
+    "toolVersion": {"type": "string"},
+    "tu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceFile", "configurationId", "projectId", "stage"],
+      "properties": {
+        "sourceFile": {"type": "string"},
+        "configurationId": {"type": "string"},
+        "projectId": {"type": "string"},
+        "stage": {"type": "string"}
+      }
+    },
+    "timingsMilliseconds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parseAndAstConstruction", "astTraversal", "sameTUNamedCallSCCFixpoint",
+        "crossTUSCCFixpoint", "importedSummaryOverlay", "castHistoryConstruction",
+        "stdoutReportWrite", "prevalenceMetricsWrite", "linkSummaryWrite",
+        "verboseReportWrite", "paperFactsWrite", "artifactWrite", "totalElapsed",
+        "unattributed"
+      ],
+      "properties": {
+        "parseAndAstConstruction": {"type": "integer", "minimum": 0},
+        "astTraversal": {"type": "integer", "minimum": 0},
+        "sameTUNamedCallSCCFixpoint": {"type": "integer", "minimum": 0},
+        "crossTUSCCFixpoint": {"type": "integer", "minimum": 0},
+        "importedSummaryOverlay": {"type": "integer", "minimum": 0},
+        "castHistoryConstruction": {"type": "integer", "minimum": 0},
+        "stdoutReportWrite": {"type": "integer", "minimum": 0},
+        "prevalenceMetricsWrite": {"type": "integer", "minimum": 0},
+        "linkSummaryWrite": {"type": "integer", "minimum": 0},
+        "verboseReportWrite": {"type": "integer", "minimum": 0},
+        "paperFactsWrite": {"type": "integer", "minimum": 0},
+        "artifactWrite": {"type": "integer", "minimum": 0},
+        "totalElapsed": {"type": "integer", "minimum": 0},
+        "unattributed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "notes": {"type": "object"}
+  }
+}

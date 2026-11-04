@@ -1,0 +1,12 @@
+     ../compat/getopt.c \
+     ../compat/xalloc.c \
+     ../compat/regex.c \
+     ../src/main.c \
+     ../src/psgen.c \
+     ../src/util.c \
+     ../src/mkafmmap.c \
+     ../states/lex.l \
+     ../states/main.c \
+     ../states/prims.c \
+     ../states/process.c \
+     ../states/utils.c

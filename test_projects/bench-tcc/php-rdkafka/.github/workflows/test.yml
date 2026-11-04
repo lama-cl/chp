@@ -1,0 +1,191 @@
+name: 'Tests'
+
+on:
+    push:
+        branches:
+            - '6.x'
+    pull_request:
+    schedule:
+        - cron: '30 8 * * 1'
+
+jobs:
+    tests:
+        name: 'Tests'
+        strategy:
+          matrix:
+            include:
+              # Latest librdkafka 2.x with memcheck
+              - php: '8.3.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+              - php: '8.2.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+              - php: '8.1.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+
+              # Latest librdkafka 1.x with memcheck
+              - php: '8.3.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+              - php: '8.2.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+              - php: '8.1.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+              - php: '8.0.0'
+                librdkafka: 'v1.9.2'
+                memcheck: '1'
+
+              # Latest librdkafka 2.x
+              - php: '8.3.0'
+                librdkafka: 'v2.3.0'
+              - php: '8.2.0'
+                librdkafka: 'v2.3.0'
+              - php: '8.1.0'
+                librdkafka: 'v2.3.0'
+
+              # Latest librdkafka 1.x
+              - php: '8.3.0'
+                librdkafka: 'v1.9.2'
+              - php: '8.2.0'
+                librdkafka: 'v1.9.2'
+              - php: '8.1.0'
+                librdkafka: 'v1.9.2'
+              - php: '8.0.0'
+                librdkafka: 'v1.9.2'
+              - php: '7.4.0'
+                librdkafka: 'v1.9.2'
+              - php: '7.3.0'
+                librdkafka: 'v1.9.2'
+
+              # librdkafka 1.7.0
+              - php: '8.3.0'
+                librdkafka: 'v1.7.0'
+              - php: '8.2.0'
+                librdkafka: 'v1.7.0'
+              - php: '8.1.0'
+                librdkafka: 'v1.7.0'
+              - php: '8.0.0'
+                librdkafka: 'v1.7.0'
+              - php: '7.4.0'
+                librdkafka: 'v1.7.0'
+              - php: '7.3.0'
+                librdkafka: 'v1.7.0'
+
+              # librdkafka 1.6.1
+              - php: '8.1.0'
+                librdkafka: 'v1.6.1'
+              - php: '8.0.0'
+                librdkafka: 'v1.6.1'
+              - php: '7.4.0'
+                librdkafka: 'v1.6.1'
+              - php: '7.3.0'
+                librdkafka: 'v1.6.1'
+
+              # librdkafka 1.5.3
+              - php: '8.1.0'
+                librdkafka: 'v1.5.3'
+              - php: '8.0.0'
+                librdkafka: 'v1.5.3'
+              - php: '7.4.0'
+                librdkafka: 'v1.5.3'
+              - php: '7.3.0'
+                librdkafka: 'v1.5.3'
+
+              # librdkafka 1.4.4
+              - php: '8.1.0'
+                librdkafka: 'v1.4.4'
+              - php: '8.0.0'
+                librdkafka: 'v1.4.4'
+              - php: '7.4.0'
+                librdkafka: 'v1.4.4'
+              - php: '7.3.0'
+                librdkafka: 'v1.4.4'
+
+              # librdkafka 1.0.1
+              - php: '8.1.0'
+                librdkafka: 'v1.0.1'
+              - php: '8.0.0'
+                librdkafka: 'v1.0.1'
+              - php: '7.4.0'
+                librdkafka: 'v1.0.1'
+              - php: '7.3.0'
+                librdkafka: 'v1.0.1'
+
+              # librdkafka 0.11.6
+              - php: '8.1.0'
+                librdkafka: 'v0.11.6'
+              - php: '8.0.0'
+                librdkafka: 'v0.11.6'
+              - php: '7.4.0'
+                librdkafka: 'v0.11.6'
+              - php: '7.3.0'
+                librdkafka: 'v0.11.6'
+              - php: '7.2.0'
+                librdkafka: 'v0.11.6'
+              - php: '7.1.0'
+                librdkafka: 'v0.11.6'
+              - php: '7.0.0'
+                librdkafka: 'v0.11.6'
+
+              # librdkafka master (experimental, does not block PRs)
+              - php: '8.3.0'
+                librdkafka: 'master'
+                experimental: true
+              - php: '8.2.0'
+                librdkafka: 'master'
+                experimental: true
+              - php: '8.1.0'
+                librdkafka: 'master'
+                experimental: true
+              - php: '8.0.0'
+                librdkafka: 'master'
+                experimental: true
+              - php: '7.4.0'
+                librdkafka: 'master'
+                experimental: true
+              - php: '7.3.0'
+                librdkafka: 'master'
+                experimental: true
+
+        runs-on: 'ubuntu-20.04'
+        continue-on-error: ${{ !!matrix.experimental }}
+        env:
+            PHP_VERSION: ${{ matrix.php }}
+            LIBRDKAFKA_VERSION: ${{ matrix.librdkafka }}
+            MEMORY_CHECK: ${{ matrix.memcheck }}
+            TEST_KAFKA_BROKERS: kafka:9092
+            TEST_KAFKA_BROKER_VERSION: 2.6
+        steps:
+            - name: 'Check out repository'
+              uses: 'actions/checkout@v2'
+              with:
+                  path: 'php-rdkafka'
+
+            - uses: actions/cache@v2
+              with:
+                  path: ~/build-cache/php
+                  key: ${{ runner.os }}-${{ matrix.php }}-${{ matrix.memcheck }}
+
+            - uses: actions/cache@v2
+              with:
+                  path: ~/build-cache/librdkafka
+                  key: ${{ runner.os }}-${{ matrix.librdkafka }}
+
+            - name: 'Build librdkafka'
+              run: './php-rdkafka/.github/workflows/test/build-librdkafka.sh'
+
+            - name: 'Build PHP'
+              run: './php-rdkafka/.github/workflows/test/build-php.sh'
+
+            - name: 'Build php-rdkafka'
+              run: './php-rdkafka/.github/workflows/test/build-php-rdkafka.sh'
+
+            - name: 'Start Kafka'
+              run: './php-rdkafka/.github/workflows/test/start-kafka.sh'
+
+            - name: 'Run tests'
+              run: './php-rdkafka/.github/workflows/test/tests.sh'

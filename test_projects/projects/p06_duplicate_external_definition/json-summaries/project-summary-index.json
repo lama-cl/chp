@@ -1,0 +1,229 @@
+{
+  "schemaName": "cast-history-project-summary-index",
+  "schemaVersion": 2,
+  "projectKind": "real",
+  "summaryRoot": "test_projects/projects/p06_duplicate_external_definition/json-summaries",
+  "numSummaryFiles": 2,
+  "numFunctions": 4,
+  "translationUnits": [
+    {
+      "summaryFile": "a.cast-summary.json",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+      "configurationId": "",
+      "compileCommandHash": "",
+      "numFunctionSummaries": 2
+    },
+    {
+      "summaryFile": "b.cast-summary.json",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+      "configurationId": "",
+      "compileCommandHash": "",
+      "numFunctionSummaries": 2
+    }
+  ],
+  "functions": [
+    {
+      "function": "dup",
+      "name": "dup",
+      "qualifiedName": "dup",
+      "signatureKey": "fn:(ptr:void)->void",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+      "location": {
+        "column": 6,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+        "line": 8
+      },
+      "summaryFile": "a.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "ReinterpretingWriteFunction",
+      "lookupKey": "external::dup::fn:(ptr:void)->void",
+      "publicLookupKey": "dup::fn:(ptr:void)->void",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c:8:6",
+      "status": "duplicate-external-definition",
+      "resolution": "unsafe"
+    },
+    {
+      "function": "dup",
+      "name": "dup",
+      "qualifiedName": "dup",
+      "signatureKey": "fn:(ptr:void)->void",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+      "location": {
+        "column": 6,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+        "line": 7
+      },
+      "summaryFile": "b.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "ReinterpretingWriteFunction",
+      "lookupKey": "external::dup::fn:(ptr:void)->void",
+      "publicLookupKey": "dup::fn:(ptr:void)->void",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c:7:6",
+      "status": "duplicate-external-definition",
+      "resolution": "unsafe"
+    },
+    {
+      "function": "fa",
+      "name": "fa",
+      "qualifiedName": "fa",
+      "signatureKey": "fn:(ptr:void)->void",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+      "location": {
+        "column": 6,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+        "line": 13
+      },
+      "summaryFile": "a.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "ReinterpretingWriteFunction",
+      "lookupKey": "external::fa::fn:(ptr:void)->void",
+      "publicLookupKey": "fa::fn:(ptr:void)->void",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c:13:6",
+      "status": "unambiguous",
+      "resolution": "safe"
+    },
+    {
+      "function": "fb",
+      "name": "fb",
+      "qualifiedName": "fb",
+      "signatureKey": "fn:(ptr:void)->void",
+      "linkage": "external",
+      "sourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+      "location": {
+        "column": 6,
+        "file": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+        "line": 12
+      },
+      "summaryFile": "b.cast-summary.json",
+      "tuSourceFile": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c",
+      "tuConfigurationId": "",
+      "tuCompileCommandHash": "",
+      "functionBehavior": "ReinterpretingWriteFunction",
+      "lookupKey": "external::fb::fn:(ptr:void)->void",
+      "publicLookupKey": "fb::fn:(ptr:void)->void",
+      "locationKey": "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c:12:6",
+      "status": "unambiguous",
+      "resolution": "safe"
+    }
+  ],
+  "lookups": {
+    "byLookupKey": {
+      "external::dup::fn:(ptr:void)->void": [
+        0,
+        1
+      ],
+      "external::fa::fn:(ptr:void)->void": [
+        2
+      ],
+      "external::fb::fn:(ptr:void)->void": [
+        3
+      ]
+    },
+    "byPublicLookupKey": {
+      "dup::fn:(ptr:void)->void": [
+        0,
+        1
+      ],
+      "fa::fn:(ptr:void)->void": [
+        2
+      ],
+      "fb::fn:(ptr:void)->void": [
+        3
+      ]
+    },
+    "byQualifiedName": {
+      "dup": [
+        0,
+        1
+      ],
+      "fa": [
+        2
+      ],
+      "fb": [
+        3
+      ]
+    }
+  },
+  "statusCounts": {
+    "duplicate-external-definition": 2,
+    "unambiguous": 2
+  },
+  "resolutionCounts": {
+    "safe": 2,
+    "unsafe": 2
+  },
+  "duplicateGroups": [
+    {
+      "count": 2,
+      "summaryFiles": [
+        "a.cast-summary.json",
+        "b.cast-summary.json"
+      ],
+      "sourceFiles": [
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c"
+      ],
+      "locations": [
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c:8:6",
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c:7:6"
+      ],
+      "linkages": [
+        "external"
+      ],
+      "entries": [
+        0,
+        1
+      ],
+      "lookupKey": "external::dup::fn:(ptr:void)->void",
+      "kind": "duplicate-external-definition",
+      "resolution": "unsafe",
+      "note": "same external name/signature has multiple distinct definitions; unsafe for C3 import"
+    }
+  ],
+  "ambiguityGroups": [],
+  "problemGroups": [
+    {
+      "count": 2,
+      "summaryFiles": [
+        "a.cast-summary.json",
+        "b.cast-summary.json"
+      ],
+      "sourceFiles": [
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c",
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c"
+      ],
+      "locations": [
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/a.c:8:6",
+        "/mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p06_duplicate_external_definition/b.c:7:6"
+      ],
+      "linkages": [
+        "external"
+      ],
+      "entries": [
+        0,
+        1
+      ],
+      "lookupKey": "external::dup::fn:(ptr:void)->void",
+      "kind": "duplicate-external-definition",
+      "resolution": "unsafe",
+      "note": "same external name/signature has multiple distinct definitions; unsafe for C3 import"
+    }
+  ],
+  "scopedNameGroups": [],
+  "groupCounts": {
+    "duplicates": 1,
+    "ambiguities": 0,
+    "problems": 1,
+    "scopedNameGroups": 0
+  },
+  "issues": []
+}

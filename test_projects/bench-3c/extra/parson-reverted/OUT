@@ -1,0 +1,334 @@
+96 (val = json_parse_file("tests/test_1_1.txt")) != NULL                   - OK
+97 json_value_equals(json_parse_string(json_serialize_to_string(val)), val)- OK
+98 json_value_equals(json_parse_string(json_serialize_to_string_pretty(val)), val)- OK
+101 (val = json_parse_file("tests/test_1_2.txt")) == NULL                   - OK
+104 (val = json_parse_file("tests/test_1_3.txt")) != NULL                   - OK
+105 json_value_equals(json_parse_string(json_serialize_to_string(val)), val)- OK
+106 json_value_equals(json_parse_string(json_serialize_to_string_pretty(val)), val)- OK
+109 (val = json_parse_file_with_comments("tests/test_1_1.txt")) != NULL     - OK
+110 json_value_equals(json_parse_string(json_serialize_to_string(val)), val)- OK
+111 json_value_equals(json_parse_string(json_serialize_to_string_pretty(val)), val)- OK
+114 (val = json_parse_file_with_comments("tests/test_1_2.txt")) == NULL     - OK
+117 (val = json_parse_file_with_comments("tests/test_1_3.txt")) != NULL     - OK
+118 json_value_equals(json_parse_string(json_serialize_to_string(val)), val)- OK
+119 json_value_equals(json_parse_string(json_serialize_to_string_pretty(val)), val)- OK
+128 root_value                                                              - OK
+129 json_value_get_type(root_value) == JSONObject                           - OK
+132 json_object_has_value(root_object, "string")                            - OK
+133 !json_object_has_value(root_object, "_string")                          - OK
+134 json_object_has_value_of_type(root_object, "object", JSONObject)        - OK
+135 !json_object_has_value_of_type(root_object, "string array", JSONObject) - OK
+136 json_object_has_value_of_type(root_object, "string array", JSONArray)   - OK
+137 !json_object_has_value_of_type(root_object, "object", JSONArray)        - OK
+138 json_object_has_value_of_type(root_object, "string", JSONString)        - OK
+139 !json_object_has_value_of_type(root_object, "positive one", JSONString) - OK
+140 json_object_has_value_of_type(root_object, "positive one", JSONNumber)  - OK
+141 !json_object_has_value_of_type(root_object, "string", JSONNumber)       - OK
+142 json_object_has_value_of_type(root_object, "boolean true", JSONBoolean) - OK
+143 !json_object_has_value_of_type(root_object, "positive one", JSONBoolean)- OK
+144 json_object_has_value_of_type(root_object, "null", JSONNull)            - OK
+145 !json_object_has_value_of_type(root_object, "object", JSONNull)         - OK
+147 json_object_dothas_value(root_object, "object.nested array")            - OK
+148 !json_object_dothas_value(root_object, "_object.nested array")          - OK
+149 json_object_dothas_value_of_type(root_object, "object.nested object", JSONObject)- OK
+150 !json_object_dothas_value_of_type(root_object, "object.nested array", JSONObject)- OK
+151 json_object_dothas_value_of_type(root_object, "object.nested array", JSONArray)- OK
+152 !json_object_dothas_value_of_type(root_object, "object.nested object", JSONArray)- OK
+153 json_object_dothas_value_of_type(root_object, "object.nested string", JSONString)- OK
+154 !json_object_dothas_value_of_type(root_object, "object.nested number", JSONString)- OK
+155 json_object_dothas_value_of_type(root_object, "object.nested number", JSONNumber)- OK
+156 !json_object_dothas_value_of_type(root_object, "_object.nested whatever", JSONNumber)- OK
+157 json_object_dothas_value_of_type(root_object, "object.nested true", JSONBoolean)- OK
+158 !json_object_dothas_value_of_type(root_object, "object.nested number", JSONBoolean)- OK
+159 json_object_dothas_value_of_type(root_object, "object.nested null", JSONNull)- OK
+160 !json_object_dothas_value_of_type(root_object, "object.nested object", JSONNull)- OK
+162 STREQ(json_object_get_string(root_object, "string"), "lorem ipsum")     - OK
+163 STREQ(json_object_get_string(root_object, "utf string"), "lorem ipsum") - OK
+164 STREQ(json_object_get_string(root_object, "utf-8 string"), "あいうえお")- OK
+165 STREQ(json_object_get_string(root_object, "surrogate string"), "lorem𝄞ipsum𝍧lorem")- OK
+167 json_object_get_number(root_object, "positive one") == 1.0              - OK
+168 json_object_get_number(root_object, "negative one") == -1.0             - OK
+169 fabs(json_object_get_number(root_object, "hard to parse number") - (-0.000314)) < EPSILON- OK
+170 json_object_get_boolean(root_object, "boolean true") == 1               - OK
+171 json_object_get_boolean(root_object, "boolean false") == 0              - OK
+172 json_value_get_type(json_object_get_value(root_object, "null")) == JSONNull- OK
+176 STREQ(json_array_get_string(array, 0), "lorem")                         - OK
+177 STREQ(json_array_get_string(array, 1), "ipsum")                         - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+191 json_object_get_array(root_object, "non existent array") == NULL        - OK
+192 STREQ(json_object_dotget_string(root_object, "object.nested string"), "str")- OK
+193 json_object_dotget_boolean(root_object, "object.nested true") == 1      - OK
+194 json_object_dotget_boolean(root_object, "object.nested false") == 0     - OK
+195 json_object_dotget_value(root_object, "object.nested null") != NULL     - OK
+196 json_object_dotget_number(root_object, "object.nested number") == 123   - OK
+198 json_object_dotget_value(root_object, "should.be.null") == NULL         - OK
+199 json_object_dotget_value(root_object, "should.be.null.") == NULL        - OK
+200 json_object_dotget_value(root_object, ".") == NULL                      - OK
+201 json_object_dotget_value(root_object, "") == NULL                       - OK
+204 array != NULL                                                           - OK
+205 json_array_get_count(array) > 1                                         - OK
+207 STREQ(json_array_get_string(array, 0), "lorem")                         - OK
+208 STREQ(json_array_get_string(array, 1), "ipsum")                         - OK
+210 json_object_dotget_boolean(root_object, "object.nested true") == 1      - OK
+212 STREQ(json_object_get_string(root_object, "/**/"), "comment")           - OK
+213 STREQ(json_object_get_string(root_object, "//"), "comment")             - OK
+214 STREQ(json_object_get_string(root_object, "url"), "https://www.example.com/search?q=12345")- OK
+215 STREQ(json_object_get_string(root_object, "escaped chars"), "\" \\ /")  - OK
+217 json_object_get_object(root_object, "empty object") != NULL             - OK
+218 json_object_get_array(root_object, "empty array") != NULL               - OK
+220 json_object_get_wrapping_value(root_object) == root_value               - OK
+223 json_array_get_wrapping_value(array) == array_value                     - OK
+224 json_value_get_parent(array_value) == root_value                        - OK
+225 json_value_get_parent(root_value) == NULL                               - OK
+233 json_value_equals(root_value, json_parse_string(json_serialize_to_string(root_value)))- OK
+234 json_value_equals(root_value, json_parse_string(json_serialize_to_string_pretty(root_value)))- OK
+128 root_value                                                              - OK
+129 json_value_get_type(root_value) == JSONObject                           - OK
+132 json_object_has_value(root_object, "string")                            - OK
+133 !json_object_has_value(root_object, "_string")                          - OK
+134 json_object_has_value_of_type(root_object, "object", JSONObject)        - OK
+135 !json_object_has_value_of_type(root_object, "string array", JSONObject) - OK
+136 json_object_has_value_of_type(root_object, "string array", JSONArray)   - OK
+137 !json_object_has_value_of_type(root_object, "object", JSONArray)        - OK
+138 json_object_has_value_of_type(root_object, "string", JSONString)        - OK
+139 !json_object_has_value_of_type(root_object, "positive one", JSONString) - OK
+140 json_object_has_value_of_type(root_object, "positive one", JSONNumber)  - OK
+141 !json_object_has_value_of_type(root_object, "string", JSONNumber)       - OK
+142 json_object_has_value_of_type(root_object, "boolean true", JSONBoolean) - OK
+143 !json_object_has_value_of_type(root_object, "positive one", JSONBoolean)- OK
+144 json_object_has_value_of_type(root_object, "null", JSONNull)            - OK
+145 !json_object_has_value_of_type(root_object, "object", JSONNull)         - OK
+147 json_object_dothas_value(root_object, "object.nested array")            - OK
+148 !json_object_dothas_value(root_object, "_object.nested array")          - OK
+149 json_object_dothas_value_of_type(root_object, "object.nested object", JSONObject)- OK
+150 !json_object_dothas_value_of_type(root_object, "object.nested array", JSONObject)- OK
+151 json_object_dothas_value_of_type(root_object, "object.nested array", JSONArray)- OK
+152 !json_object_dothas_value_of_type(root_object, "object.nested object", JSONArray)- OK
+153 json_object_dothas_value_of_type(root_object, "object.nested string", JSONString)- OK
+154 !json_object_dothas_value_of_type(root_object, "object.nested number", JSONString)- OK
+155 json_object_dothas_value_of_type(root_object, "object.nested number", JSONNumber)- OK
+156 !json_object_dothas_value_of_type(root_object, "_object.nested whatever", JSONNumber)- OK
+157 json_object_dothas_value_of_type(root_object, "object.nested true", JSONBoolean)- OK
+158 !json_object_dothas_value_of_type(root_object, "object.nested number", JSONBoolean)- OK
+159 json_object_dothas_value_of_type(root_object, "object.nested null", JSONNull)- OK
+160 !json_object_dothas_value_of_type(root_object, "object.nested object", JSONNull)- OK
+162 STREQ(json_object_get_string(root_object, "string"), "lorem ipsum")     - OK
+163 STREQ(json_object_get_string(root_object, "utf string"), "lorem ipsum") - OK
+164 STREQ(json_object_get_string(root_object, "utf-8 string"), "あいうえお")- OK
+165 STREQ(json_object_get_string(root_object, "surrogate string"), "lorem𝄞ipsum𝍧lorem")- OK
+167 json_object_get_number(root_object, "positive one") == 1.0              - OK
+168 json_object_get_number(root_object, "negative one") == -1.0             - OK
+169 fabs(json_object_get_number(root_object, "hard to parse number") - (-0.000314)) < EPSILON- OK
+170 json_object_get_boolean(root_object, "boolean true") == 1               - OK
+171 json_object_get_boolean(root_object, "boolean false") == 0              - OK
+172 json_value_get_type(json_object_get_value(root_object, "null")) == JSONNull- OK
+176 STREQ(json_array_get_string(array, 0), "lorem")                         - OK
+177 STREQ(json_array_get_string(array, 1), "ipsum")                         - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+185 json_array_get_number(array, i) == (i * i)                              - OK
+191 json_object_get_array(root_object, "non existent array") == NULL        - OK
+192 STREQ(json_object_dotget_string(root_object, "object.nested string"), "str")- OK
+193 json_object_dotget_boolean(root_object, "object.nested true") == 1      - OK
+194 json_object_dotget_boolean(root_object, "object.nested false") == 0     - OK
+195 json_object_dotget_value(root_object, "object.nested null") != NULL     - OK
+196 json_object_dotget_number(root_object, "object.nested number") == 123   - OK
+198 json_object_dotget_value(root_object, "should.be.null") == NULL         - OK
+199 json_object_dotget_value(root_object, "should.be.null.") == NULL        - OK
+200 json_object_dotget_value(root_object, ".") == NULL                      - OK
+201 json_object_dotget_value(root_object, "") == NULL                       - OK
+204 array != NULL                                                           - OK
+205 json_array_get_count(array) > 1                                         - OK
+207 STREQ(json_array_get_string(array, 0), "lorem")                         - OK
+208 STREQ(json_array_get_string(array, 1), "ipsum")                         - OK
+210 json_object_dotget_boolean(root_object, "object.nested true") == 1      - OK
+212 STREQ(json_object_get_string(root_object, "/**/"), "comment")           - OK
+213 STREQ(json_object_get_string(root_object, "//"), "comment")             - OK
+214 STREQ(json_object_get_string(root_object, "url"), "https://www.example.com/search?q=12345")- OK
+215 STREQ(json_object_get_string(root_object, "escaped chars"), "\" \\ /")  - OK
+217 json_object_get_object(root_object, "empty object") != NULL             - OK
+218 json_object_get_array(root_object, "empty array") != NULL               - OK
+220 json_object_get_wrapping_value(root_object) == root_value               - OK
+223 json_array_get_wrapping_value(array) == array_value                     - OK
+224 json_value_get_parent(array_value) == root_value                        - OK
+225 json_value_get_parent(root_value) == NULL                               - OK
+243 json_value_equals(root_value, json_parse_string(json_serialize_to_string(root_value)))- OK
+244 json_value_equals(root_value, json_parse_string(json_serialize_to_string_pretty(root_value)))- OK
+Testing valid strings:
+250 json_parse_string("{\"lorem\":\"ipsum\"}") != NULL                      - OK
+251 json_parse_string("[\"lorem\"]") != NULL                                - OK
+252 json_parse_string("null") != NULL                                       - OK
+253 json_parse_string("true") != NULL                                       - OK
+254 json_parse_string("false") != NULL                                      - OK
+255 json_parse_string("\"string\"") != NULL                                 - OK
+256 json_parse_string("123") != NULL                                        - OK
+Test UTF-16 parsing:
+259 STREQ(json_string(json_parse_string("\"\\u0024x\"")), "$x")             - OK
+260 STREQ(json_string(json_parse_string("\"\\u00A2x\"")), "¢x")            - OK
+261 STREQ(json_string(json_parse_string("\"\\u20ACx\"")), "€x")           - OK
+262 STREQ(json_string(json_parse_string("\"\\uD801\\uDC37x\"")), "𐐷x")   - OK
+Testing invalid strings:
+266 json_parse_string(NULL) == NULL                                         - OK
+267 json_parse_string("") == NULL                                           - OK
+268 json_parse_string("[\"lorem\",]") == NULL                               - OK
+269 json_parse_string("{\"lorem\":\"ipsum\",}") == NULL                     - OK
+270 json_parse_string("{lorem:ipsum}") == NULL                              - OK
+271 json_parse_string("[,]") == NULL                                        - OK
+272 json_parse_string("[,") == NULL                                         - OK
+273 json_parse_string("[") == NULL                                          - OK
+274 json_parse_string("]") == NULL                                          - OK
+275 json_parse_string("{\"a\":0,\"a\":0}") == NULL                          - OK
+276 json_parse_string("{:,}") == NULL                                       - OK
+277 json_parse_string("{,}") == NULL                                        - OK
+278 json_parse_string("{,") == NULL                                         - OK
+279 json_parse_string("{:") == NULL                                         - OK
+280 json_parse_string("{") == NULL                                          - OK
+281 json_parse_string("}") == NULL                                          - OK
+282 json_parse_string("x") == NULL                                          - OK
+283 json_parse_string("{:\"no name\"}") == NULL                             - OK
+284 json_parse_string("[,\"no first value\"]") == NULL                      - OK
+285 json_parse_string("{\"key\"\"value\"}") == NULL                         - OK
+286 json_parse_string("{\"a\"}") == NULL                                    - OK
+287 json_parse_string("[\"\\u00zz\"]") == NULL                              - OK
+288 json_parse_string("[\"\\u00\"]") == NULL                                - OK
+289 json_parse_string("[\"\\u\"]") == NULL                                  - OK
+290 json_parse_string("[\"\\\"]") == NULL                                   - OK
+291 json_parse_string("[\"\"\"]") == NULL                                   - OK
+292 json_parse_string("[\"\0\"]") == NULL                                   - OK
+293 json_parse_string("[\"\a\"]") == NULL                                   - OK
+294 json_parse_string("[\"\b\"]") == NULL                                   - OK
+295 json_parse_string("[\"\t\"]") == NULL                                   - OK
+296 json_parse_string("[\"\n\"]") == NULL                                   - OK
+297 json_parse_string("[\"\f\"]") == NULL                                   - OK
+298 json_parse_string("[\"\r\"]") == NULL                                   - OK
+299 json_parse_string("[0x2]") == NULL                                      - OK
+300 json_parse_string("[0X2]") == NULL                                      - OK
+301 json_parse_string("[07]") == NULL                                       - OK
+302 json_parse_string("[0070]") == NULL                                     - OK
+303 json_parse_string("[07.0]") == NULL                                     - OK
+304 json_parse_string("[-07]") == NULL                                      - OK
+305 json_parse_string("[-007]") == NULL                                     - OK
+306 json_parse_string("[-07.0]") == NULL                                    - OK
+307 json_parse_string("[\"\\uDF67\\uD834\"]") == NULL                       - OK
+308 json_parse_string("[1.7976931348623157e309]") == NULL                   - OK
+309 json_parse_string("[-1.7976931348623157e309]") == NULL                  - OK
+310 malloc_count == 0                                                       - OK
+Testing tests/test_2.txt:
+318 json_value_equals(a, a)                                                 - OK
+320 a_copy != NULL                                                          - OK
+321 json_value_equals(a, a_copy)                                            - OK
+337 val != NULL                                                             - OK
+340 obj != NULL                                                             - OK
+342 json_object_set_string(obj, "first", "John") == JSONSuccess             - OK
+343 json_object_set_string(obj, "last", "Doe") == JSONSuccess               - OK
+344 json_object_set_number(obj, "age", 25) == JSONSuccess                   - OK
+345 json_object_set_boolean(obj, "registered", 1) == JSONSuccess            - OK
+347 json_object_set_value(obj, "interests", json_value_init_array()) == JSONSuccess- OK
+349 interests_arr != NULL                                                   - OK
+350 json_array_append_string(interests_arr, "Writing") == JSONSuccess       - OK
+351 json_array_append_string(interests_arr, "Mountain Biking") == JSONSuccess- OK
+352 json_array_replace_string(interests_arr, 0, "Reading") == JSONSuccess   - OK
+354 json_object_dotset_string(obj, "favorites.color", "blue") == JSONSuccess- OK
+355 json_object_dotset_string(obj, "favorites.sport", "running") == JSONSuccess- OK
+356 json_object_dotset_string(obj, "favorites.fruit", "apple") == JSONSuccess- OK
+357 json_object_dotremove(obj, "favorites.fruit") == JSONSuccess            - OK
+358 json_object_set_string(obj, "utf string", "lorem ipsum") == JSONSuccess - OK
+359 json_object_set_string(obj, "utf-8 string", "あいうえお") == JSONSuccess- OK
+360 json_object_set_string(obj, "surrogate string", "lorem𝄞ipsum𝍧lorem") == JSONSuccess- OK
+361 json_object_set_string(obj, "windows path", "C:\\Windows\\Path") == JSONSuccess- OK
+362 json_value_equals(val_from_file, val)                                   - OK
+364 json_object_set_string(obj, NULL, "") == JSONFailure                    - OK
+365 json_object_set_string(obj, "last", NULL) == JSONFailure                - OK
+366 json_object_set_string(obj, NULL, NULL) == JSONFailure                  - OK
+367 json_object_set_value(obj, NULL, NULL) == JSONFailure                   - OK
+369 json_object_dotset_string(obj, NULL, "") == JSONFailure                 - OK
+370 json_object_dotset_string(obj, "favorites.color", NULL) == JSONFailure  - OK
+371 json_object_dotset_string(obj, NULL, NULL) == JSONFailure               - OK
+372 json_object_dotset_value(obj, NULL, NULL) == JSONFailure                - OK
+374 json_array_append_string(NULL, "lorem") == JSONFailure                  - OK
+375 json_array_append_value(interests_arr, NULL) == JSONFailure             - OK
+376 json_array_append_value(NULL, NULL) == JSONFailure                      - OK
+378 json_array_remove(NULL, 0) == JSONFailure                               - OK
+379 json_array_replace_value(interests_arr, 0, NULL) == JSONFailure         - OK
+380 json_array_replace_string(NULL, 0, "lorem") == JSONFailure              - OK
+381 json_array_replace_string(interests_arr, 100, "not existing") == JSONFailure- OK
+383 json_array_append_string(json_object_get_array(obj, "interests"), NULL) == JSONFailure- OK
+385 json_array_append_string(interests_arr, "Writing") == JSONSuccess       - OK
+386 json_array_remove(interests_arr, 0) == JSONSuccess                      - OK
+387 json_array_remove(interests_arr, 1) == JSONSuccess                      - OK
+388 json_array_remove(interests_arr, 0) == JSONSuccess                      - OK
+389 json_array_remove(interests_arr, 0) == JSONFailure                      - OK
+392 json_object_set_value(obj, "x", val_parent) == JSONSuccess              - OK
+393 json_object_set_value(obj, "x", val_parent) == JSONFailure              - OK
+396 json_array_append_value(interests_arr, val_parent) == JSONSuccess       - OK
+397 json_array_append_value(interests_arr, val_parent) == JSONFailure       - OK
+400 json_array_replace_value(interests_arr, 0, val_parent) == JSONSuccess   - OK
+401 json_array_replace_value(interests_arr, 0, val_parent) == JSONFailure   - OK
+403 json_object_remove(obj, "interests") == JSONSuccess                     - OK
+406 json_object_set_string(obj, "correct string", "κόσμε") == JSONSuccess- OK
+408 json_object_set_string(obj, "boundary 1", "\xed\x9f\xbf") == JSONSuccess- OK
+409 json_object_set_string(obj, "boundary 2", "\xee\x80\x80") == JSONSuccess- OK
+410 json_object_set_string(obj, "boundary 3", "\xef\xbf\xbd") == JSONSuccess- OK
+411 json_object_set_string(obj, "boundary 4", "\xf4\x8f\xbf\xbf") == JSONSuccess- OK
+413 json_object_set_string(obj, "first continuation byte", "\x80") == JSONFailure- OK
+414 json_object_set_string(obj, "last continuation byte", "\xbf") == JSONFailure- OK
+416 json_object_set_string(obj, "impossible sequence 1", "\xfe") == JSONFailure- OK
+417 json_object_set_string(obj, "impossible sequence 2", "\xff") == JSONFailure- OK
+418 json_object_set_string(obj, "impossible sequence 3", "\xfe\xfe\xff\xff") == JSONFailure- OK
+420 json_object_set_string(obj, "overlong 1", "\xc0\xaf") == JSONFailure    - OK
+421 json_object_set_string(obj, "overlong 2", "\xc1\xbf") == JSONFailure    - OK
+422 json_object_set_string(obj, "overlong 3", "\xe0\x80\xaf") == JSONFailure- OK
+423 json_object_set_string(obj, "overlong 4", "\xe0\x9f\xbf") == JSONFailure- OK
+424 json_object_set_string(obj, "overlong 5", "\xf0\x80\x80\xaf") == JSONFailure- OK
+425 json_object_set_string(obj, "overlong 6", "\xf0\x8f\xbf\xbf") == JSONFailure- OK
+426 json_object_set_string(obj, "overlong 7", "\xf0\x8f\xbf\xbf") == JSONFailure- OK
+428 json_object_set_string(obj, "overlong null 1", "\xc0\x80") == JSONFailure- OK
+429 json_object_set_string(obj, "overlong null 2", "\xe0\x80\x80") == JSONFailure- OK
+430 json_object_set_string(obj, "overlong null 3", "\xf0\x80\x80\x80") == JSONFailure- OK
+431 json_object_set_string(obj, "overlong null 4", "\xf8\x80\x80\x80\x80") == JSONFailure- OK
+432 json_object_set_string(obj, "overlong null 5", "\xfc\x80\x80\x80\x80\x80") == JSONFailure- OK
+434 json_object_set_string(obj, "single surrogate 1", "\xed\xa0\x80") == JSONFailure- OK
+435 json_object_set_string(obj, "single surrogate 2", "\xed\xaf\xbf") == JSONFailure- OK
+436 json_object_set_string(obj, "single surrogate 3", "\xed\xbf\xbf") == JSONFailure- OK
+442 json_value_equals(remove_test_val, json_parse_string("[1, 2, 4, 5]"))   - OK
+444 json_value_equals(remove_test_val, json_parse_string("[2, 4, 5]"))      - OK
+446 json_value_equals(remove_test_val, json_parse_string("[2, 4]"))         - OK
+449 json_object_set_number(obj, "num", 0.0 / zero) == JSONFailure           - OK
+450 json_object_set_number(obj, "num", 1.0 / zero) == JSONFailure           - OK
+459 json_value_equals(a, b)                                                 - OK
+461 !json_value_equals(a, b)                                                - OK
+463 json_value_equals(a, b)                                                 - OK
+465 !json_value_equals(a, b)                                                - OK
+480 json_validate(schema, val_from_file) == JSONSuccess                     - OK
+482 json_validate(schema, val_from_file) == JSONFailure                     - OK
+493 json_serialize_to_file(a, temp_filename) == JSONSuccess                 - OK
+495 json_value_equals(a, b)                                                 - OK
+499 (strlen(buf)+1) == serialization_size                                   - OK
+511 json_serialize_to_file_pretty(a, temp_filename) == JSONSuccess          - OK
+513 json_value_equals(a, b)                                                 - OK
+517 (strlen(serialized)+1) == serialization_size                            - OK
+521 STREQ(file_contents, serialized)                                        - OK
+544 malloc_count == 0                                                       - OK
+554 STREQ(array_with_escaped_slashes, serialized)                           - OK
+558 STREQ(array_with_slashes, serialized)                                   - OK
+562 STREQ(array_with_escaped_slashes, serialized)                           - OK
+Tests failed: 0
+Tests passed: 328

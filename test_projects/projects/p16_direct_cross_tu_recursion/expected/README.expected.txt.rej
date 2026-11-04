@@ -1,0 +1,22 @@
+--- test_projects/projects/p16_direct_cross_tu_recursion/expected/README.expected.txt	2026-06-12 04:34:25.820244505 +0000
++++ test_projects/projects/p16_direct_cross_tu_recursion/expected/README.expected.txt	1970-01-01 00:00:00.000000000 +0000
+@@ -1,19 +0,0 @@
+-C4c expected behavior for p16_direct_cross_tu_recursion
+-=======================================================
+-
+-After building per-TU summaries, merging them with build_summary_index.py,
+-and then re-running cast-history-tool in import mode with --summary-index and
+---enable-summary-import, the text report for a.c and b.c should include:
+-
+-Cross-TU summary SCC awareness:
+-  f : SCC #<n>    [recursive]    [size=2]
+-      members: f::fn:(ptr:void)->void, g::fn:(ptr:void)->void
+-
+-or, when analyzing b.c:
+-
+-Cross-TU summary SCC awareness:
+-  g : SCC #<n>    [recursive]    [size=2]
+-      members: f::fn:(ptr:void)->void, g::fn:(ptr:void)->void
+-
+-The exact SCC id may vary, but both functions should map to the same concrete
+-recursive SCC read from project-summary-index.json.

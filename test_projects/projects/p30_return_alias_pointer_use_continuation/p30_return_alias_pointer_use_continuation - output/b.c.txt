@@ -1,0 +1,129 @@
+Command:
+./cast-history-tool --enable-summary-import --summary-index /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test-output/multitu/p30_return_alias_pointer_use_continuation/import-round-01-index-input.json --summary-dir /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test-output/multitu/p30_return_alias_pointer_use_continuation/.tmp-intermediates/import-round-01-summaries -p /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p30_return_alias_pointer_use_continuation /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p30_return_alias_pointer_use_continuation/b.c 
+
+Output:
+x : void * => int *    [scope=idv]    [implicit-cast]    @ b.c:4:12
+p : void * => int * => void *    [scope=idv]    [implicit-cast]    @ b.c:5:10
+
+Function summaries:
+  idv($0 : void * => int *) -> void * [$0 => int * => void *]    [ret aliases $0]
+
+Direct cast histories (entity-oriented):
+  idv::x : void * => int *
+
+Function pointer flows:
+  <none>
+
+Cross-TU summary SCC awareness:
+  <none>
+
+Project-solved call-site provenance:
+  <none>
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Cross-TU SCC parameter-summary fixpoint:
+  iterations: 0 / 16
+  status: converged
+  recursive SCC edges: 0
+  changed edges: 0
+  note: no-named-call-edges
+  domains: parameter-cast-histories
+
+Cross-TU direct-call summary lookup:
+  <none>
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  idv::x : void * => int *
+
+Observed later interpretations (raw evidence):
+  idv::x
+    - [always] int *    {init-projection, role=Intermediate}
+    - [always] int *    {init-projection-origin, role=Intermediate}
+
+Derived observation summaries:
+  idv::x
+    branch-cast: <none>
+    grouped: {int * @ always}
+
+Pointer use summaries:
+  idv::x
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to int *}    @ b.c:4:12
+    - [always] attach=int *, as=int * : returned    {return-alias-parent}    @ b.c:5:3
+  idv::p
+    - [always] attach=<id>, as=int * : returned    {return}    @ b.c:5:3
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  idv::x
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecialized
+    wildLike: yes
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {int *, void *}
+      pointerTypes: 2 {int *, void *}
+      nonVoidPointerTypes: 1 {int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  idv::x
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {int *, void *}
+    pointerTypes: 2 {int *, void *}
+    nonVoidPointerTypes: 1 {int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  idv.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecialized
+    wildLike: yes
+    summary: int *
+    pointerTypes: int *, void *
+    nonVoidPointerTypes: int *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+
+Function behavior classifications:
+  idv
+    class: ConcreteSpecializerFunction
+    evidenceFlags: callbackProvider=no, callbackDependent=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecialized, summary=int *
+
+Unsupported / approximated language features:
+  <none>

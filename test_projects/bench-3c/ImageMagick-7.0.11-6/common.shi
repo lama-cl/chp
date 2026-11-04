@@ -1,0 +1,27 @@
+# -*- shell-script -*-
+# Copyright 1999-2021 ImageMagick Studio LLC
+# Definitions of optional features and configuration values for this build.
+# Intended for use by test scripts.
+MAGICK_FEATURES='DPC HDRI Cipher'
+top_srcdir='/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6'
+top_builddir='/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6'
+
+set -a
+COMPARE="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick compare"
+COMPOSITE="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick composite"
+CONJURE="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick conjure"
+CONVERT="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick convert"
+DISPLAY="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick display"
+IDENTIFY="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick identify"
+MAGICK="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick"
+MONTAGE="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities/magick montage"
+VALIDATE="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/tests/validate"
+DRAWTEST="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/tests/drawtest"
+WANDTEST="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/tests/wandtest"
+LD_LIBRARY_PATH="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/MagickCore/.libs:/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/MagickWand/.libs:${LD_LIBRARY_PATH}"
+MAGICK_CODER_MODULE_PATH="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/coders"
+MAGICK_CONFIGURE_PATH="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/config:/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/config"
+MAGICK_FILTER_MODULE_PATH="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/filters"
+MAGICK_FONT="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/PerlMagick/demo/Generic.ttf"
+PATH="/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/utilities:/home/C00536225/dev/tcc/alternative-imp2/test_projects/3c/ImageMagick-7.0.11-6/tests:${PATH}"
+set +a

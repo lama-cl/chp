@@ -1,0 +1,3 @@
+[submodule "c/php-rdkafka"]
+	path = c/php-rdkafka
+	url = https://github.com/arnaud-lb/php-rdkafka

@@ -1,0 +1,194 @@
+Command:
+./cast-history-tool --enable-summary-import --summary-index /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test-output/multitu/p30_return_alias_pointer_use_continuation/import-round-01-index-input.json --summary-dir /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test-output/multitu/p30_return_alias_pointer_use_continuation/.tmp-intermediates/import-round-01-summaries -p /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p30_return_alias_pointer_use_continuation /mnt/d/r/IR/ch-imp-mod/v17-multiple-TUs/test_projects/projects/p30_return_alias_pointer_use_continuation/a.c 
+
+Output:
+y : void * => idv⌜int *⌝idv    [scope=use]    [imported-call-arg]    @ a.c:7:13
+y : void *    [scope=use]    [call-arg]    @ a.c:7:13
+z : idv⌜$0 => int * => void *⌝idv => void * => int *    [scope=use]    [implicit-cast]    @ a.c:8:12
+&i : int * => void * => use⌜void * => ⟨| idv⌜int *⌝idv, idv⌜int * => void *⌝idv => int *, int * => void * => int * |⟩⌝use    [scope=main]    [call-arg]    @ a.c:14:3
+&i : int * => void *    [scope=main]    [implicit-cast]    @ a.c:14:7
+
+Function summaries:
+  use($0 : void * => int * => void * => int *)
+  main() -> int [int]
+
+Recursive named-call fixpoint:
+  iterations: 1 / 16
+  status: converged
+
+Direct cast histories (entity-oriented):
+  use::y : void * => int * => void * => int *
+  use::z : void * => int *
+
+Function pointer flows:
+  <none>
+
+Cross-TU summary SCC awareness:
+  <none>
+
+Project-solved call-site provenance:
+  use::fn:(ptr:void)->void.$0 -> idv::fn:(ptr:void)->ptr:void.$0 : idv⌜void * => int *⌝idv    [display-only]
+      wrapper: idv⌜void * => int *⌝idv
+      parts: formalEntry=void * calleeCore=int *
+      @ a.c:7:13
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Cross-TU SCC parameter-summary fixpoint:
+  iterations: 0 / 16
+  status: converged
+  recursive SCC edges: 0
+  changed edges: 0
+  note: no-cross-tu-recursive-import-edges
+  domains: parameter-cast-histories
+
+Cross-TU direct-call summary lookup:
+  use -> idv : fn:(ptr:void)->ptr:void    [found]    [summary=.tmp-intermediates/c1-summaries/b.c.cast-summary.json]    [behavior=ConcreteSpecializerFunction]    [composed]    [paramImport=composed]    [pointerUseImport=composed]    [importedUses=2]    [returnImport=call-result-origin-composed]    @ a.c:7:13
+      C3a imported callee parameter summaries and pointer-use summaries onto actual arguments
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  use::y : void * => int * => void * => int *
+  use::z : idv⌜$0 => int * => void *⌝idv => void * => int *
+
+Observed later interpretations (raw evidence):
+  use::y
+    - [always] idv⌜int *⌝idv    {imported-call-through-idv, role=Semantic}
+    - [always] idv⌜int *⌝idv    {imported-call-through-idv-origin, role=Semantic}
+    - [always] attach=idv⌜int * => void *⌝idv, obs=int *    {init-projection-origin, role=Intermediate}
+    - [always] int * => void * => int *    {return-alias-continuation-origin-core, role=Semantic}
+  use::z
+    - [always] int *    {init-projection, role=Intermediate}
+
+Derived observation summaries:
+  use::y
+    branch-cast: <none>
+    grouped: {idv⌜int *⌝idv @ always; int * @ always}
+  use::z
+    branch-cast: <none>
+    grouped: {int * @ always}
+
+Pointer use summaries:
+  use::y
+    - [always] attach=idv⌜int * => void *⌝idv, as=void * : init-rhs    {init-rhs to void *-origin}    @ a.c:7:13
+    - [always] attach=<id>, as=void * : call-arg    {arg0 to idv}    @ a.c:7:13
+    - [always] attach=<id>, as=void * : init-rhs    {imported via idv.$0; init-rhs to int *}    @ a.c:7:13
+    - [always] attach=int *, as=int * : returned    {imported via idv.$0; return-alias-parent}    @ a.c:7:13
+    - [always] attach=idv⌜int * => void *⌝idv, as=void * : init-rhs    {init-rhs to int *-origin}    @ a.c:8:12
+    - [always] attach=idv⌜int * => void *⌝idv => int *, as=int *, access=int : deref-readwrite    {assignment-lhs-*-origin}    @ a.c:9:6
+  use::z
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to int *}    @ a.c:8:12
+    - [always] attach=int *, as=int *, access=int : deref-readwrite    {assignment-lhs-*-alias-parent}    @ a.c:9:6
+  use::p
+    - [always] attach=<id>, as=int *, access=int : deref-readwrite    {assignment-lhs-*}    @ a.c:9:6
+
+Return-alias pointer-use continuations:
+  use::y : idv⌜int * => void *⌝idv    [semantic-core=int * => void *]    as=void * : init-rhs    {init-rhs to void *-origin}    @ a.c:7:13
+  use::y : idv⌜int * => void *⌝idv    [semantic-core=int * => void *]    as=void * : init-rhs    {init-rhs to int *-origin}    @ a.c:8:12
+  use::y : idv⌜int * => void *⌝idv => int *    [semantic-core=int * => void * => int *]    as=int *, access=int : deref-readwrite    {assignment-lhs-*-origin}    @ a.c:9:6
+      note: Structured C4Q1 explanation records; the propagation payload remains in Pointer use summaries.
+
+Pointer behavior metrics:
+  use::y
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    wildLike: yes
+    history:
+      seqDepth: 4
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=2, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {int *, void *}
+      pointerTypes: 2 {int *, void *}
+      nonVoidPointerTypes: 1 {int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: int *
+      writeDerefTypes: int *
+  use::z
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    wildLike: yes
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {int *, void *}
+      pointerTypes: 2 {int *, void *}
+      nonVoidPointerTypes: 1 {int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: int *
+      writeDerefTypes: int *
+
+Storage-location history metrics:
+  use::y
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 4
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=2, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {int *, void *}
+    pointerTypes: 2 {int *, void *}
+    nonVoidPointerTypes: 1 {int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  use::z
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 5
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {idv⌜$0, int *, void *, void *⌝idv}
+    pointerTypes: 2 {int *, void *, void *⌝idv}
+    nonVoidPointerTypes: 1 {int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  use.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    wildLike: yes
+    summary: int * => void * => int *
+    pointerTypes: int *, void *
+    nonVoidPointerTypes: int *
+    derefTypes: int *
+    writeDerefTypes: int *
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+
+Function behavior classifications:
+  use
+    class: ReinterpretingWriteFunction
+    evidenceFlags: callbackProvider=no, callbackDependent=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=yes, byteWrite=no, concreteWrite=yes, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecializedWrite, summary=int * => void * => int *
+
+Unsupported / approximated language features:
+  <none>

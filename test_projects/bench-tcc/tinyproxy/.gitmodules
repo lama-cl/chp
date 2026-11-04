@@ -1,0 +1,3 @@
+[submodule "c/tinyproxy"]
+	path = c/tinyproxy
+	url = https://github.com/tinyproxy/tinyproxy

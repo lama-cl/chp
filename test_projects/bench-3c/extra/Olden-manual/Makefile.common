@@ -1,0 +1,54 @@
+# assumes that the including makefile will define
+# SOURCES
+# PROG
+# HDRS
+# OUTPUT
+# CFLAGS
+# LFLAGS
+# C3
+
+C3_SOURCES = $(addprefix conv/,$(SOURCES))
+C3_HDRS = $(addprefix conv/,$(HDRS))
+OBJS = $(SOURCES:.c=.o)
+C3_OBJS = $(C3_SOURCES:.c=.o)
+C3_PROG = $(PROG)_c3
+
+.PRECIOUS: conv/%.c
+
+$(PROG): $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+
+$(C3_PROG): $(C3_OBJS)
+	$(CC) -o $@ $(C3_OBJS) $(LDFLAGS)
+
+.c.o:
+	$(CC) -c $*.c $(CFLAGS) -o $@
+
+$(C3_OBJS): $(C3_HDRS)
+
+conv:
+	mkdir $@
+
+conv/%.c: %.c | conv
+	$(C3) -f $^ > $@
+
+conv/%.h: %.h | conv
+	$(C3) -f $^ > $@
+
+clean:
+	$(RM) $(OBJS) $(C3_OBJS) $(C3_SOURCES) $(C3_PROG) $(C3_HDRS) $(PROG) 
+
+# Is it considered useful that the ACTUAL_OUTPUT file is left behind when a test
+# fails? If not, we could set `SHELL = bash` and then use:
+#
+# set -o pipefail; ./$(PROG) ... 2>&1 | diff -w $(OUTPUT) -
+#
+# ~ Matt 2021-04-29
+
+test:
+	./$(C3_PROG) $(RUN_OPTIONS) > ACTUAL_OUTPUT 2>&1
+	diff -w $(OUTPUT) ACTUAL_OUTPUT
+	$(RM) ACTUAL_OUTPUT
+	./$(PROG) $(RUN_OPTIONS) > ACTUAL_OUTPUT 2>&1
+	diff -w $(OUTPUT) ACTUAL_OUTPUT
+	$(RM) ACTUAL_OUTPUT

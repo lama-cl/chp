@@ -1,0 +1,9 @@
+#define PROLOG_DIALECT             "gprolog"
+#define PROLOG_NAME                "GNU Prolog"
+#define PROLOG_VERSION             "1.5.0"
+#define PROLOG_DATE                "Jun 19 2026"
+#define PROLOG_COPYRIGHT           "Copyright (C) 1999-2026 Daniel Diaz"
+
+#define WIN_TMP_DIR                ""
+#define WIN_CC_VER                 ""
+

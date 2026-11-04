@@ -1,0 +1,30 @@
+[submodule "twemproxy"]
+	path = twemproxy
+	url = https://github.com/twitter/twemproxy
+[submodule "pocketlang"]
+	path = pocketlang
+	url = https://github.com/ThakeeNathees/pocketlang
+[submodule "shairport"]
+	path = shairport
+	url = https://github.com/abrasive/shairport
+[submodule "php-rdkafka"]
+	path = php-rdkafka
+	url = https://github.com/arnaud-lb/php-rdkafka
+[submodule "webdis"]
+	path = webdis
+	url = https://github.com/nicolasff/webdis
+[submodule "tinyproxy"]
+	path = tinyproxy
+	url = https://github.com/tinyproxy/tinyproxy
+[submodule "raygui"]
+	path = raygui
+	url = https://github.com/raysan5/raygui
+[submodule "compton"]
+	path = compton
+	url = https://github.com/chjj/compton
+[submodule "minilisp"]
+	path = minilisp
+	url = https://github.com/rui314/minilisp
+[submodule "hiredis"]
+	path = hiredis
+	url = https://github.com/redis/hiredis
