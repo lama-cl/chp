@@ -19,6 +19,20 @@ default, so the breadth of the profile depends on how the run was configured.
 | `*.cast-runtime.json` | `cast-history-tu-runtime-timing` | `RUNTIME_METRICS=1` | analysis cost by phase, slowest translation unit |
 | `project-summary-index.json` | `cast-history-project-summary-index` | always | call-graph size, SCC/fixpoint convergence, call-edge resolution rate |
 
+### Directories the profile must skip
+
+A runner publishes two kinds of directory that look like results but are not:
+
+| Directory | Contents | Why it is excluded |
+|---|---|---|
+| `partial-summaries/`, `partial-reports/`, `partial-paper-facts/`, `partial-runtime-metrics/`, `partial-prevalence-metrics/` | sidecars of translation units that **failed during C1** | the runner states these are never fed to the index; they describe an aborted analysis, so counting them mixes incomplete data into every distribution |
+| `.work/` (kept by `--keep-intermediates`) | a full `c1-`, `imp01-`, `local-overlay-` copy of every sidecar | counting them multiplies every figure by the number of passes |
+
+`partial-status/<stem>.cast-analysis-status.json` is read, but only to report
+*which* translation units failed and why. On a 2-TU project with one failing
+TU, including the `partial-*` sidecars inflated the declaration count from 6
+to 7 and the cast count from 9 to 12.
+
 A profile built from link summaries alone is nearly empty: the compact link
 summary deliberately omits rendered histories, metrics and classification. To
 get a complete overview the run needs at minimum:
@@ -88,25 +102,37 @@ These are the reasons a project-level figure cannot be a sum of per-TU counters.
    `id`, so project-level counts must deduplicate on it. The same applies to
    classification rows (deduplicate on subject plus definition location) and to
    paper-facts subjects (deduplicate on `subjectId`).
-2. **Per-round scratch directories duplicate everything again.** Import rounds
+2. **The record `id` alone is not a safe dedup key.** It is
+   `<kind>:<file>:<line>:<col>:<discriminator>`, where `<file>` is the path
+   exactly as clang reported it. That path is neither normalized
+   (`/p/src/../src/a.c` and `/p/src/a.c` are two keys for one declaration) nor
+   unique across projects: two projects analyzed under one output root can
+   carry the same relative path, so their rows collide and their statistics
+   are conflated. Key on **the project plus the resolved, normalized source
+   location**, keeping the discriminator the analyzer encoded —
+   `declarationKind` for a declaration, `castKind` plus implicit/explicit for
+   a cast. Dropping that discriminator silently merges an explicit
+   `CStyleCastExpr` with the `ImplicitCastExpr` at the same position; on zlib
+   that lost 24 of 11540 casts.
+3. **Per-round scratch directories duplicate everything again.** Import rounds
    leave copies under `.tmp-intermediates/`, `c1-*` and `import-round-*`. A
    recursive glob that does not exclude them multiplies counts by the round
    count.
-3. **The same source location can yield conflicting rows across TUs.** A
+4. **The same source location can yield conflicting rows across TUs.** A
    declaration or cast inside a macro or a conditionally-compiled header may be
    recorded with different types in different translation units while keeping
    the same `file:line:column` id. zlib produces 25 such conflicting cast ids.
    Deduplication must therefore pick a representative deterministically (this
    profiler keeps the first in sorted-path order, matching
    `aggregate_cast_prevalence_metrics.py`, which warns about them).
-4. **`paperWildness` and `stableClassification` are different vocabularies.**
+5. **`paperWildness` and `stableClassification` are different vocabularies.**
    The paper-facts sidecar carries the pre-refinement family
    (`ConcreteSpecialization`, risk `High`); the report carries the refined one
    (`DataFieldMediatedConcreteSpecialization`, risk `DangerousReinterpretation`).
    They are not interchangeable, and mixing them silently double-counts.
-5. **System-header subjects are in the data.** Filter on the project root
+6. **System-header subjects are in the data.** Filter on the project root
    before reporting project characteristics.
-6. **Report sidecars are large.** zlib's are 228 MB against 12 MB of
+7. **Report sidecars are large.** zlib's are 228 MB against 12 MB of
    paper-facts. Identify artifacts by reading the first few KB rather than
    parsing, and allow the classification pass to be skipped.
 
@@ -118,20 +144,56 @@ Found while profiling zlib 1.2.11 with the current `cast-history-dev` build.
 
 `PrevalenceMetrics::projectLocation` keeps a row only when
 `sourceManager.getFilename()` starts with `--prevalence-metrics-project-root`.
-Clang reports the filename exactly as it appears in the compilation database,
-so a relative entry such as
+Clang reports the filename exactly as the compilation database spells it, so a
+Bear-style entry whose `arguments` end in a relative path
 
 ```json
-{"directory": "/src/zlib", "arguments": ["clang", "-c", "adler32.c"], "file": "/src/zlib/adler32.c"}
+{"directory": "/p", "arguments": ["clang", "-c", "-I.", "-o", "/dev/null", "good.c"],
+ "file": "/p/good.c"}
 ```
 
-yields the filename `adler32.c`, which never matches the absolute project root.
-Every declaration and cast is dropped and the sidecar is written with all
-counters at zero and no diagnostic. The same compilation database produces a
-complete inventory once the source argument is absolute. Bear-generated
-databases frequently use relative arguments, so this is likely to hit real
-pilot runs. The profiler reports it as a critical finding rather than printing
-a page of zeros.
+yields the filename `good.c`, which never matches the absolute project root.
+The runner's own safeguards do not help: it passes the **absolute** source path
+on the command line and an absolute `--prevalence-metrics-project-root`, but
+the filename clang reports comes from the database entry, not from the path the
+tool was invoked with.
+
+**This cannot be repaired after the fact.** The records are never constructed,
+so the sidecar is written with empty arrays:
+
+```
+project.root        : /p
+pointerDeclarations : []
+casts               : []
+tuCounts nonzero    : {} (ALL ZERO)
+```
+
+There is no path in the artifact to normalize and no row to re-key — the data
+does not exist. Path normalization and project-scoped keys in an aggregator are
+worth having for other reasons (trap 2 above), but they cannot recover this.
+
+The run looks clean from the outside: the runner reports `prevalence sidecars: 1`
+(it counts files, not content), every project is `OK`, and it exits 0. The
+profiler reports it as a critical finding and exits non-zero instead.
+
+The same project-root prefix test scopes the paper-facts declared-pointer
+inventory, so `--paper-facts-project-root` is emptied by the same cause:
+`declaredPointerInventory` is `[]` and `coverage.declaredPointerInventoryRows`
+is 0 while `coverage.subjectRows` is unaffected.
+
+Three ways to fix it, in order of preference:
+
+1. **In the analyzer.** Make the reported filename absolute before the prefix
+   test (resolve a relative path against the compile command's working
+   directory) and lexically normalize both it and `projectRoot`. One change,
+   every consumer fixed.
+2. **In the runner.** `discover_sources` already resolves every source to an
+   absolute path. It could write a normalized copy of `compile_commands.json`
+   into `$OUT/` with absolute source arguments and point `-p` at that. No C++
+   change, and it also fixes paper-facts.
+3. **Detect and refuse.** Treat an all-zero prevalence sidecar beside a
+   non-empty translation unit as an error rather than a result. This is what
+   the profiler does today, but it only catches the problem after a full run.
 
 ### `tu.sourceFile` in the prevalence sidecar is a dangling reference
 
@@ -150,22 +212,76 @@ consumer that decodes it strictly — `json.loads(path.read_text(encoding="utf-8
 the pattern `scripts/extract_stable_classifications.py` uses — raises
 `UnicodeDecodeError` on it. All 15 of zlib's prevalence sidecars are affected;
 the report, paper-facts, link-summary and runtime sidecars are clean.
-`scripts/aggregate_cast_prevalence_metrics.py` already carries
-`errors='replace'` at its read site, which looks like an undocumented
-workaround for exactly this. The fix is to store an owning string
+Three separate repo scripts already carry `errors="replace"` at their read
+sites — `aggregate_cast_prevalence_metrics.py`,
+`aggregate_void_pointer_reconciliation.py` and `validate_json_summaries.py`
+(which globs every `*.json`, so it reaches the prevalence sidecars). Nothing
+crashes today, but nothing is fixed either: the corruption is read in and
+passed on, and `tu.sourceFile` cannot be used to attribute a sidecar to its
+translation unit.
+
+The corruption has a clear signature — the first 16 bytes of the freed heap
+buffer are reused and the tail survives:
+
+```
+'\x9dB\xd9=\xc5U\x00\x00\xc7\xa9\x0b\xc9\xd3&\x12\xe9ome-user-chp/.../zlib/adler32.c'
+```
+
+`tests/prevalence_sidecar_tu_source_file_contract.py` pins this down: it
+performs the strict read a naive consumer would, then checks that
+`tu.sourceFile` actually names a source file. All 15 of zlib's sidecars fail
+it.
+
+```bash
+python3 tests/prevalence_sidecar_tu_source_file_contract.py <output-root>/zlib
+``` The fix is to store an owning string
 (`std::string`, so `json::Value` copies it) at that call site instead of
 binding the temporary to a non-owning `StringRef`.
 
 ### Classification vocabulary has drifted from the schema
 
-The analyzer emits families (`ByteMediatedReinterpretation`,
-`MultiTypeAccess`, `MultiTargetReinterpretation`,
-`GuardedDataFieldMediatedSpecialization`, `DangerousProvenance`, `Unknown`) and
-risk tiers (`DangerousReinterpretation`, `DangerousProvenance`) that are not in
-`x-c6f-known-values` in `schemas/stable-classification.schema.json`. Those
-labels account for 121 of zlib's 273 classified subjects (44%), so
-`validate_classification_labels.py --strict-vocabulary` cannot currently be
-used as a gate until the schema is refreshed.
+`stableClassification.family` is `SemanticMediationSummary::semanticFamily` and
+`stableClassification.risk` is `historyRiskClassName(HistoryRiskClass)`. Both
+produce labels that `schemas/stable-classification.schema.json` does not list
+in `x-c6f-known-values`, so `validate_classification_labels.py
+--strict-vocabulary` cannot be used as a gate.
+
+**Missing from the schema's `family` list (8).** All eight are reachable:
+the first five are paper families that pass through the mediation layer
+unchanged, the three `Guarded*` ones come from the `BranchTaggedUnionLike`
+branch.
+
+| label | origin |
+|---|---|
+| `ByteMediatedReinterpretation` | paper family, passes through unchanged |
+| `MultiTargetReinterpretation` | paper family, passes through unchanged |
+| `MultiTypeAccess` | paper family, passes through unchanged |
+| `DangerousProvenance` | paper family, passes through unchanged |
+| `Unknown` | paper family default |
+| `GuardedDataFieldMediatedSpecialization` | `BranchTaggedUnionLike` + data field |
+| `GuardedNestedDataFieldMediatedSpecialization` | `BranchTaggedUnionLike` + nested data field |
+| `GuardedDataFieldCallbackMediatedSpecialization` | `BranchTaggedUnionLike` + data field + callback |
+
+On zlib these account for 121 of 273 classified subjects (44%).
+
+**Missing from the schema's `risk` list (8).** `HistoryRiskClass` has twelve
+enumerators; the schema lists four of them plus `High`.
+
+`ByteViewRead`, `ByteViewWrite`, `BranchPolymorphicWrite`,
+`SuspiciousReinterpretation`, `DangerousReinterpretation`, `DangerousProvenance`,
+`HigherOrderUnresolved`, `ExternalSink`
+
+**Listed but never emitted.** Worth deciding on rather than leaving:
+family `ConcreteSpecialization`, `MixedMediatedConcreteSpecialization` and
+`UnknownMediation` (the first is always rewritten by the mediation layer);
+risk `High` — it is produced by `paperSemanticRiskTier` for
+`paperWildness.semanticRiskTier`, but never by `historyRiskClassName`, so it
+cannot appear in `stableClassification.risk`.
+
+**`validate_classification_labels.py` is less stale than the schema.** Its
+`ALLOWED_SEMANTIC_FAMILIES` is missing only `DangerousProvenance` and
+`MultiTypeAccess`; its `ALLOWED_RISK_TIERS` is missing the same eight risk
+labels as the schema.
 
 ## 5. Using the script
 
@@ -188,4 +304,10 @@ printed unless `--quiet` is passed.
 Useful flags: `--no-classification` skips the large report sidecars,
 `--max-file-mb` caps sidecar size, `--mode project|corpus` overrides the
 auto-detection, `--project-root` names the source tree when the prevalence
-sidecars do not record it, and `--strict` makes a serious finding fail the run.
+sidecars do not record it, `--include-partial` counts the sidecars of
+translation units that failed in C1, `--include-intermediates` reads `.work/`,
+and `--strict` makes a serious finding fail the run.
+
+A root holding exactly one project is reported as that project, so pointing at
+either `<output>/` or `<output>/<project>/` of a single-project run gives the
+same report; pass `--mode corpus` to force the comparison table.

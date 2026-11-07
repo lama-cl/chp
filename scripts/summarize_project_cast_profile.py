@@ -57,11 +57,21 @@ CLASSIFICATION_SCHEMAS = {SCHEMA_REPORT, SCHEMA_LEGACY_SUMMARY}
 
 # Directories that hold per-round scratch copies rather than published results.
 # Counting them would multiply every figure by the number of import rounds.
+# `.work` is the runner's per-phase staging tree, kept by --keep-intermediates;
+# it holds a full c1-/imp01-/local-overlay- copy of every sidecar.
 INTERMEDIATE_DIR_RE = re.compile(
-    r"^(\.tmp-intermediates|rounds|c1-[a-z-]+|import-round-\d+[a-z-]*|"
-    r"local-overlay[a-z0-9-]*)$"
+    r"^(\.work|\.tmp-intermediates|rounds|"
+    r"(c1|imp\d+|local-overlay)-[a-z-]+|c1-[a-z-]+|"
+    r"import-round-\d+[a-z-]*|local-overlay[a-z0-9-]*)$"
 )
 INTERMEDIATE_FILE_RE = re.compile(r"^import-round-\d+-index-input\.json$")
+
+# Sidecars of translation units that FAILED during C1. The runner publishes them
+# under partial-* so the evidence is not lost, and states that they are never
+# fed to the index. They describe an aborted analysis, so counting them in the
+# project profile mixes incomplete data into every distribution.
+PARTIAL_DIR_RE = re.compile(r"^partial-[a-z-]+$")
+PARTIAL_STATUS_SUFFIX = ".cast-analysis-status.json"
 
 # Vocabulary frozen in schemas/stable-classification.schema.json. Labels outside
 # it are not errors, but a project-level report should say the vocabulary drifted.
@@ -120,10 +130,14 @@ def is_corrupt_text(value: Any) -> bool:
     return "�" in value or any(ord(c) < 9 for c in value)
 
 
-def walk_json(root: Path, *, include_intermediates: bool) -> Iterable[Path]:
+def walk_json(
+    root: Path, *, include_intermediates: bool, include_partial: bool = False
+) -> Iterable[Path]:
     for dirpath, dirnames, filenames in os.walk(root):
         if not include_intermediates:
             dirnames[:] = [d for d in dirnames if not INTERMEDIATE_DIR_RE.match(d)]
+        if not include_partial:
+            dirnames[:] = [d for d in dirnames if not PARTIAL_DIR_RE.match(d)]
         dirnames.sort()
         for name in sorted(filenames):
             if not name.endswith(".json"):
@@ -137,6 +151,8 @@ class Artifacts:
     """Cast-history JSON files of one project, grouped by schema."""
 
     def __init__(self) -> None:
+        self.partial_status: list[Path] = []
+        self.partial_sidecars: list[Path] = []
         self.prevalence: list[Path] = []
         self.reports: list[Path] = []
         self.paper_facts: list[Path] = []
@@ -187,6 +203,8 @@ def peek_schema(path: Path) -> str | None:
     Files written with sorted keys put ``schemaName`` in the middle of the
     document, so fall back to the head, the tail, and finally a bounded scan.
     """
+    if path.name.endswith(PARTIAL_STATUS_SUFFIX):
+        return None
     for suffix, schema in SUFFIX_SCHEMA.items():
         if path.name.endswith(suffix):
             return schema
@@ -212,9 +230,34 @@ def peek_schema(path: Path) -> str | None:
     return None
 
 
-def collect_artifacts(root: Path, *, include_intermediates: bool) -> Artifacts:
+def collect_partial(root: Path) -> tuple[list[Path], list[Path]]:
+    """Find the sidecars and status manifests of translation units that failed in C1."""
+    status: list[Path] = []
+    sidecars: list[Path] = []
+    for child in sorted(root.iterdir()) if root.is_dir() else []:
+        if not child.is_dir() or not PARTIAL_DIR_RE.match(child.name):
+            continue
+        for item in sorted(child.iterdir()):
+            if not item.is_file() or not item.name.endswith(".json"):
+                continue
+            if item.name.endswith(PARTIAL_STATUS_SUFFIX):
+                status.append(item)
+            else:
+                sidecars.append(item)
+    return status, sidecars
+
+
+def collect_artifacts(
+    root: Path, *, include_intermediates: bool, include_partial: bool = False
+) -> Artifacts:
     found = Artifacts()
-    for path in walk_json(root, include_intermediates=include_intermediates):
+    if not include_partial:
+        found.partial_status, found.partial_sidecars = collect_partial(root)
+    for path in walk_json(
+        root,
+        include_intermediates=include_intermediates,
+        include_partial=include_partial,
+    ):
         schema = peek_schema(path)
         if schema == SCHEMA_PREVALENCE:
             found.prevalence.append(path)
@@ -303,7 +346,47 @@ def classify_root(path: Path) -> str:
 
 
 def normalize_path(value: str) -> str:
-    return value.replace("\\", "/").rstrip("/")
+    """Lexically normalize a source path from a sidecar.
+
+    Done purely on the string: the analyzed tree is often not present on the
+    machine that reads the artifacts, so the filesystem cannot be consulted.
+    Separators are unified, duplicate slashes collapsed, and `.` / `..`
+    segments resolved, so that `/p/src/../src/a.c`, `/p/./src/a.c` and
+    `/p/src/a.c` become one key instead of three.
+    """
+    if not value:
+        return ""
+    value = value.replace("\\", "/")
+    absolute = value.startswith("/")
+    out: list[str] = []
+    for part in value.split("/"):
+        if not part or part == ".":
+            continue
+        if part == "..":
+            if out and out[-1] != "..":
+                out.pop()
+            elif not absolute:
+                out.append("..")
+            continue
+        out.append(part)
+    joined = "/".join(out)
+    return ("/" + joined) if absolute else joined
+
+
+def resolve_path(value: str, base: str | None) -> str:
+    """Normalize a source path, anchoring a relative one to its project root.
+
+    Clang reports a filename exactly as the compilation database spells it, so
+    a database with relative source arguments yields relative paths here. Such
+    a path is meaningless on its own but is well defined relative to the
+    project root the sidecar records, so anchor it there before normalizing.
+    """
+    if not value:
+        return ""
+    value = value.replace("\\", "/")
+    if not value.startswith("/") and base:
+        value = base.rstrip("/") + "/" + value
+    return normalize_path(value)
 
 
 class ProjectProfile:
@@ -316,12 +399,16 @@ class ProjectProfile:
         self.source_root: str | None = None
         self.reports_seen = 0
         self.paper_facts_seen = 0
+        self.partial_tus: list[dict[str, Any]] = []
+        self.partial_sidecar_count = 0
+        self.key_collisions = 0
+        self.projects_seen: set[str] = set()
 
         # Pointer / cast inventory, deduplicated by source-located row id so a
         # declaration in a shared header counts once for the project rather
         # than once per translation unit that includes it.
-        self.decls: dict[str, dict[str, Any]] = {}
-        self.casts: dict[str, dict[str, Any]] = {}
+        self.decls: dict[tuple, dict[str, Any]] = {}
+        self.casts: dict[tuple, dict[str, Any]] = {}
         self.tu_counts_sum: Counter[str] = Counter()
         self.prevalence_tus = 0
 
@@ -332,7 +419,7 @@ class ProjectProfile:
         self.cross_tu_lookups = 0
 
         # Paper-facts subjects, deduplicated by subjectId.
-        self.subjects: dict[str, dict[str, Any]] = {}
+        self.subjects: dict[tuple, dict[str, Any]] = {}
         self.subject_rows_raw = 0
         self.coverage: Counter[str] = Counter()
         self.callback_records = 0
@@ -351,17 +438,15 @@ class ProjectProfile:
         self.prevalence_tus += 1
         self.tool_versions.add(str(doc.get("toolVersion", "")))
         project = doc.get("project") or {}
-        root = project.get("root")
+        root = normalize_path(str(project.get("root") or ""))
+        project_key = str(project.get("id") or "") or root or self.name
+        self.projects_seen.add(project_key)
         if root and not self.source_root:
-            self.source_root = normalize_path(str(root))
+            self.source_root = root
         for decl in doc.get("pointerDeclarations") or []:
-            key = decl.get("id")
-            if key:
-                self.decls.setdefault(key, decl)
+            self._put(self.decls, self._row_key(project_key, decl, root), decl)
         for cast in doc.get("casts") or []:
-            key = cast.get("id")
-            if key:
-                self.casts.setdefault(key, cast)
+            self._put(self.casts, self._row_key(project_key, cast, root), cast)
         counts = doc.get("tuCounts") or {}
         for key, value in counts.items():
             if isinstance(value, int):
@@ -374,6 +459,46 @@ class ProjectProfile:
             )
         elif tu:
             self.tus.add(normalize_path(str(tu)))
+
+    @staticmethod
+    def _row_key(project_key: str, record: dict[str, Any], base: str) -> tuple:
+        """Identity of a declaration or cast row.
+
+        The emitted id is `<kind>:<file>:<line>:<col>:<discriminator>`, where
+        `<file>` is the path exactly as clang reported it: not normalized, and
+        not unique across projects, since two projects analyzed under one root
+        can hold the same relative path. Rebuild the id with the resolved,
+        normalized path and pair it with the project, which keeps every
+        discriminator the analyzer encoded (declarationKind for a declaration,
+        castKind plus implicit/explicit for a cast) while making
+        `/p/src/../src/a.c` and `/p/src/a.c` one key.
+        """
+        raw_id = str(record.get("id", ""))
+        raw_file = str((record.get("source") or {}).get("file", ""))
+        resolved = resolve_path(raw_file, base)
+        if raw_file and raw_file in raw_id:
+            return (project_key, raw_id.replace(raw_file, resolved, 1))
+        return (project_key, raw_id)
+
+    def _put(self, store: dict, key: tuple, record: dict[str, Any]) -> None:
+        if key in store:
+            if store[key] != record:
+                self.key_collisions += 1
+            return
+        store[key] = record
+
+    def note_partial(self, status: dict[str, Any], sidecars: int) -> None:
+        self.partial_tus.append(
+            {
+                "sourceFile": str(status.get("sourceFile", "")),
+                "stem": str(status.get("sourceStem", "")),
+                "stage": str(status.get("stage", "c1")),
+                "exitCode": status.get("toolExitCode"),
+                "reason": str(status.get("reason", "")),
+                "artifacts": len(status.get("publishedArtifacts") or []),
+            }
+        )
+        self.partial_sidecar_count = sidecars
 
     def add_report(self, doc: dict[str, Any]) -> None:
         self.reports_seen += 1
@@ -400,10 +525,12 @@ class ProjectProfile:
             return
         self.class_rows_raw += 1
         location = stable.get("location") or {}
+        file_path = resolve_path(str(location.get("file", "")), self.source_root)
         key = (
+            self.name,
             stable.get("subjectKind", kind),
             stable.get("subject", ""),
-            normalize_path(str(location.get("file", ""))),
+            file_path,
             location.get("startLine"),
             location.get("startColumn"),
         )
@@ -417,7 +544,7 @@ class ProjectProfile:
             "risk": stable.get("risk", "Unknown"),
             "evidenceSourceKind": stable.get("evidenceSourceKind", "unknown"),
             "flags": stable.get("flags") or {},
-            "file": normalize_path(str(location.get("file", ""))),
+            "file": file_path,
             "line": location.get("startLine"),
             "declaredType": metric.get("declaredType", ""),
             "function": metric.get("function", ""),
@@ -440,7 +567,7 @@ class ProjectProfile:
             self.subject_rows_raw += 1
             key = subject.get("subjectId") or subject.get("entity")
             if key:
-                self.subjects.setdefault(str(key), subject)
+                self.subjects.setdefault((self.name, str(key)), subject)
         for key, value in (doc.get("coverage") or {}).items():
             if isinstance(value, int) and not isinstance(value, bool):
                 self.coverage[key] += value
@@ -484,7 +611,9 @@ class ProjectProfile:
             d.get("declarationKind", "other") for d in decls if d.get("isVoidPointer")
         )
         by_file = Counter(
-            os.path.basename(normalize_path(str((d.get("source") or {}).get("file", ""))))
+            os.path.basename(
+                resolve_path(str((d.get("source") or {}).get("file", "")), self.source_root)
+            )
             for d in decls
         )
         total = len(decls)
@@ -536,7 +665,7 @@ class ProjectProfile:
             "topExplicitPairs": pairs.most_common(12),
             "topFiles": Counter(
                 os.path.basename(
-                    normalize_path(str((c.get("source") or {}).get("file", "")))
+                    resolve_path(str((c.get("source") or {}).get("file", "")), self.source_root)
                 )
                 for c in explicit
             ).most_common(10),
@@ -701,7 +830,21 @@ class ProjectProfile:
                 "'arguments' array therefore discards the whole inventory. Rebuild the "
                 "compilation database with absolute source paths and re-run.",
             )
-        elif not self.prevalence_tus:
+        inventory = self.coverage.get("declaredPointerInventoryRows")
+        subject_rows = self.coverage.get("subjectRows", 0)
+        if self.paper_facts_seen and subject_rows and inventory == 0:
+            add(
+                "critical",
+                "Declared-pointer inventory is empty",
+                "Paper-facts sidecars carry subject rows but no declared-pointer "
+                "inventory rows. The inventory is scoped to "
+                "--paper-facts-project-root by the same project-root prefix test "
+                "the prevalence sidecar uses, so a relative source path in the "
+                "compilation database empties it too. Rebuild the compilation "
+                "database with absolute source paths and re-run.",
+            )
+
+        if not self.prevalence_tus:
             add(
                 "warning",
                 "No prevalence sidecars",
@@ -723,6 +866,46 @@ class ProjectProfile:
                 "No paper-facts sidecars",
                 "Operation characteristics and declared-pointer kinds are unavailable. "
                 "Re-run with PAPER_FACTS=1.",
+            )
+
+        if self.partial_tus or self.partial_sidecar_count:
+            names = ", ".join(
+                t["stem"] or os.path.basename(t["sourceFile"]) for t in self.partial_tus[:5]
+            )
+            more = "" if len(self.partial_tus) <= 5 else f" (+{len(self.partial_tus) - 5} more)"
+            add(
+                "warning",
+                "Translation units failed during C1",
+                f"{len(self.partial_tus) or 'Some'} translation unit(s) aborted in C1 "
+                f"and are absent from the project index, so calls into them stay "
+                f"unresolved and their declarations are missing from every "
+                f"distribution here: {names}{more}. Their "
+                f"{self.partial_sidecar_count} partial sidecar(s) under partial-*/ "
+                "describe an incomplete analysis and are excluded from this profile "
+                "(pass --include-partial to count them anyway).",
+            )
+
+        if self.key_collisions:
+            add(
+                "info",
+                "Conflicting rows at the same source location",
+                f"{self.key_collisions} record(s) share a project and source location "
+                "with an earlier, different record. This happens for declarations and "
+                "casts inside macros or conditionally compiled headers, which differ "
+                "between translation units. The first row in sorted-path order is kept.",
+            )
+
+        if len(self.projects_seen) > 1:
+            add(
+                "info",
+                "Artifacts from several projects under one root",
+                "Sidecars naming "
+                + str(len(self.projects_seen))
+                + " different projects were read as one profile ("
+                + ", ".join(sorted(self.projects_seen)[:6])
+                + "). Records are keyed by project plus source location, so the "
+                "projects are not conflated, but the totals are a sum over all of "
+                "them. Use --mode corpus for a per-project breakdown.",
             )
 
         corrupt = {
@@ -802,7 +985,11 @@ class ProjectProfile:
 
 def build_profile(name: str, root: Path, args: argparse.Namespace) -> ProjectProfile:
     profile = ProjectProfile(name, root)
-    found = collect_artifacts(root, include_intermediates=args.include_intermediates)
+    found = collect_artifacts(
+        root,
+        include_intermediates=args.include_intermediates,
+        include_partial=args.include_partial,
+    )
     profile.artifacts = found
 
     limit_bytes = int(args.max_file_mb * 1024 * 1024) if args.max_file_mb else 0
@@ -833,6 +1020,12 @@ def build_profile(name: str, root: Path, args: argparse.Namespace) -> ProjectPro
         doc = load_json(found.index, profile.issues)
         if doc is not None:
             profile.add_index(doc)
+    for status_path in found.partial_status:
+        doc = load_json(status_path, profile.issues)
+        if doc is not None:
+            profile.note_partial(doc, len(found.partial_sidecars))
+    if found.partial_sidecars and not found.partial_status:
+        profile.partial_sidecar_count = len(found.partial_sidecars)
     if args.project_root:
         profile.source_root = normalize_path(args.project_root)
     return profile
@@ -860,6 +1053,8 @@ def assemble(profile: ProjectProfile, schema_dir: Path) -> dict[str, Any]:
         "topology": profile.topology(),
         "cost": profile.cost(),
         "health": profile.health(known_families, known_mediations),
+        "failedTranslationUnits": profile.partial_tus,
+        "partialSidecars": profile.partial_sidecar_count,
     }
 
 
@@ -1788,6 +1983,10 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
                     help="skip sidecars larger than this many MB (0 = no limit)")
     ap.add_argument("--include-intermediates", action="store_true",
                     help="also read per-round scratch directories (inflates counts)")
+    ap.add_argument("--include-partial", action="store_true",
+                    help="also count partial-*/ sidecars of translation units that "
+                         "failed during C1; off by default because they describe an "
+                         "aborted analysis and the runner never indexes them")
     ap.add_argument("--mode", choices=["auto", "project", "corpus"], default="auto",
                     help="treat --root as one project, as a corpus of projects, or "
                          "decide from its contents (default)")
@@ -1811,6 +2010,11 @@ def discover_projects(root: Path, mode: str) -> tuple[list[Path], bool]:
             if owns_artifacts(child)
             or any(owns_artifacts(gc) for gc in subdirectories(child))
         ]
+        # A runner writes one project to <output>/<name>/ as well, so a root
+        # holding a single project is reported as that project unless the
+        # caller explicitly asked for the corpus table.
+        if len(projects) == 1 and mode == "auto":
+            return projects, False
         return projects, True
     return [], False
 
