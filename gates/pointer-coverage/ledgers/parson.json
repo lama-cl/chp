@@ -1,0 +1,116 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 2,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 2,
+      "resolved": 0,
+      "blocked": 1,
+      "opaqueNoEvidence": 1,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.5,
+      "buckets": {
+        "blocked:external-unmodeled": 1,
+        "opaque-no-evidence": 1
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 358,
+      "resolved": 23,
+      "blocked": 74,
+      "opaqueNoEvidence": 261,
+      "resolvedShare": 0.0642,
+      "blockedShare": 0.2067,
+      "buckets": {
+        "blocked:external-unmodeled": 73,
+        "blocked:forwarded-to-project": 1,
+        "opaque-no-evidence": 261,
+        "resolved": 23
+      }
+    },
+    "function-pointer": {
+      "total": 2,
+      "resolved": 0,
+      "blocked": 0,
+      "opaqueNoEvidence": 2,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.0,
+      "buckets": {
+        "opaque-no-evidence": 2
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 47,
+    "unresolved": 0,
+    "byKindAndTier": {
+      "global-variable/global-initializer": 47
+    }
+  },
+  "escapeCallees": {
+    "distinct": 13,
+    "top": [
+      {
+        "callee": "free",
+        "subjects": 46
+      },
+      {
+        "callee": "fopen",
+        "subjects": 14
+      },
+      {
+        "callee": "sprintf",
+        "subjects": 12
+      },
+      {
+        "callee": "fclose",
+        "subjects": 4
+      },
+      {
+        "callee": "fputs",
+        "subjects": 4
+      },
+      {
+        "callee": "fread",
+        "subjects": 4
+      },
+      {
+        "callee": "ferror",
+        "subjects": 2
+      },
+      {
+        "callee": "fseek",
+        "subjects": 2
+      },
+      {
+        "callee": "ftell",
+        "subjects": 2
+      },
+      {
+        "callee": "printf",
+        "subjects": 2
+      },
+      {
+        "callee": "remove",
+        "subjects": 2
+      },
+      {
+        "callee": "rewind",
+        "subjects": 2
+      },
+      {
+        "callee": "puts",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "parson",
+  "translationUnits": {
+    "total": 2,
+    "failed": 0,
+    "failedNames": []
+  }
+}

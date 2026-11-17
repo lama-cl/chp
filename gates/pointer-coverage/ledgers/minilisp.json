@@ -1,0 +1,88 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 1,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 51,
+      "resolved": 14,
+      "blocked": 1,
+      "opaqueNoEvidence": 36,
+      "resolvedShare": 0.2745,
+      "blockedShare": 0.0196,
+      "buckets": {
+        "blocked:external-unmodeled": 1,
+        "opaque-no-evidence": 36,
+        "resolved": 14
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 236,
+      "resolved": 127,
+      "blocked": 4,
+      "opaqueNoEvidence": 105,
+      "resolvedShare": 0.5381,
+      "blockedShare": 0.0169,
+      "buckets": {
+        "blocked:external-unmodeled": 4,
+        "opaque-no-evidence": 105,
+        "resolved": 127
+      }
+    },
+    "function-pointer": {
+      "total": 2,
+      "resolved": 0,
+      "blocked": 0,
+      "opaqueNoEvidence": 2,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.0,
+      "buckets": {
+        "opaque-no-evidence": 2
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 1,
+    "unresolved": 1,
+    "byKindAndTier": {
+      "field-via-pointer/unresolved": 1
+    }
+  },
+  "escapeCallees": {
+    "distinct": 6,
+    "top": [
+      {
+        "callee": "munmap",
+        "subjects": 2
+      },
+      {
+        "callee": "vfprintf",
+        "subjects": 2
+      },
+      {
+        "callee": "__builtin_va_start",
+        "subjects": 1
+      },
+      {
+        "callee": "fprintf",
+        "subjects": 1
+      },
+      {
+        "callee": "getenv",
+        "subjects": 1
+      },
+      {
+        "callee": "ungetc",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "minilisp",
+  "translationUnits": {
+    "total": 1,
+    "failed": 0,
+    "failedNames": []
+  }
+}
