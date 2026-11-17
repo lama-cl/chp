@@ -1350,6 +1350,18 @@ public:
     Unsupported
   };
 
+  // P0 pointer-coverage accounting (docs/pointer-coverage-plan.md).  This is
+  // an inventory only: it never participates in history composition.
+  struct IndirectCallSiteRecord {
+    std::string functionName;
+    SourceSpan span;
+    std::string calleeExpr;
+    std::string calleeExprKind;
+    std::string resolutionTier;
+    std::vector<std::string> targets;
+    unsigned pointerArguments = 0;
+  };
+
   struct FeatureSupportRecord {
     FeatureSupportSeverity severity;
     std::string feature;
@@ -5758,6 +5770,7 @@ public:
               call->getArg(i), PaperVoidPointerUsageKind::UnresolvedIndirectCall,
               call->getExprLoc());
       }
+      recordIndirectCallSite(call, depCalleeExpr, depTargets);
       notePaperCallbackSlotCallRelations(call, depCalleeExpr, depTargets);
       // Preserve the fact that the callback carrier itself is a field even
       // when target discovery is deferred or fails.  Classification consumes
@@ -21403,6 +21416,8 @@ public:
         {"semanticMediation", semanticMediationJson(mediation)}};
     if (entity.kind == EntityKey::Kind::FieldEntity)
       subject["fieldStorage"] = paperFieldStorageJson(entity);
+    subject["escape"] =
+        paperEscapeJson(uses, opFacts.hasExternalEscape, callbackState);
     return subject;
   }
 
@@ -21780,7 +21795,7 @@ public:
     }
 
     return json::Object{
-        {"schemaVersion", static_cast<int64_t>(9)},
+        {"schemaVersion", static_cast<int64_t>(10)},
         {"schemaName", "cast-history-tu-paper-facts"},
         {"toolVersion", "cast-history-dev"},
         {"tu",
@@ -21848,6 +21863,7 @@ public:
         {"subjects", std::move(subjects)},
         {"declaredPointerInventory", std::move(declaredInventory)},
         {"callbackUseRecords", std::move(callbacks)},
+        {"indirectCallSites", emitIndirectCallSitesJson()},
         {"nestedCallbackSlotRelations", std::move(nestedCallbackSlots)},
         {"voidPointerUsageFingerprints", std::move(voidPointerUsageFingerprints)},
         {"allocationOriginDerivedAliasUses",
@@ -21860,6 +21876,251 @@ public:
     json::Value v(emitTUPaperFactsJsonObject(configurationId,
                                               compileCommandHash));
     os << llvm::formatv("{0:2}\n", v);
+  }
+
+  // ---------------------------------------------------------------------
+  // P0 pointer-coverage accounting
+  // ---------------------------------------------------------------------
+  std::string indirectCalleeExprKind(const Expr *callee) const {
+    if (!callee)
+      return "other";
+    callee = callee->IgnoreParenImpCasts();
+    while (const auto *ce = dyn_cast<CastExpr>(callee))
+      callee = ce->getSubExpr()->IgnoreParenImpCasts();
+    if (isa<ArraySubscriptExpr>(callee))
+      return "array-element";
+    if (const auto *me = dyn_cast<MemberExpr>(callee)) {
+      const Expr *base = me;
+      while (const auto *cur = dyn_cast<MemberExpr>(base)) {
+        if (cur->isArrow())
+          return "field-via-pointer";
+        base = cur->getBase()->IgnoreParenImpCasts();
+      }
+      if (isa<ArraySubscriptExpr>(base))
+        return "field-of-array-element";
+      if (isa<DeclRefExpr>(base))
+        return "field-of-instance";
+      return "field-via-pointer";
+    }
+    if (const auto *dre = dyn_cast<DeclRefExpr>(callee)) {
+      if (isa<ParmVarDecl>(dre->getDecl()))
+        return "parameter";
+      if (const auto *vd = dyn_cast<VarDecl>(dre->getDecl()))
+        return vd->hasGlobalStorage() ? "global-variable" : "local-variable";
+    }
+    if (isa<CallExpr>(callee))
+      return "call-result";
+    return "other";
+  }
+
+  void recordIndirectCallSite(const CallExpr *call, const Expr *calleeExpr,
+                              const std::set<const FunctionDecl *> &targets) {
+    if (!call)
+      return;
+    IndirectCallSiteRecord rec;
+    rec.functionName = currentScopeName;
+    rec.span = sourceSpan(call->getExprLoc());
+    rec.calleeExpr = calleeExpr ? exprToString(calleeExpr) : std::string();
+    rec.calleeExprKind = indirectCalleeExprKind(calleeExpr);
+    for (const FunctionDecl *target : targets)
+      if (target)
+        rec.targets.push_back(target->getQualifiedNameAsString());
+    std::sort(rec.targets.begin(), rec.targets.end());
+    // Tier vocabulary is shared with later phases: flow-sensitive, slot,
+    // mlta, signature, name-match.  P0 knows two producers: the local
+    // flow-sensitive map, and the initializer of a global function pointer,
+    // which ignores reassignments made in other functions (unsound).
+    if (!rec.targets.empty())
+      rec.resolutionTier = rec.calleeExprKind == "global-variable"
+                               ? "global-initializer"
+                               : "flow-sensitive";
+    else if (rec.calleeExprKind == "parameter")
+      rec.resolutionTier = "formal-parameter";
+    else
+      rec.resolutionTier = "unresolved";
+    for (unsigned i = 0; i < call->getNumArgs(); ++i)
+      if (call->getArg(i)->IgnoreParenImpCasts()->getType()->isPointerType())
+        ++rec.pointerArguments;
+    indirectCallSiteRecords.push_back(std::move(rec));
+  }
+
+  json::Array emitIndirectCallSitesJson() const {
+    std::vector<const IndirectCallSiteRecord *> records;
+    records.reserve(indirectCallSiteRecords.size());
+    for (const auto &rec : indirectCallSiteRecords)
+      records.push_back(&rec);
+    std::stable_sort(records.begin(), records.end(),
+                     [this](const IndirectCallSiteRecord *a,
+                            const IndirectCallSiteRecord *b) {
+                       return sourceSpanLess(a->span, b->span);
+                     });
+    json::Array arr;
+    for (const IndirectCallSiteRecord *rec : records) {
+      json::Array targets;
+      for (const std::string &target : rec->targets)
+        targets.push_back(target);
+      arr.push_back(json::Object{
+          {"function", rec->functionName},
+          {"location", sourceSpanJson(rec->span)},
+          {"calleeExpr", rec->calleeExpr},
+          {"calleeExprKind", rec->calleeExprKind},
+          {"resolutionTier", rec->resolutionTier},
+          {"targetCount", static_cast<int64_t>(rec->targets.size())},
+          {"targets", std::move(targets)},
+          {"pointerArguments", static_cast<int64_t>(rec->pointerArguments)}});
+    }
+    return arr;
+  }
+
+  bool projectIndexHasFunctionNamed(const std::string &name) const {
+    if (!summaryImportEnabled || !summaryIndex)
+      return false;
+    if (!projectIndexFunctionNames) {
+      projectIndexFunctionNames.emplace();
+      for (const auto &entry : summaryIndex->functions()) {
+        projectIndexFunctionNames->insert(entry.name);
+        projectIndexFunctionNames->insert(entry.qualifiedName);
+      }
+    }
+    return projectIndexFunctionNames->count(name) ||
+           projectIndexFunctionNames->count(stripSyntheticTargetSuffixes(name));
+  }
+
+  // Why, and where, a subject's interpretation could be lost.  Null when no
+  // loss evidence exists.  The record is evidence, not a verdict: a subject
+  // can be fully typed and still escape.
+  const IndirectCallSiteRecord *indirectCallSiteAt(const SourceSpan &span) const {
+    const IndirectCallSiteRecord *sameLine = nullptr;
+    for (const IndirectCallSiteRecord &rec : indirectCallSiteRecords) {
+      if (rec.span.file != span.file || rec.span.line != span.line)
+        continue;
+      if (rec.span.column == span.column)
+        return &rec;
+      sameLine = sameLine ? sameLine : &rec;
+    }
+    return sameLine;
+  }
+
+  bool functionIsAnalysed(const std::string &name) const {
+    return hasFunctionSummaryNamed(name) || projectIndexHasFunctionNamed(name);
+  }
+
+  // Why, and where, a subject's interpretation could be lost.  Null when no
+  // loss evidence exists.  The record is evidence, not a verdict: a subject
+  // can be fully typed and still escape.
+  //
+  // Site kinds:
+  //   external           direct call to a function with no body anywhere
+  //   project            direct call to a project function defined in another
+  //                      TU whose summary contributed nothing here
+  //   indirect-external  indirect call whose known targets have no body
+  //   indirect           indirect call with no known target
+  json::Value paperEscapeJson(const std::vector<PointerUseRecord> *uses,
+                              bool hasExternalEscape,
+                              CallbackMediationState callbackState) const {
+    static const size_t maxSites = 8;
+    const bool callbackLoss =
+        callbackState == CallbackMediationState::UnresolvedCallback ||
+        callbackState == CallbackMediationState::FieldCallback ||
+        callbackState == CallbackMediationState::FormalCallbackParameter;
+    std::set<std::string> externalCallees;
+    std::set<std::string> projectCallees;
+    bool sawUnresolvedIndirect = false;
+    bool sawResolvedIndirect = false;
+    std::set<std::string> seenSites;
+    json::Array sites;
+    size_t siteCount = 0;
+
+    auto addSite = [&](const std::string &name, const std::string &kind,
+                       const SourceSpan &span) {
+      std::string key = kind + "|" + name + "|" + span.file + ":" +
+                        std::to_string(span.line) + ":" +
+                        std::to_string(span.column);
+      if (!seenSites.insert(key).second)
+        return;
+      ++siteCount;
+      if (sites.size() < maxSites)
+        sites.push_back(json::Object{{"callee", name},
+                                     {"kind", kind},
+                                     {"location", sourceSpanJson(span)}});
+    };
+
+    if (uses) {
+      for (const PointerUseRecord &u : *uses) {
+        if (u.kind != PointerUseKind::CallArgument)
+          continue;
+        const SourceSpan &span =
+            u.operationSiteSpan.file.empty() ? u.span : u.operationSiteSpan;
+        if (std::optional<std::string> callee =
+                directCalleeNameFromCallArgDetail(u.detail)) {
+          std::string name = stripSyntheticTargetSuffixes(*callee);
+          if (name.empty())
+            name = *callee;
+          if (hasFunctionSummaryNamed(*callee))
+            continue;  // defined in this TU: composed locally
+          if (projectIndexHasFunctionNamed(*callee)) {
+            projectCallees.insert(name);
+            addSite(name, "project", span);
+          } else {
+            externalCallees.insert(name);
+            addSite(name, "external", span);
+          }
+          continue;
+        }
+        if (!stringContains(u.detail, "<indirect>"))
+          continue;
+        const IndirectCallSiteRecord *site = indirectCallSiteAt(span);
+        if (!site || site->targets.empty()) {
+          sawUnresolvedIndirect = true;
+          if (callbackLoss)
+            addSite("<indirect>", "indirect", span);
+          continue;
+        }
+        sawResolvedIndirect = true;
+        for (const std::string &target : site->targets) {
+          if (functionIsAnalysed(target))
+            continue;
+          externalCallees.insert(target);
+          addSite(target, "indirect-external", span);
+        }
+      }
+    }
+
+    json::Array reasons;
+    if (!externalCallees.empty() ||
+        (hasExternalEscape && projectCallees.empty()))
+      reasons.push_back("external-unmodeled");
+    // The pre-existing externalBoundary flag only consults summaries of the
+    // current TU, so it also fires for project functions defined elsewhere.
+    // Report those separately rather than as external code.
+    if (hasExternalEscape && !projectCallees.empty())
+      reasons.push_back("forwarded-to-project");
+    // A callback state is a loss only if some indirect site stayed
+    // unresolved, or no indirect use was seen at all (field/formal carriers
+    // whose call is recorded on another entity).
+    if (callbackLoss && (sawUnresolvedIndirect || !sawResolvedIndirect)) {
+      if (callbackState == CallbackMediationState::UnresolvedCallback)
+        reasons.push_back("callback-unresolved");
+      else if (callbackState == CallbackMediationState::FieldCallback)
+        reasons.push_back("callback-field");
+      else
+        // Resolved per call site by higher-order specialization, but lost at
+        // the definition itself: the callee is whatever the caller passes.
+        reasons.push_back("callback-formal");
+    }
+    if (reasons.empty())
+      return nullptr;
+
+    std::set<std::string> callees = externalCallees;
+    callees.insert(projectCallees.begin(), projectCallees.end());
+    std::string primary = reasons.front().getAsString()->str();
+    return json::Object{{"reason", primary},
+                        {"reasons", std::move(reasons)},
+                        {"callees", stringSetJson(callees)},
+                        {"externalCallees", stringSetJson(externalCallees)},
+                        {"projectCallees", stringSetJson(projectCallees)},
+                        {"siteCount", static_cast<int64_t>(siteCount)},
+                        {"sites", std::move(sites)}};
   }
 
   json::Array emitFeatureDiagnosticsJson() const {
@@ -23384,7 +23645,8 @@ public:
         {"callSiteSpecializedExperimentData",
          emitCallSiteSpecializedExperimentDataJson()},
         {"functionSummaries", emitReadableFunctionSummariesJson()},
-        {"featureDiagnostics", emitFeatureDiagnosticsJson()}};
+        {"featureDiagnostics", emitFeatureDiagnosticsJson()},
+        {"indirectCallSites", emitIndirectCallSitesJson()}};
 
     if (linkSummaryPath.empty()) {
       out["linkSummary"] = json::Value(nullptr);
@@ -23512,6 +23774,8 @@ public:
     emitReadableFunctionSummariesJsonArrayStream(os);
     writeStreamedJsonField(os, first, "featureDiagnostics",
                            json::Value(emitFeatureDiagnosticsJson()));
+    writeStreamedJsonField(os, first, "indirectCallSites",
+                           json::Value(emitIndirectCallSitesJson()));
 
     if (linkSummaryPath.empty()) {
       writeStreamedJsonField(os, first, "linkSummary", json::Value(nullptr));
@@ -24394,6 +24658,10 @@ private:
 
   // Flow-side trace output.
   std::vector<FlowRecord> flowRecords;
+
+  // P0 pointer-coverage accounting: one record per indirect call expression.
+  std::vector<IndirectCallSiteRecord> indirectCallSiteRecords;
+  mutable std::optional<std::set<std::string>> projectIndexFunctionNames;
 
   // Unsupported / approximated feature diagnostics.
   std::vector<FeatureSupportRecord> featureSupportRecords;

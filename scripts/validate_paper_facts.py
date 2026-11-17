@@ -17,8 +17,87 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
 SCHEMA_NAME = "cast-history-tu-paper-facts"
-CURRENT_SCHEMA_VERSION = 9
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+CURRENT_SCHEMA_VERSION = 10
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+# Schema version 10 (pointer-coverage P0): escape accounting vocabulary.
+ESCAPE_REASONS = {
+    "external-unmodeled", "forwarded-to-project", "callback-unresolved", "callback-field",
+    "callback-formal", "dynamic-symbol",
+}
+ESCAPE_SITE_KINDS = {"external", "project", "indirect-external", "indirect", "dynamic-symbol"}
+INDIRECT_CALLEE_EXPR_KINDS = {
+    "array-element", "field-via-pointer", "field-of-array-element", "field-of-instance",
+    "parameter", "global-variable", "local-variable", "call-result", "other",
+}
+RESOLUTION_TIERS = {
+    "flow-sensitive", "global-initializer", "slot", "mlta", "signature", "name-match",
+    "formal-parameter", "unresolved",
+}
+
+
+def validate_escape(path: Path, where: str, escape: Any) -> int:
+    """Schema version 10: subject.escape is null or a located loss record."""
+    if escape is None:
+        return 0
+    if not isinstance(escape, Mapping):
+        error(path, f"{where}.escape must be null or an object")
+        return 1
+    errors = 0
+    reasons = escape.get("reasons")
+    if not isinstance(reasons, list) or not reasons or not all(r in ESCAPE_REASONS for r in reasons):
+        error(path, f"{where}.escape.reasons must be a non-empty array drawn from {sorted(ESCAPE_REASONS)}")
+        errors += 1
+    elif escape.get("reason") != reasons[0]:
+        error(path, f"{where}.escape.reason must equal escape.reasons[0]")
+        errors += 1
+    callees = escape.get("callees")
+    if not isinstance(callees, list) or not all(isinstance(c, str) and c for c in callees):
+        error(path, f"{where}.escape.callees must be an array of non-empty strings")
+        errors += 1
+    sites = escape.get("sites")
+    site_count = escape.get("siteCount")
+    if not isinstance(sites, list) or not isinstance(site_count, int) or site_count < len(sites):
+        error(path, f"{where}.escape.sites must be an array no longer than integer escape.siteCount")
+        errors += 1
+    else:
+        for site in sites:
+            if not isinstance(site, Mapping) or not site.get("callee") or not isinstance(site.get("location"), Mapping) \
+                    or site.get("kind") not in ESCAPE_SITE_KINDS:
+                error(path, f"{where}.escape.sites entries need callee, a known kind and location")
+                errors += 1
+                break
+    return errors
+
+
+def validate_indirect_call_sites(path: Path, sites: Any) -> int:
+    if not isinstance(sites, list):
+        error(path, "indirectCallSites must be an array in schema version 10+")
+        return 1
+    errors = 0
+    for index, site in enumerate(sites):
+        where = f"indirectCallSites[{index}]"
+        if not isinstance(site, Mapping):
+            error(path, f"{where} must be an object")
+            errors += 1
+            continue
+        if site.get("calleeExprKind") not in INDIRECT_CALLEE_EXPR_KINDS:
+            error(path, f"{where}.calleeExprKind is not a known kind")
+            errors += 1
+        tier = site.get("resolutionTier")
+        if tier not in RESOLUTION_TIERS:
+            error(path, f"{where}.resolutionTier is not a known tier")
+            errors += 1
+        targets = site.get("targets")
+        if not isinstance(targets, list) or site.get("targetCount") != len(targets):
+            error(path, f"{where}.targetCount must equal targets length")
+            errors += 1
+        elif (tier in ("unresolved", "formal-parameter")) != (len(targets) == 0):
+            error(path, f"{where}: targets must be empty exactly when the tier is unresolved/formal-parameter")
+            errors += 1
+        if not isinstance(site.get("location"), Mapping):
+            error(path, f"{where}.location must be an object")
+            errors += 1
+    return errors
 OUTER_POINTER_KINDS = {
     "void-data-pointer", "nonvoid-data-pointer", "function-pointer",
     "not-pointer", "unknown",
@@ -256,6 +335,12 @@ def validate_document(path: Path, data: Any) -> int:
         if not isinstance(subject.get("refinementFacts"), Mapping):
             error(path, f"{where}.refinementFacts must be an object")
             errors += 1
+        if schema_version is not None and schema_version >= 10:
+            if "escape" not in subject:
+                error(path, f"{where}.escape must be present (null allowed) in schema version 10+")
+                errors += 1
+            else:
+                errors += validate_escape(path, where, subject.get("escape"))
         callback_mediation = subject.get("callbackMediation")
         if schema_version is not None and schema_version >= 3:
             if not isinstance(callback_mediation, Mapping):
@@ -604,6 +689,9 @@ def validate_document(path: Path, data: Any) -> int:
                         if not isinstance(no_final.get(field), list) or not all(isinstance(x, str) for x in no_final.get(field, [])):
                             error(path, f"{where}.observedNoFinalHistory.{field} must be an array of strings")
                             errors += 1
+
+    if schema_version is not None and schema_version >= 10:
+        errors += validate_indirect_call_sites(path, data.get("indirectCallSites"))
 
     if schema_version is not None and schema_version >= 8:
         if isinstance(coverage.get("allocationOriginDerivedAliasUses"), int) and \

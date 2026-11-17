@@ -1,8 +1,10 @@
 # Extending cast-history pointer coverage
 
-Status: plan, nothing implemented. Gates are in place and red.
+Status: P0 implemented, awaiting human review (`gates/pointer-coverage/review/P0.md`).
+P1 to P5 not started; their gates are in place and red.
 Hooks: `gates/pointer-coverage/` (fixtures, `gates.json`, `run_gates.py`,
-`coverage_ledger.py`, `baseline.json`) and CTest (`pointer-coverage-*`).
+`run_corpus.py`, `coverage_ledger.py`, `review_packet.py`, `baseline.json`,
+`ledgers/`, `signoffs.json`) and CTest (`pointer-coverage-*`).
 
 ## 1. Where coverage is lost today
 
@@ -12,6 +14,7 @@ lost at four kinds of boundary. Each row is reproduced by a fixture.
 
 | Boundary | What the tool does now | Code anchor (`include/CastHistory/CastHistoryVisitor.h`) | Fixture |
 |---|---|---|---|
+| Global fptr **reassigned** in another function | resolved from the initializer only; the reassigned target is silently missing, with no loss recorded (unsound) | `functionPointerTargets` filled by `VisitVarDecl` | `fp_global_reassigned.c` |
 | Call through fptr **array** | `unsupported: function-pointer-array-call`; data args become `UnresolvedCallback` | `recordIndirectCallFeature` :30717, `resolveFunctionValueSet` :25456 (no `ArraySubscriptExpr` case) | `fp_array_dispatch.c` |
 | Call through fptr **field via pointer base** (`s->ops->area`) | `unsupported: function-pointer-field-call`; `FieldCallback` | `entityOfMemberExprNoSideEffect` :26133 keys a field on a *named instance* (`decl` + path), so a pointer base has no entity | `fp_vtable_oop.c`, `fp_fsm.c` |
 | Fptr in a **global**, called in another function | `unsupported: function-pointer-variable-call` | `functionPointerTargets` :24088 is flow-sensitive per function body | `fp_callback_registered.c` |
@@ -20,17 +23,9 @@ lost at four kinds of boundary. Each row is reproduced by a fixture.
 | **External** callee | `ExternalUnknown`, `externalEscape=true`, no callee name, no model | `VisitCallExpr` :5704 (`knownInternalDirect`), `classifyCallUse` :30148 knows only `mem*` names | `ext_*.c` |
 | **dlsym** | result is an unresolved fptr variable | no handling | `fp_dlsym_plugin/` |
 
-Size of the problem on a real project (vsftpd-3.0.3, 39 TUs, C1 only, so
-"external" still includes other project TUs; rerun with the multi-TU pipeline
-for the true number):
-
-| pointer kind | total | resolved | blocked | opaque |
-|---|---|---|---|---|
-| `void *` | 62 | 17 | 15 (13 external, 2 callback) | 30 |
-| other data pointers | 624 | 83 | 307 (all external) | 234 |
-| function pointers | 15 | 0 | 3 | 12 |
-
-Two things follow. The external boundary dominates by count, so P0 (naming
+Size of the problem on real projects: see the corpus tables in
+`gates/pointer-coverage/review/P0.md` and the per-project ledgers in
+`gates/pointer-coverage/ledgers/`. Two things follow. The external boundary dominates by count, so P0 (naming
 every loss) and P4 (models) move the headline number most. The `opaque` bucket
 is where unmodelled stores hide (a pointer stored into a struct and never
 typed locally looks "opaque", not "blocked"), so P2 is measured by `opaque`
@@ -131,7 +126,7 @@ express. Model the union object as one slot with typed *views*:
 Four complementary answers; the plan uses all of them, in this order.
 
 1. **Account for it** (P0). Every escaping subject gets
-   `escape: {reason, callees, site}`. Nothing is inferred, but every loss
+   `escape: {reason, reasons, callees, siteCount, sites}`. Nothing is inferred, but every loss
    becomes countable by callee, which tells us which models are worth writing.
 2. **Declarative contracts** (P4). A data file, not C++: per function,
    `copies` (memcpy-like pointee copy), `returnsAlias` (realloc, `strchr`),
@@ -168,8 +163,8 @@ slot table with P1 and should follow it; P5 needs P1.
 
 | Phase | Deliverable | Depends on | Gates |
 |---|---|---|---|
-| **P0** Accounting | `escape{reason,callees,site}` on paper-facts subjects; indirect-call-site inventory (callee expr kind, tier, target count) in the report; ledger baseline per benchmark project | none | `P0-escape-accounting` |
-| **P1** Function-value slots | slot table + inclusion solver; `ArraySubscriptExpr` and pointer-base `MemberExpr` cases in `resolveFunctionValueSet`; global fptr variables; `resolutionTier`; slot facts in link summary and index | P0 | `P1-fp-array-dispatch`, `P1-fp-vtable-oop`, `P1-fp-fsm`, `P1-fp-callback-registered-target` |
+| **P0** Accounting (done, in review) | `escape{reason,reasons,callees,siteCount,sites}` on paper-facts subjects; `indirectCallSites` inventory (callee expr kind, tier, targets) in paper facts and report; paper-facts schema v10; ledger baseline per corpus project | none | `P0-escape-accounting` |
+| **P1** Function-value slots | slot table + inclusion solver; `ArraySubscriptExpr` and pointer-base `MemberExpr` cases in `resolveFunctionValueSet`; global fptr variables including reassignments (replaces the `global-initializer` tier); `resolutionTier`; slot facts in link summary and index | P0 | `P1-fp-array-dispatch`, `P1-fp-vtable-oop`, `P1-fp-fsm`, `P1-fp-callback-registered-target`, `P1-fp-global-reassigned` |
 | **P2** Data slots | store/load sets for globals and `(type, field)`; store source inherits load interpretations; polymorphic-carrier reporting | P1 | `P2-fp-callback-registered-context`, `P2-st-heap-carrier` |
 | **P3** Unions | union slot with views; `union-pun` cast events; discriminant detection; `unionMediation` | P0 | `P3-un-type-punning`, `P3-un-tagged` |
 | **P4** External contracts | contract file + schema; synthetic summaries; first models chosen from the P0 ledger | P0 | `P4-ext-libc-callbacks`, `P4-ext-libc-dataflow` |
@@ -179,8 +174,16 @@ slot table with P1 and should follow it; P5 needs P1.
 Schema additions introduced by the gates (add to
 `schemas/cast-paper-facts.schema.json`, bump `schemaVersion`):
 
-- `subject.escape`: `{reason, callees[], site}`; `reason` in
-  `external-unmodeled`, `dynamic-symbol`, `callback-unresolved`, ...
+- `subject.escape` (v10, done): null or `{reason, reasons[], callees[],
+  externalCallees[], projectCallees[], siteCount, sites[{callee, kind,
+  location}]}`; reasons in `external-unmodeled`, `forwarded-to-project`,
+  `callback-unresolved`, `callback-field`, `callback-formal`,
+  `dynamic-symbol` (P5). It is evidence, not a verdict: a fully typed subject
+  can still carry it.
+- `indirectCallSites` (v10, done): `{function, location, calleeExpr,
+  calleeExprKind, resolutionTier, targets[]}`. P0 tiers: `flow-sensitive`,
+  `global-initializer` (unsound, see P1), `formal-parameter`, `unresolved`.
+  Later phases only change `resolutionTier` and `targets`.
 - `subject.unionMediation`: `{kind}`; `kind` in `type-punning`,
   `tagged-union`.
 - `coverage_ledger.py` already prefers `escape.reason` over its heuristics, so
@@ -209,8 +212,9 @@ print expected against actual, for example:
          -> callbackMediation.state is still 'UnresolvedCallback'
 ```
 
-Baseline, recorded in `baseline.json`: 0 of 12 gates green, all 16 control
-checks passing, all 21 target checks failing.
+Baseline, recorded in `baseline.json` after P0: 1 of 13 gates green (P0);
+17 of 17 control checks and the 4 P0 target checks pass; the 21 target checks
+of P1 to P5 fail.
 
 Precision is gated too: `fp_array_dispatch.c` contains `h_unrelated`, same
 signature, address-taken, never in the table. `dispatch::payload` must not
@@ -222,26 +226,33 @@ acquire `long *`. A signature-only resolver fails this control.
   `baseline.json` fails now. It is green today and must stay green in every
   change.
 - When a phase's gates turn green: run `run_gates.py --update-baseline`
-  (refuses if anything regressed), and append the phase to
+  (refuses if anything regressed). That locks the progress in.
+- After a human approves the phase (section 4.4), the phase is appended to
   `POINTER_COVERAGE_SEALED_PHASES` in `CMakeLists.txt`. From then on
   `ctest -R pointer-coverage-phase-<P>` requires the whole phase green.
 - A target check may be edited only to rename an output field, in the same
   change that defines the field in the schema. Weakening an expectation (fewer
   required types, dropping a decoy) is not an acceptable way to pass.
 
-### 4.3 Corpus gate (P0 baseline, enforced from P1 on)
+### 4.3 Corpus gate
 
 ```bash
-PAPER_FACTS=1 scripts/run_all_multitu_projects.sh
+gates/pointer-coverage/run_corpus.py --tool build/cast-history-tool
 ```
 
-```bash
-gates/pointer-coverage/coverage_ledger.py --root test-output/multitu/<project> --json ledger.json --compare gates/pointer-coverage/ledgers/<project>.json
-```
+Runs C1, the summary index and one import round over the projects in
+`corpus.json` and compares each result with `ledgers/<project>.json`. It
+fails if, for any pointer kind, `resolved` dropped or `blocked` grew, if
+unresolved indirect call sites grew, if more TUs fail to parse, or if any
+blocked subject lacks `escape.reason`. `--update` rewrites the ledgers; later
+phases refresh them only upward.
 
-`--compare` fails if, for any pointer kind, `resolved` dropped or `blocked`
-grew. P0 commits one ledger per benchmark project under
-`gates/pointer-coverage/ledgers/`; later phases refresh them only upward.
+The corpus is source-only (no configure step, no compile database), so it runs
+anywhere but covers only projects that parse that way; TUs that fail are
+counted in each ledger. `coverage_ledger.py --root <dir> --compare <ledger>`
+does the same comparison on output of the full
+`scripts/run_all_multitu_projects.sh` pipeline (`PAPER_FACTS=1`).
+
 Phase exit criteria on the corpus:
 
 | Phase | Corpus criterion |
@@ -253,7 +264,31 @@ Phase exit criteria on the corpus:
 | P4 | `blocked:external-unmodeled` falls by the share attributed to the modelled callees in the P0 ledger |
 | P6 | existing validators still pass (`validate_paper_facts.py`, `validate_classification_labels.py`, `validate_cast_text_json_consistency.py`); runtime per project within 1.5x of the P0 timing sidecars |
 
-### 4.4 What a gate does not prove
+### 4.4 Human review (every phase)
+
+Gates show that a mechanism exists; a person decides whether it is right.
+Each phase ends with a generated review packet, `review/<phase>.md`:
+
+```bash
+gates/pointer-coverage/review_packet.py --phase P1 --tool build/cast-history-tool --before-tool <previous build>
+```
+
+The packet contains, in reading order: gate status; each fixture's source
+next to a before/after table of its probe subjects and indirect calls; corpus
+tables (resolved, blocked by reason, indirect call sites by kind and tier,
+escape callees ranked by subjects lost); a spot-check sample of 12 real-code
+cases chosen by content hash, each with its source line and a correct/wrong
+checkbox; and the phase's review questions from `gates.json`.
+
+The reviewer records the verdict in `signoffs.json` (`approved` or
+`changes-requested`, reviewer, date, notes). Agents generate packets and never
+edit `signoffs.json`. A phase is sealed in `CMakeLists.txt` only after
+`approved`, and the sealed-phase test checks that
+(`run_gates.py --require-signoff`). Until then the phase's work is protected
+by the ratchet but is not a foundation: dependent phases may start, but must
+be ready to absorb review changes.
+
+### 4.5 What a gate does not prove
 
 Fixture gates prove the mechanism on one clean instance per pattern. They do
 not prove recall on real code (section 2.6 does) and they do not bound
@@ -261,14 +296,13 @@ precision loss from type-keyed slots on generic containers (the P2
 polymorphic-carrier count on the corpus does). Treat a green phase as
 "mechanism present", and the corpus criteria as "mechanism useful".
 
-## 5. Open decisions
+## 5. Decisions
 
-1. **MLTA tier in composition**: default off (recommended) or on. Off keeps
-   current classifications stable; on raises coverage on large codebases at
-   some precision cost.
-2. **Contract file format and location**: JSON under `models/` validated by a
-   schema (recommended), or attributes in a C header parsed by the tool.
-3. **Existing `examples/` expectations**: P1 and P2 will legitimately change
-   some outputs (for instance `CallbackDependent` becoming resolved). Decide
-   whether those are re-baselined per phase or kept behind a
-   `--pointer-coverage-level` option until P6.
+1. **MLTA tier in composition: off by default.** Type-layer fallback is
+   computed and reported from P1, but composes histories only behind an
+   option. Current classifications stay stable.
+2. **Contracts: JSON under `models/`, validated by a schema.** No attributes
+   in C headers.
+3. **Existing `examples/` expectations: re-baselined per phase.** Each phase's
+   review packet lists the outputs it changed, so the change is reviewed with
+   the phase rather than hidden behind an option until P6.

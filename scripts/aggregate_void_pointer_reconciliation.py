@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 PAPER_SCHEMA_NAME = "cast-history-tu-paper-facts"
-PAPER_SCHEMA_VERSIONS = {4, 5, 6, 7, 8, 9}
+PAPER_SCHEMA_VERSIONS = {4, 5, 6, 7, 8, 9, 10}
 PREVALENCE_SCHEMA_NAME = "cast-history-prevalence-metrics"
 PREVALENCE_SCHEMA_VERSIONS = {1, 2}
 VERSION = "v5-c6g5f4j-void-pointer-reconciliation"
