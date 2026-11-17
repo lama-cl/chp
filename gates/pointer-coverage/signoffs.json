@@ -1,0 +1,49 @@
+{
+  "schemaName": "cast-history-pointer-coverage-signoffs",
+  "schemaVersion": 1,
+  "note": "Edited by human reviewers only. A phase may be added to POINTER_COVERAGE_SEALED_PHASES once its entry is approved.",
+  "phases": {
+    "P0": {
+      "status": "pending",
+      "reviewer": null,
+      "date": null,
+      "packet": "review/P0.md",
+      "notes": ""
+    },
+    "P1": {
+      "status": "pending",
+      "reviewer": null,
+      "date": null,
+      "packet": "review/P1.md",
+      "notes": ""
+    },
+    "P2": {
+      "status": "pending",
+      "reviewer": null,
+      "date": null,
+      "packet": "review/P2.md",
+      "notes": ""
+    },
+    "P3": {
+      "status": "pending",
+      "reviewer": null,
+      "date": null,
+      "packet": "review/P3.md",
+      "notes": ""
+    },
+    "P4": {
+      "status": "pending",
+      "reviewer": null,
+      "date": null,
+      "packet": "review/P4.md",
+      "notes": ""
+    },
+    "P5": {
+      "status": "pending",
+      "reviewer": null,
+      "date": null,
+      "packet": "review/P5.md",
+      "notes": ""
+    }
+  }
+}

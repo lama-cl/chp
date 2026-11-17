@@ -172,6 +172,8 @@ def main():
     ap.add_argument("--require", action="append", default=[], help="gate id that must be green (repeatable)")
     ap.add_argument("--require-phase", action="append", default=[],
                     help="every gate of this phase must be green (repeatable)")
+    ap.add_argument("--require-signoff", action="append", default=[],
+                    help="phase whose human sign-off in signoffs.json must be 'approved' (repeatable)")
     ap.add_argument("--update-baseline", action="store_true", help="rewrite baseline.json from this run")
     ap.add_argument("--baseline", default=str(HERE / "baseline.json"))
     ap.add_argument("--json", help="write machine-readable results here")
@@ -245,6 +247,12 @@ def main():
 
     required = set(args.require) | {g["id"] for g in gates if g["phase"] in args.require_phase}
     unmet = sorted(g for g in required if gate_status.get(g) != "GREEN")
+    signoffs = json.loads((HERE / "signoffs.json").read_text())["phases"]
+    for phase in args.require_signoff:
+        entry = signoffs.get(phase) or {}
+        if entry.get("status") != "approved" or not entry.get("reviewer") \
+                or not (HERE / entry.get("packet", "")).is_file():
+            unmet.append(f"{phase} human sign-off (signoffs.json: {entry.get('status', 'missing')})")
     greens = sum(1 for s in gate_status.values() if s == "GREEN")
     print(f"\n{greens}/{len(gate_status)} gates green; "
           f"{len(regressions)} regression(s); {len(newly_green)} check(s) newly passing")

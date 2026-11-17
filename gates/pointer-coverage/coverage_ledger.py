@@ -59,6 +59,9 @@ def bucket_of(subject):
 
 def build_ledger(root):
     seen = {}
+    callee_subjects = collections.Counter()
+    unexplained = []
+    call_sites = {}
     files = sorted(pathlib.Path(root).rglob("*.cast-paper-facts.json"))
     for path in files:
         try:
@@ -73,13 +76,26 @@ def build_ledger(root):
             loc = s.get("location") or {}
             key = (loc.get("file"), loc.get("line"), loc.get("column"), s.get("entity"))
             bucket = bucket_of(s)
+            escape = s.get("escape") or {}
+            if key not in seen:
+                # Rank external code only: project callees are not modelling
+                # candidates.  Schema v10 records before the split lack the key.
+                externals = escape.get("externalCallees")
+                for callee in (escape.get("callees") or []) if externals is None else externals:
+                    callee_subjects[callee] += 1
+                if bucket.startswith("blocked:") and not escape.get("reason"):
+                    unexplained.append(f"{loc.get('file')}:{loc.get('line')} {s.get('entity')}")
             # A header-declared subject can appear in many TUs: keep the best.
             if key not in seen or (bucket == "resolved" and seen[key][1] != "resolved"):
                 seen[key] = (kind, bucket)
+        for site in doc.get("indirectCallSites") or []:
+            loc = site.get("location") or {}
+            call_sites[(loc.get("file"), loc.get("line"), loc.get("column"))] = (
+                site.get("calleeExprKind", "other"), site.get("resolutionTier", "unresolved"))
     by_kind = {k: collections.Counter() for k in POINTER_KINDS}
     for kind, bucket in seen.values():
         by_kind[kind][bucket] += 1
-    out = {"schemaName": "cast-history-pointer-coverage-ledger", "schemaVersion": 1,
+    out = {"schemaName": "cast-history-pointer-coverage-ledger", "schemaVersion": 2,
            "paperFactsFiles": len(files), "kinds": {}}
     for kind, counts in by_kind.items():
         total = sum(counts.values())
@@ -93,6 +109,19 @@ def build_ledger(root):
             "blockedShare": round(blocked / total, 4) if total else None,
             "buckets": dict(sorted(counts.items())),
         }
+    sites = collections.Counter(call_sites.values())
+    out["indirectCallSites"] = {
+        "total": len(call_sites),
+        "unresolved": sum(n for (_, tier), n in sites.items() if tier == "unresolved"),
+        "byKindAndTier": {f"{kind}/{tier}": n for (kind, tier), n in sorted(sites.items())},
+    }
+    out["escapeCallees"] = {
+        "distinct": len(callee_subjects),
+        "top": [{"callee": c, "subjects": n} for c, n in
+                sorted(callee_subjects.items(), key=lambda kv: (-kv[1], kv[0]))[:40]],
+    }
+    out["blockedWithoutEscapeReason"] = len(unexplained)
+    out["blockedWithoutEscapeReasonExamples"] = sorted(unexplained)[:10]
     return out
 
 
@@ -103,11 +132,22 @@ def render(ledger):
                      f"blocked={row['blocked']} opaque={row['opaqueNoEvidence']}")
         for bucket, n in row["buckets"].items():
             lines.append(f"    {bucket:32s} {n}")
+    sites = ledger["indirectCallSites"]
+    lines.append(f"indirect call sites: total={sites['total']} unresolved={sites['unresolved']}")
+    for key, n in sites["byKindAndTier"].items():
+        lines.append(f"    {key:40s} {n}")
+    top = ledger["escapeCallees"]["top"][:10]
+    if top:
+        lines.append(f"escape callees: {ledger['escapeCallees']['distinct']} distinct; top by subjects:")
+        lines.extend(f"    {row['callee']:32s} {row['subjects']}" for row in top)
+    lines.append(f"blocked subjects without escape.reason: {ledger['blockedWithoutEscapeReason']}")
     return "\n".join(lines)
 
 
 def compare(new, old):
-    """Ratchet: resolved may not drop, blocked may not grow, per pointer kind."""
+    """Ratchet: resolved may not drop and blocked may not grow per pointer
+    kind, unresolved indirect call sites may not grow, and every blocked
+    subject must say why (escape.reason)."""
     problems = []
     for kind, row in new["kinds"].items():
         prev = (old.get("kinds") or {}).get(kind)
@@ -117,6 +157,13 @@ def compare(new, old):
             problems.append(f"{kind}: resolved dropped {prev['resolved']} -> {row['resolved']}")
         if row["blocked"] > prev["blocked"]:
             problems.append(f"{kind}: blocked grew {prev['blocked']} -> {row['blocked']}")
+    old_sites = (old.get("indirectCallSites") or {}).get("unresolved")
+    new_sites = new["indirectCallSites"]["unresolved"]
+    if old_sites is not None and new_sites > old_sites:
+        problems.append(f"unresolved indirect call sites grew {old_sites} -> {new_sites}")
+    if new["blockedWithoutEscapeReason"]:
+        problems.append(f"{new['blockedWithoutEscapeReason']} blocked subject(s) have no escape.reason: "
+                        + "; ".join(new["blockedWithoutEscapeReasonExamples"][:3]))
     return problems
 
 

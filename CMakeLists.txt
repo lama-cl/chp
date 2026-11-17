@@ -48,8 +48,9 @@ endif()
 # Pointer-coverage gates (docs/pointer-coverage-plan.md).
 #   ctest -R pointer-coverage-ratchet   nothing that passed in baseline.json may fail
 #   ctest -R pointer-coverage-phase     exit gates of the phases sealed below
-# Sealing a phase = appending it to POINTER_COVERAGE_SEALED_PHASES in the same
-# change that turns its gates green.  Sealed phases can never go red again.
+# Sealing a phase = appending it to POINTER_COVERAGE_SEALED_PHASES after a
+# human approved its review packet in gates/pointer-coverage/signoffs.json.
+# Sealed phases can never go red again.
 set(POINTER_COVERAGE_SEALED_PHASES "" CACHE STRING
     "Phases (P0;P1;...) whose pointer-coverage gates are required to be green")
 enable_testing()
@@ -64,6 +65,7 @@ if (Python3_FOUND)
     add_test(NAME pointer-coverage-phase-${phase}
       COMMAND ${Python3_EXECUTABLE} ${POINTER_COVERAGE_GATES}
               --tool $<TARGET_FILE:cast-history-tool>
-              --phase ${phase} --require-phase ${phase})
+              --phase ${phase} --require-phase ${phase}
+              --require-signoff ${phase})
   endforeach()
 endif()
