@@ -44,3 +44,26 @@ if (MSVC)
 else()
   target_compile_options(cast-history-tool PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+# Pointer-coverage gates (docs/pointer-coverage-plan.md).
+#   ctest -R pointer-coverage-ratchet   nothing that passed in baseline.json may fail
+#   ctest -R pointer-coverage-phase     exit gates of the phases sealed below
+# Sealing a phase = appending it to POINTER_COVERAGE_SEALED_PHASES in the same
+# change that turns its gates green.  Sealed phases can never go red again.
+set(POINTER_COVERAGE_SEALED_PHASES "" CACHE STRING
+    "Phases (P0;P1;...) whose pointer-coverage gates are required to be green")
+enable_testing()
+find_package(Python3 COMPONENTS Interpreter)
+if (Python3_FOUND)
+  set(POINTER_COVERAGE_GATES
+      ${CMAKE_CURRENT_SOURCE_DIR}/gates/pointer-coverage/run_gates.py)
+  add_test(NAME pointer-coverage-ratchet
+    COMMAND ${Python3_EXECUTABLE} ${POINTER_COVERAGE_GATES}
+            --tool $<TARGET_FILE:cast-history-tool>)
+  foreach(phase IN LISTS POINTER_COVERAGE_SEALED_PHASES)
+    add_test(NAME pointer-coverage-phase-${phase}
+      COMMAND ${Python3_EXECUTABLE} ${POINTER_COVERAGE_GATES}
+              --tool $<TARGET_FILE:cast-history-tool>
+              --phase ${phase} --require-phase ${phase})
+  endforeach()
+endif()
