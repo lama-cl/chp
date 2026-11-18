@@ -27,9 +27,10 @@
         6,
         7,
         8,
-        9
+        9,
+        10
       ],
-      "description": "Version 9 is current. Versions 1 through 8 are accepted for legacy validation only."
+      "description": "Version 10 is current: it adds subject.escape and indirectCallSites (pointer-coverage P0). Versions 1 through 9 are accepted for legacy validation only."
     },
     "toolVersion": {
       "type": "string"
@@ -179,6 +180,25 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/callbackUse"
+      }
+    },
+    "indirectCallSites": {
+      "type": "array",
+      "description": "Version 10: one record per indirect call expression in the TU. Inventory only; never consumed by history composition.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["function", "location", "calleeExpr", "calleeExprKind", "resolutionTier", "targetCount", "targets"],
+        "properties": {
+          "function": {"type": "string"},
+          "location": {"type": "object"},
+          "calleeExpr": {"type": "string"},
+          "calleeExprKind": {"enum": ["array-element", "field-via-pointer", "field-of-array-element", "field-of-instance", "parameter", "global-variable", "local-variable", "call-result", "other"]},
+          "resolutionTier": {"enum": ["flow-sensitive", "global-initializer", "slot", "mlta", "signature", "name-match", "formal-parameter", "unresolved"]},
+          "targetCount": {"type": "integer", "minimum": 0},
+          "targets": {"type": "array", "items": {"type": "string"}},
+          "pointerArguments": {"type": "integer", "minimum": 0}
+        }
       }
     },
     "declaredPointerInventory": {
@@ -722,6 +742,21 @@
             "MixedOrProvenanceSensitive",
             "ExternalUnknown"
           ]
+        },
+        "escape": {
+          "description": "Version 10: null, or where and why this subject's interpretation can be lost. Evidence, not a verdict: a typed subject can still escape.",
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "required": ["reason", "reasons", "callees", "siteCount", "sites"],
+          "properties": {
+            "reason": {"enum": ["external-unmodeled", "forwarded-to-project", "callback-unresolved", "callback-field", "callback-formal", "dynamic-symbol"]},
+            "reasons": {"type": "array", "minItems": 1, "items": {"enum": ["external-unmodeled", "forwarded-to-project", "callback-unresolved", "callback-field", "callback-formal", "dynamic-symbol"]}},
+            "callees": {"type": "array", "items": {"type": "string"}},
+            "siteCount": {"type": "integer", "minimum": 0},
+            "externalCallees": {"type": "array", "items": {"type": "string"}},
+            "projectCallees": {"type": "array", "items": {"type": "string"}},
+            "sites": {"type": "array", "items": {"type": "object", "required": ["callee", "kind", "location"], "properties": {"kind": {"enum": ["external", "project", "indirect-external", "indirect", "dynamic-symbol"]}}}}
+          }
         },
         "callbackMediation": {
           "type": "object",

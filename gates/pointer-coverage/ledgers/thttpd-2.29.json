@@ -1,0 +1,226 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 8,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 14,
+      "resolved": 8,
+      "blocked": 3,
+      "opaqueNoEvidence": 3,
+      "resolvedShare": 0.5714,
+      "blockedShare": 0.2143,
+      "buckets": {
+        "blocked:external-unmodeled": 3,
+        "opaque-no-evidence": 3,
+        "resolved": 8
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 490,
+      "resolved": 64,
+      "blocked": 130,
+      "opaqueNoEvidence": 296,
+      "resolvedShare": 0.1306,
+      "blockedShare": 0.2653,
+      "buckets": {
+        "blocked:callback-field": 1,
+        "blocked:external-unmodeled": 125,
+        "blocked:forwarded-to-project": 4,
+        "opaque-no-evidence": 296,
+        "resolved": 64
+      }
+    },
+    "function-pointer": {
+      "total": 1,
+      "resolved": 0,
+      "blocked": 0,
+      "opaqueNoEvidence": 1,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.0,
+      "buckets": {
+        "opaque-no-evidence": 1
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 1,
+    "unresolved": 1,
+    "byKindAndTier": {
+      "field-via-pointer/unresolved": 1
+    }
+  },
+  "escapeCallees": {
+    "distinct": 43,
+    "top": [
+      {
+        "callee": "free",
+        "subjects": 37
+      },
+      {
+        "callee": "syslog",
+        "subjects": 31
+      },
+      {
+        "callee": "fprintf",
+        "subjects": 24
+      },
+      {
+        "callee": "fclose",
+        "subjects": 12
+      },
+      {
+        "callee": "strcspn",
+        "subjects": 12
+      },
+      {
+        "callee": "vsprintf",
+        "subjects": 9
+      },
+      {
+        "callee": "__builtin_va_start",
+        "subjects": 8
+      },
+      {
+        "callee": "stat",
+        "subjects": 7
+      },
+      {
+        "callee": "strspn",
+        "subjects": 7
+      },
+      {
+        "callee": "execve",
+        "subjects": 6
+      },
+      {
+        "callee": "fopen",
+        "subjects": 6
+      },
+      {
+        "callee": "strcasecmp",
+        "subjects": 6
+      },
+      {
+        "callee": "strncasecmp",
+        "subjects": 4
+      },
+      {
+        "callee": "strpbrk",
+        "subjects": 4
+      },
+      {
+        "callee": "atoi",
+        "subjects": 3
+      },
+      {
+        "callee": "chdir",
+        "subjects": 3
+      },
+      {
+        "callee": "crypt",
+        "subjects": 3
+      },
+      {
+        "callee": "fgets",
+        "subjects": 3
+      },
+      {
+        "callee": "perror",
+        "subjects": 3
+      },
+      {
+        "callee": "read",
+        "subjects": 3
+      },
+      {
+        "callee": "realloc",
+        "subjects": 3
+      },
+      {
+        "callee": "sscanf",
+        "subjects": 3
+      },
+      {
+        "callee": "strftime",
+        "subjects": 3
+      },
+      {
+        "callee": "atol",
+        "subjects": 2
+      },
+      {
+        "callee": "atoll",
+        "subjects": 2
+      },
+      {
+        "callee": "fileno",
+        "subjects": 2
+      },
+      {
+        "callee": "open",
+        "subjects": 2
+      },
+      {
+        "callee": "opendir",
+        "subjects": 2
+      },
+      {
+        "callee": "openlog",
+        "subjects": 2
+      },
+      {
+        "callee": "readlink",
+        "subjects": 2
+      },
+      {
+        "callee": "sprintf",
+        "subjects": 2
+      },
+      {
+        "callee": "write",
+        "subjects": 2
+      },
+      {
+        "callee": "closedir",
+        "subjects": 1
+      },
+      {
+        "callee": "fflush",
+        "subjects": 1
+      },
+      {
+        "callee": "fread",
+        "subjects": 1
+      },
+      {
+        "callee": "freeaddrinfo",
+        "subjects": 1
+      },
+      {
+        "callee": "getaddrinfo",
+        "subjects": 1
+      },
+      {
+        "callee": "getpwnam",
+        "subjects": 1
+      },
+      {
+        "callee": "initgroups",
+        "subjects": 1
+      },
+      {
+        "callee": "lstat",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "thttpd-2.29",
+  "translationUnits": {
+    "total": 8,
+    "failed": 0,
+    "failedNames": []
+  }
+}

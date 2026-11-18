@@ -1,0 +1,103 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 15,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 24,
+      "resolved": 6,
+      "blocked": 5,
+      "opaqueNoEvidence": 13,
+      "resolvedShare": 0.25,
+      "blockedShare": 0.2083,
+      "buckets": {
+        "blocked:callback-field": 1,
+        "blocked:callback-formal": 2,
+        "blocked:external-unmodeled": 2,
+        "opaque-no-evidence": 13,
+        "resolved": 6
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 463,
+      "resolved": 171,
+      "blocked": 52,
+      "opaqueNoEvidence": 240,
+      "resolvedShare": 0.3693,
+      "blockedShare": 0.1123,
+      "buckets": {
+        "blocked:callback-field": 2,
+        "blocked:callback-unresolved": 2,
+        "blocked:external-unmodeled": 37,
+        "blocked:forwarded-to-project": 11,
+        "opaque-no-evidence": 240,
+        "resolved": 171
+      }
+    },
+    "function-pointer": {
+      "total": 27,
+      "resolved": 0,
+      "blocked": 0,
+      "opaqueNoEvidence": 27,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.0,
+      "buckets": {
+        "opaque-no-evidence": 27
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 6,
+    "unresolved": 3,
+    "byKindAndTier": {
+      "field-of-array-element/unresolved": 1,
+      "field-via-pointer/unresolved": 2,
+      "parameter/formal-parameter": 3
+    }
+  },
+  "escapeCallees": {
+    "distinct": 8,
+    "top": [
+      {
+        "callee": "free",
+        "subjects": 28
+      },
+      {
+        "callee": "write",
+        "subjects": 15
+      },
+      {
+        "callee": "snprintf",
+        "subjects": 10
+      },
+      {
+        "callee": "read",
+        "subjects": 8
+      },
+      {
+        "callee": "vsnprintf",
+        "subjects": 5
+      },
+      {
+        "callee": "open",
+        "subjects": 4
+      },
+      {
+        "callee": "__builtin_va_start",
+        "subjects": 1
+      },
+      {
+        "callee": "memchr",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "zlib-1.2.11",
+  "translationUnits": {
+    "total": 15,
+    "failed": 0,
+    "failedNames": []
+  }
+}

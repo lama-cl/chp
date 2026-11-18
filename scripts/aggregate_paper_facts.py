@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 SCHEMA_NAME = "cast-history-tu-paper-facts"
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 VERSION = "v9-c6g5f4j-paper-facts-aggregation"
 
 PRIMARY_CATEGORIES = (

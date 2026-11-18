@@ -1,0 +1,596 @@
+{
+  "schemaName": "cast-history-pointer-coverage-gates",
+  "schemaVersion": 1,
+  "doc": "docs/pointer-coverage-plan.md",
+  "checkKinds": {
+    "subject": "Locate one paper-facts subject by `entity`, then apply: typesInclude / typesExclude (history + active concrete pointer types, whitespace-normalised), bucket / bucketPrefix (coverage_ledger.py bucket), callbackStateNotIn, fields (dotted path inside the subject row -> required value; a list value means 'contains all').",
+    "noFeature": "The report's featureDiagnostics must contain no `unsupported` record with one of these feature names."
+  },
+  "gates": [
+    {
+      "id": "P0-escape-accounting",
+      "phase": "P0",
+      "title": "Every lost pointer names where and why it was lost",
+      "fixture": [
+        "fixtures/ext_unknown_boundary.c",
+        "fixtures/ext_formal_callback.c",
+        "fixtures/ext_indirect_external.c",
+        "fixtures/escape_cross_tu/forward.c",
+        "fixtures/escape_cross_tu/sink.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "keep::p",
+          "typesInclude": [
+            "int *"
+          ]
+        },
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "leak::p",
+          "bucketPrefix": "blocked:"
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "leak::p",
+          "fields": {
+            "escape.reason": "external-unmodeled",
+            "escape.callees": [
+              "vendor_consume"
+            ],
+            "escape.externalCallees": [
+              "vendor_consume"
+            ]
+          }
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "pump::ctx",
+          "fields": {
+            "escape.reason": "callback-formal",
+            "escape.siteCount": 1
+          }
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "fwd::p",
+          "fields": {
+            "escape.reason": "forwarded-to-project",
+            "escape.projectCallees": [
+              "sink"
+            ],
+            "escape.externalCallees": []
+          }
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "release::p",
+          "fields": {
+            "escape.reason": "external-unmodeled",
+            "escape.externalCallees": [
+              "free"
+            ],
+            "escape.reasons": [
+              "external-unmodeled"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "P1-fp-array-dispatch",
+      "phase": "P1",
+      "title": "Constant function-pointer array call expands to its initialiser targets",
+      "fixture": [
+        "fixtures/fp_array_dispatch.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "h_int::payload",
+          "typesInclude": [
+            "int *"
+          ]
+        },
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "h_dbl::payload",
+          "typesInclude": [
+            "double *"
+          ]
+        },
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "dispatch::payload",
+          "typesExclude": [
+            "long *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "noFeature",
+          "features": [
+            "function-pointer-array-call"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "dispatch::payload",
+          "typesInclude": [
+            "int *",
+            "double *"
+          ],
+          "callbackStateNotIn": [
+            "UnresolvedCallback"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P1-fp-vtable-oop",
+      "phase": "P1",
+      "title": "ops-table call through a pointer base resolves by (record type, field)",
+      "fixture": [
+        "fixtures/fp_vtable_oop.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "circle_area::self",
+          "typesInclude": [
+            "const struct circle *"
+          ]
+        },
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "rect_area::self",
+          "typesInclude": [
+            "const struct rect *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "noFeature",
+          "features": [
+            "function-pointer-field-call"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "shape_area::s",
+          "typesInclude": [
+            "const struct circle *",
+            "const struct rect *"
+          ],
+          "callbackStateNotIn": [
+            "FieldCallback",
+            "UnresolvedCallback"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P1-fp-fsm",
+      "phase": "P1",
+      "title": "Table-driven state machine: array-of-struct fptr field resolves to all states",
+      "fixture": [
+        "fixtures/fp_fsm.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "st_body::ctx",
+          "typesInclude": [
+            "struct parser *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "noFeature",
+          "features": [
+            "function-pointer-field-call",
+            "function-pointer-array-call"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "run::ctx",
+          "typesInclude": [
+            "struct parser *"
+          ],
+          "callbackStateNotIn": [
+            "UnresolvedCallback",
+            "FieldCallback"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P1-fp-callback-registered-target",
+      "phase": "P1",
+      "title": "Callback stored in a global resolves at the later invocation site",
+      "fixture": [
+        "fixtures/fp_callback_registered.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "on_event::ctx",
+          "typesInclude": [
+            "int *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "noFeature",
+          "features": [
+            "function-pointer-variable-call"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "g_ctx",
+          "typesInclude": [
+            "int *"
+          ],
+          "callbackStateNotIn": [
+            "UnresolvedCallback"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P1-fp-global-reassigned",
+      "phase": "P1",
+      "title": "Global function pointer reassigned elsewhere: initializer is not the whole target set",
+      "fixture": [
+        "fixtures/fp_global_reassigned.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "h_dbl::p",
+          "typesInclude": [
+            "double *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "call::p",
+          "typesInclude": [
+            "int *",
+            "double *"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2-fp-callback-registered-context",
+      "phase": "P2",
+      "title": "Context stored in a global inherits the interpretation made after the later load",
+      "fixture": [
+        "fixtures/fp_callback_registered.c"
+      ],
+      "checks": [
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "register_handler::ctx",
+          "typesInclude": [
+            "int *"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P2-st-heap-carrier",
+      "phase": "P2",
+      "title": "Payload stored in a heap struct in one function, interpreted after a load in another",
+      "fixture": [
+        "fixtures/st_heap_carrier.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "node_item::n.payload",
+          "typesInclude": [
+            "struct item *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "node_new::payload",
+          "typesInclude": [
+            "struct item *"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P3-un-type-punning",
+      "phase": "P3",
+      "title": "Write one union member, read another: a cast with no CastExpr",
+      "fixture": [
+        "fixtures/un_type_punning.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "pun_to_int::pi",
+          "typesInclude": [
+            "int *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "pun_to_int::p",
+          "typesInclude": [
+            "int *"
+          ],
+          "fields": {
+            "unionMediation.kind": "type-punning"
+          }
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "pun_chain::p",
+          "typesInclude": [
+            "float *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "pun_to_bits::p",
+          "fields": {
+            "refinementFacts.integerPointerFlow": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "P3-un-tagged",
+      "phase": "P3",
+      "title": "Tagged union: discriminant-guarded parallel interpretations of shared storage",
+      "fixture": [
+        "fixtures/un_tagged.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "value_read::v.u.ip",
+          "typesInclude": [
+            "int * const"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "value_set::payload",
+          "typesInclude": [
+            "int *",
+            "double *"
+          ],
+          "fields": {
+            "history.guarded": true,
+            "unionMediation.kind": "tagged-union"
+          }
+        }
+      ]
+    },
+    {
+      "id": "P4-ext-libc-callbacks",
+      "phase": "P4",
+      "title": "Modelled library functions forward data into project callbacks",
+      "fixture": [
+        "fixtures/ext_libc_callbacks.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "cmp_int::a",
+          "typesInclude": [
+            "const int *"
+          ]
+        },
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "worker::arg",
+          "typesInclude": [
+            "struct job *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "sort_ints::base",
+          "typesInclude": [
+            "const int *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "spawn::arg",
+          "typesInclude": [
+            "struct job *"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P4-ext-libc-dataflow",
+      "phase": "P4",
+      "title": "Modelled library functions copy / return-alias pointer values",
+      "fixture": [
+        "fixtures/ext_libc_dataflow.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "read_copied::out",
+          "typesInclude": [
+            "int *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "read_copied::p",
+          "typesInclude": [
+            "int *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "grow::buf",
+          "typesInclude": [
+            "double *"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P5-fp-dlsym-plugin",
+      "phase": "P5",
+      "title": "dlsym literal links to the project definition; non-literal is an explicit boundary",
+      "fixture": [
+        "fixtures/fp_dlsym_plugin/host.c",
+        "fixtures/fp_dlsym_plugin/plugin.c"
+      ],
+      "checks": [
+        {
+          "role": "control",
+          "kind": "subject",
+          "entity": "plugin_entry::data",
+          "typesInclude": [
+            "struct job *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "host_run::data",
+          "typesInclude": [
+            "struct job *"
+          ]
+        },
+        {
+          "role": "target",
+          "kind": "subject",
+          "entity": "host_run_unknown::data",
+          "bucket": "blocked:dynamic-symbol"
+        }
+      ]
+    }
+  ],
+  "phases": {
+    "P0": {
+      "title": "Escape accounting",
+      "reviewFocus": "escape",
+      "reviewQuestions": [
+        "For each sampled subject: is the pointer really passed to the named callee at the cited line?",
+        "Sites of kind `project`: is the callee really a project function defined in another TU (so the loss is a cross-TU summary that contributed nothing, not external code)?",
+        "Is every named callee truly outside the analysed project (no body in any analysed TU)?",
+        "Does any sampled subject look lost for a reason the record does not mention?",
+        "Indirect call sites: do the calleeExprKind labels match the source expression?",
+        "Is the corpus (corpus.json) representative enough to steer P1 and P4, or should projects be added?"
+      ],
+      "contextGates": [
+        "P1-fp-array-dispatch",
+        "P1-fp-vtable-oop",
+        "P1-fp-fsm",
+        "P1-fp-callback-registered-target",
+        "P4-ext-libc-callbacks",
+        "P5-fp-dlsym-plugin",
+        "P1-fp-global-reassigned"
+      ],
+      "agentNotes": [
+        "Scope: reporting only. P0 adds `subject.escape` and `indirectCallSites` to paper facts (schema v10) and `indirectCallSites` to the report. No analysis path reads them.",
+        "Equivalence check: all 87 `examples/*.c` plus the 11 original fixtures were run with the pre-P0 and final P0 builds (text output, link summary, report, paper facts = 384 files). After removing the two new fields and the version number, every file is byte-identical / JSON-equal.",
+        "`escape` is evidence, not a verdict. A subject can be typed and still escape (it is then bucketed `resolved`). `reasons` lists every reason; `reason` is the first. Each site has a kind: `external`, `project`, `indirect-external` or `indirect`.",
+        "Self-review of the first packet found three accounting errors, now fixed and covered by fixture checks: (1) 87 of 950 corpus escapes said `external-unmodeled` with no callee. They were arguments to project functions in other TUs, which the pre-existing `externalBoundary` flag treats as external because it consults only the current TU. These are now `forwarded-to-project` with the callee named (`escape_cross_tu/`). (2) Indirect calls whose target is known but external (parson `parson_free` = `free`) were reported as unresolved callbacks; they are now `external-unmodeled` via `free`, site kind `indirect-external` (`ext_indirect_external.c`). (3) zlib `inflateBack::in_desc` was blocked with no reason; added `callback-formal` (`ext_formal_callback.c`).",
+        "Existing soundness gap, not fixed in P0: a global function pointer is resolved from its initializer only, and reassignments in other functions are ignored (parson: `parson_free = free`, reassigned at parson.c:2053). P0 labels these sites `global-initializer`, not `flow-sensitive`, and adds the red gate `P1-fp-global-reassigned`, so P1 must fix it.",
+        "Known limitation: escape sites inside macros point at the macro's spelling location (binn: `#define strnicmp strncasecmp`). The tool's `sourceSpan` uses spelling locations everywhere; switching to expansion locations would change every output, so it should be its own change.",
+        "Library functions the tool already treats as memory/string sinks (`memcpy`, `strlen`, ...) have their own pointer-use kind and are not recorded as escapes. Revisit in P4.",
+        "Corpus limits: lua-5.4.1 is excluded by default because `build_summary_index.py` needs more than 25 minutes on its 94 MB of summaries (a pre-existing problem, worth fixing before P1, since lua is the richest function-pointer project). vsftpd `sysdeputil.c` needs PAM headers that are not installed here. thttpd needs configure-equivalent defines and two generated headers, which are in `corpus-include/`.",
+        "Pre-existing, not P0: `validate_paper_facts.py` rejects hiredis `test.c` for a duplicate `declarationId` (`sds.h:89:44`, an inline function in a header). The pre-P0 build produces the same error. All other corpus and fixture paper facts validate."
+      ]
+    },
+    "P1": {
+      "title": "Function-value slots",
+      "reviewFocus": "indirect-call",
+      "reviewQuestions": [
+        "For each sampled call site: is every listed target really storable in that slot? (precision)",
+        "Can you find a function that can reach the site but is missing from the targets? (recall)",
+        "Do the new parallel histories on data arguments read as true alternatives, not artefacts?",
+        "Did any subject's classification move toward wild-like without a real second target?"
+      ]
+    },
+    "P2": {
+      "title": "Data slots",
+      "reviewFocus": "resolved",
+      "reviewQuestions": [
+        "For each sampled subject: does the inherited type come from a load of the same field/global?",
+        "Are generic containers reported as polymorphic carriers rather than resolved to one type?",
+        "Did any previously precise instance-keyed result get widened by the type-keyed slot?"
+      ]
+    },
+    "P3": {
+      "title": "Unions",
+      "reviewFocus": "union",
+      "reviewQuestions": [
+        "For each sampled pun: are the written and read members really different views of the same object?",
+        "For each tagged union: is the reported discriminant the field the code actually tests?",
+        "Are unions the model cannot handle reported as unsupported rather than silently skipped?"
+      ]
+    },
+    "P4": {
+      "title": "External contracts",
+      "reviewFocus": "resolved",
+      "reviewQuestions": [
+        "Does each contract match the documented behaviour of the library function?",
+        "Were the modelled callees chosen from the top of the P0 escape-callee ranking?",
+        "For each sampled subject: is the type it gained really reached through the modelled call?"
+      ]
+    },
+    "P5": {
+      "title": "Dynamic loading",
+      "reviewFocus": "indirect-call",
+      "reviewQuestions": [
+        "Is each name-matched dlsym binding the definition a real loader would find?",
+        "Are non-literal symbol lookups reported as dynamic-symbol boundaries?"
+      ]
+    }
+  }
+}

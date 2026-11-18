@@ -44,7 +44,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 PAPER_SCHEMA = "cast-history-tu-paper-facts"
-SUPPORTED_PAPER_VERSIONS = {6, 7, 8, 9}
+SUPPORTED_PAPER_VERSIONS = {6, 7, 8, 9, 10}
 VERSION = "v4-c6g5f4j-void-pointer-relational-facts"
 
 OBSERVED_NO_FINAL_PATTERNS = (
@@ -798,7 +798,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             continue
         version = document.get("schemaVersion")
         if version not in SUPPORTED_PAPER_VERSIONS:
-            errors.append(f"{path}: requires schemaVersion 6, 7, 8, or 9, found {version!r}")
+            errors.append(f"{path}: requires schemaVersion 6 through 10, found {version!r}")
             continue
         project = project_name(path, root, document)
         accepted.append(path.as_posix())

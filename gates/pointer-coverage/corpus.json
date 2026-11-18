@@ -1,0 +1,126 @@
+{
+  "schemaName": "cast-history-pointer-coverage-corpus",
+  "schemaVersion": 1,
+  "note": "Source-only corpus: no configure step, no compile database. Each project lists the directories whose .c files are analysed (non-recursive) and the include flags. TUs that fail to parse are counted in the ledger, not hidden.",
+  "projects": [
+    {
+      "name": "vsftpd-3.0.3",
+      "root": "test_projects/bench-3c/vsftpd-3.0.3",
+      "dirs": [
+        "."
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-iquote",
+        "."
+      ],
+      "flagsNote": "-iquote, not -I: the project ships its own features.h, which -I. would let shadow the system header. sysdeputil.c needs PAM headers (libpam0g-dev); without them it is a counted parse failure."
+    },
+    {
+      "name": "zlib-1.2.11",
+      "root": "test_projects/bench-3c/zlib-1.2.11",
+      "dirs": [
+        "."
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-I."
+      ]
+    },
+    {
+      "name": "lua-5.4.1",
+      "root": "test_projects/bench-3c/lua-5.4.1",
+      "dirs": [
+        "src"
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-Isrc"
+      ],
+      "slow": true,
+      "slowNote": "build_summary_index.py takes >15 min on its 94 MB of C1 summaries (pre-existing index scalability). Run with --include-slow; it is the richest function-pointer project (luaL_Reg tables, lua_CFunction)."
+    },
+    {
+      "name": "thttpd-2.29",
+      "root": "test_projects/bench-3c/thttpd-2.29",
+      "dirs": [
+        "."
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-I.",
+        "-I../../../gates/pointer-coverage/corpus-include/thttpd-2.29",
+        "-include",
+        "grp.h",
+        "-D_GNU_SOURCE",
+        "-DHAVE_INT64T=1",
+        "-DHAVE_POLL=1",
+        "-DHAVE_POLL_H=1",
+        "-DHAVE_TM_GMTOFF=1",
+        "-DHAVE_FCNTL_H=1",
+        "-DHAVE_SOCKLENT=1",
+        "-DHAVE_ATOLL=1",
+        "-DTIME_WITH_SYS_TIME=1",
+        "-DHAVE_SYS_TIME_H=1",
+        "-DHAVE_UNISTD_H=1",
+        "-DHAVE_DIRENT_H=1",
+        "-DHAVE_STRERROR=1",
+        "-DHAVE_WAITPID=1",
+        "-DHAVE_SETSID=1",
+        "-DHAVE_GETADDRINFO=1",
+        "-DHAVE_GETNAMEINFO=1",
+        "-DHAVE_GAI_STRERROR=1",
+        "-DHAVE_SOCKADDR_IN6=1",
+        "-DHAVE_SOCKADDR_STORAGE=1",
+        "-DHAVE_MEMORY_H=1",
+        "-DHAVE_STRING_H=1",
+        "-DHAVE_PATHS_H=1"
+      ],
+      "flagsNote": "Stands in for thttpd's configure step on Linux; generated mime headers live in corpus-include/. Include paths are relative to the project root (the runner's cwd)."
+    },
+    {
+      "name": "parson",
+      "root": "test_projects/bench-3c/parson",
+      "dirs": [
+        "."
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-I."
+      ]
+    },
+    {
+      "name": "hiredis",
+      "root": "test_projects/bench-tcc/hiredis",
+      "dirs": [
+        "."
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-I."
+      ]
+    },
+    {
+      "name": "minilisp",
+      "root": "test_projects/bench-tcc/minilisp",
+      "dirs": [
+        "."
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-I."
+      ]
+    },
+    {
+      "name": "binn-3.0",
+      "root": "test_projects/bench-tcc/binn-3.0",
+      "dirs": [
+        "src"
+      ],
+      "flags": [
+        "-std=gnu11",
+        "-Isrc"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 38,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 62,
+      "resolved": 18,
+      "blocked": 14,
+      "opaqueNoEvidence": 30,
+      "resolvedShare": 0.2903,
+      "blockedShare": 0.2258,
+      "buckets": {
+        "blocked:callback-field": 1,
+        "blocked:callback-unresolved": 1,
+        "blocked:external-unmodeled": 12,
+        "opaque-no-evidence": 30,
+        "resolved": 18
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 601,
+      "resolved": 139,
+      "blocked": 136,
+      "opaqueNoEvidence": 326,
+      "resolvedShare": 0.2313,
+      "blockedShare": 0.2263,
+      "buckets": {
+        "blocked:external-unmodeled": 82,
+        "blocked:forwarded-to-project": 54,
+        "opaque-no-evidence": 326,
+        "resolved": 139
+      }
+    },
+    "function-pointer": {
+      "total": 15,
+      "resolved": 0,
+      "blocked": 3,
+      "opaqueNoEvidence": 12,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.2,
+      "buckets": {
+        "blocked:external-unmodeled": 1,
+        "blocked:forwarded-to-project": 2,
+        "opaque-no-evidence": 12
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 7,
+    "unresolved": 4,
+    "byKindAndTier": {
+      "field-of-array-element/unresolved": 1,
+      "field-via-pointer/unresolved": 1,
+      "global-variable/unresolved": 1,
+      "local-variable/unresolved": 1,
+      "parameter/formal-parameter": 3
+    }
+  },
+  "escapeCallees": {
+    "distinct": 36,
+    "top": [
+      {
+        "callee": "free",
+        "subjects": 20
+      },
+      {
+        "callee": "open",
+        "subjects": 17
+      },
+      {
+        "callee": "write",
+        "subjects": 11
+      },
+      {
+        "callee": "read",
+        "subjects": 8
+      },
+      {
+        "callee": "readdir",
+        "subjects": 7
+      },
+      {
+        "callee": "stat",
+        "subjects": 5
+      },
+      {
+        "callee": "strftime",
+        "subjects": 5
+      },
+      {
+        "callee": "closedir",
+        "subjects": 4
+      },
+      {
+        "callee": "getpwnam",
+        "subjects": 4
+      },
+      {
+        "callee": "realloc",
+        "subjects": 4
+      },
+      {
+        "callee": "mprotect",
+        "subjects": 3
+      },
+      {
+        "callee": "qsort",
+        "subjects": 3
+      },
+      {
+        "callee": "readlink",
+        "subjects": 3
+      },
+      {
+        "callee": "dirfd",
+        "subjects": 2
+      },
+      {
+        "callee": "getcwd",
+        "subjects": 2
+      },
+      {
+        "callee": "gethostbyname",
+        "subjects": 2
+      },
+      {
+        "callee": "inet_aton",
+        "subjects": 2
+      },
+      {
+        "callee": "munmap",
+        "subjects": 2
+      },
+      {
+        "callee": "recv",
+        "subjects": 2
+      },
+      {
+        "callee": "rename",
+        "subjects": 2
+      },
+      {
+        "callee": "access",
+        "subjects": 1
+      },
+      {
+        "callee": "atoi",
+        "subjects": 1
+      },
+      {
+        "callee": "bind",
+        "subjects": 1
+      },
+      {
+        "callee": "chdir",
+        "subjects": 1
+      },
+      {
+        "callee": "chmod",
+        "subjects": 1
+      },
+      {
+        "callee": "chroot",
+        "subjects": 1
+      },
+      {
+        "callee": "connect",
+        "subjects": 1
+      },
+      {
+        "callee": "getenv",
+        "subjects": 1
+      },
+      {
+        "callee": "initgroups",
+        "subjects": 1
+      },
+      {
+        "callee": "lstat",
+        "subjects": 1
+      },
+      {
+        "callee": "mkdir",
+        "subjects": 1
+      },
+      {
+        "callee": "opendir",
+        "subjects": 1
+      },
+      {
+        "callee": "rmdir",
+        "subjects": 1
+      },
+      {
+        "callee": "syslog",
+        "subjects": 1
+      },
+      {
+        "callee": "unlink",
+        "subjects": 1
+      },
+      {
+        "callee": "utime",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "vsftpd-3.0.3",
+  "translationUnits": {
+    "total": 39,
+    "failed": 1,
+    "failedNames": [
+      "sysdeputil.c"
+    ]
+  }
+}

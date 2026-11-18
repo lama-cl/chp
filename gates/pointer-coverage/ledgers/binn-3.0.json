@@ -1,0 +1,82 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 1,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 212,
+      "resolved": 185,
+      "blocked": 1,
+      "opaqueNoEvidence": 26,
+      "resolvedShare": 0.8726,
+      "blockedShare": 0.0047,
+      "buckets": {
+        "blocked:callback-unresolved": 1,
+        "opaque-no-evidence": 26,
+        "resolved": 185
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 362,
+      "resolved": 138,
+      "blocked": 72,
+      "opaqueNoEvidence": 152,
+      "resolvedShare": 0.3812,
+      "blockedShare": 0.1989,
+      "buckets": {
+        "blocked:callback-unresolved": 11,
+        "blocked:external-unmodeled": 61,
+        "opaque-no-evidence": 152,
+        "resolved": 138
+      }
+    },
+    "function-pointer": {
+      "total": 11,
+      "resolved": 0,
+      "blocked": 0,
+      "opaqueNoEvidence": 11,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.0,
+      "buckets": {
+        "opaque-no-evidence": 11
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 20,
+    "unresolved": 20,
+    "byKindAndTier": {
+      "field-via-pointer/unresolved": 1,
+      "global-variable/unresolved": 19
+    }
+  },
+  "escapeCallees": {
+    "distinct": 4,
+    "top": [
+      {
+        "callee": "strncasecmp",
+        "subjects": 99
+      },
+      {
+        "callee": "atof",
+        "subjects": 5
+      },
+      {
+        "callee": "strcasecmp",
+        "subjects": 2
+      },
+      {
+        "callee": "atoi",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "binn-3.0",
+  "translationUnits": {
+    "total": 1,
+    "failed": 0,
+    "failedNames": []
+  }
+}

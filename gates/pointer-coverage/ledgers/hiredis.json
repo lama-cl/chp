@@ -1,0 +1,214 @@
+{
+  "schemaName": "cast-history-pointer-coverage-ledger",
+  "schemaVersion": 2,
+  "paperFactsFiles": 10,
+  "kinds": {
+    "void-data-pointer": {
+      "total": 122,
+      "resolved": 37,
+      "blocked": 11,
+      "opaqueNoEvidence": 74,
+      "resolvedShare": 0.3033,
+      "blockedShare": 0.0902,
+      "buckets": {
+        "blocked:callback-field": 9,
+        "blocked:callback-unresolved": 1,
+        "blocked:external-unmodeled": 1,
+        "opaque-no-evidence": 74,
+        "resolved": 37
+      }
+    },
+    "nonvoid-data-pointer": {
+      "total": 709,
+      "resolved": 164,
+      "blocked": 79,
+      "opaqueNoEvidence": 466,
+      "resolvedShare": 0.2313,
+      "blockedShare": 0.1114,
+      "buckets": {
+        "blocked:callback-field": 2,
+        "blocked:callback-unresolved": 2,
+        "blocked:external-unmodeled": 65,
+        "blocked:forwarded-to-project": 10,
+        "opaque-no-evidence": 466,
+        "resolved": 164
+      }
+    },
+    "function-pointer": {
+      "total": 373,
+      "resolved": 0,
+      "blocked": 0,
+      "opaqueNoEvidence": 373,
+      "resolvedShare": 0.0,
+      "blockedShare": 0.0,
+      "buckets": {
+        "opaque-no-evidence": 373
+      }
+    }
+  },
+  "indirectCallSites": {
+    "total": 53,
+    "unresolved": 53,
+    "byKindAndTier": {
+      "field-of-instance/unresolved": 5,
+      "field-via-pointer/unresolved": 48
+    }
+  },
+  "escapeCallees": {
+    "distinct": 36,
+    "top": [
+      {
+        "callee": "strtol",
+        "subjects": 8
+      },
+      {
+        "callee": "SSL_get_error",
+        "subjects": 6
+      },
+      {
+        "callee": "__builtin_va_start",
+        "subjects": 6
+      },
+      {
+        "callee": "SSL_CTX_load_verify_locations",
+        "subjects": 5
+      },
+      {
+        "callee": "SSL_ctrl",
+        "subjects": 5
+      },
+      {
+        "callee": "__builtin_va_copy",
+        "subjects": 5
+      },
+      {
+        "callee": "SSL_connect",
+        "subjects": 4
+      },
+      {
+        "callee": "SSL_set_connect_state",
+        "subjects": 4
+      },
+      {
+        "callee": "SSL_set_fd",
+        "subjects": 4
+      },
+      {
+        "callee": "getaddrinfo",
+        "subjects": 4
+      },
+      {
+        "callee": "memchr",
+        "subjects": 4
+      },
+      {
+        "callee": "SSL_CTX_use_PrivateKey_file",
+        "subjects": 3
+      },
+      {
+        "callee": "SSL_CTX_use_certificate_chain_file",
+        "subjects": 3
+      },
+      {
+        "callee": "connect",
+        "subjects": 3
+      },
+      {
+        "callee": "freeaddrinfo",
+        "subjects": 3
+      },
+      {
+        "callee": "strcasecmp",
+        "subjects": 3
+      },
+      {
+        "callee": "vsnprintf",
+        "subjects": 3
+      },
+      {
+        "callee": "SSL_CTX_free",
+        "subjects": 2
+      },
+      {
+        "callee": "SSL_free",
+        "subjects": 2
+      },
+      {
+        "callee": "SSL_read",
+        "subjects": 2
+      },
+      {
+        "callee": "SSL_write",
+        "subjects": 2
+      },
+      {
+        "callee": "fprintf",
+        "subjects": 2
+      },
+      {
+        "callee": "printf",
+        "subjects": 2
+      },
+      {
+        "callee": "snprintf",
+        "subjects": 2
+      },
+      {
+        "callee": "sprintf",
+        "subjects": 2
+      },
+      {
+        "callee": "strncasecmp",
+        "subjects": 2
+      },
+      {
+        "callee": "SSL_CTX_ctrl",
+        "subjects": 1
+      },
+      {
+        "callee": "SSL_CTX_new",
+        "subjects": 1
+      },
+      {
+        "callee": "SSL_CTX_set_default_verify_paths",
+        "subjects": 1
+      },
+      {
+        "callee": "SSL_CTX_set_verify",
+        "subjects": 1
+      },
+      {
+        "callee": "SSL_new",
+        "subjects": 1
+      },
+      {
+        "callee": "access",
+        "subjects": 1
+      },
+      {
+        "callee": "bind",
+        "subjects": 1
+      },
+      {
+        "callee": "recv",
+        "subjects": 1
+      },
+      {
+        "callee": "send",
+        "subjects": 1
+      },
+      {
+        "callee": "setsockopt",
+        "subjects": 1
+      }
+    ]
+  },
+  "blockedWithoutEscapeReason": 0,
+  "blockedWithoutEscapeReasonExamples": [],
+  "project": "hiredis",
+  "translationUnits": {
+    "total": 10,
+    "failed": 0,
+    "failedNames": []
+  }
+}
