@@ -1,0 +1,889 @@
+Command:
+./cast-history-tool --debug-dump "../examples/demo1.c" -- -std=c17
+
+Output:
+[cast] pvf => void * => char *
+[cast] x => void * => int *
+[cast] pidv => void * => int * => void *
+[cast] pvho => void * => char *
+[cast] pcho => void * => char * => void *
+[cast] pi1 => int * => void *
+[cast] pv => int * => void * => char *
+[cast] pv => int * => void * => char *
+[cast] pv => int * => void * => int *
+pvf : void * => char *    [scope=f]    [implicit-cast]    @ ../examples/demo1.c:2:14
+x : void * => int *    [scope=idv]    [implicit-cast]    @ ../examples/demo1.c:7:15
+pidv : void * => int * => void *    [scope=idv]    [implicit-cast]    @ ../examples/demo1.c:9:10
+pvho : void * => char *    [scope=ho]    [implicit-cast]    @ ../examples/demo1.c:13:16
+pcho : void * => char * => void * => void * => pf.$0    [scope=ho]    [higher-order-call]    @ ../examples/demo1.c:14:3
+pcho : void * => char * => void *    [scope=ho]    [implicit-cast]    @ ../examples/demo1.c:14:6
+pi1 : int * => void *    [scope=main]    [implicit-cast]    @ ../examples/demo1.c:20:14
+pv : int * => void * => char *    [scope=main]    [implicit-cast]    @ ../examples/demo1.c:21:15
+pv : int * => void * => f⌜char *⌝f    [scope=main]    [call-arg]    @ ../examples/demo1.c:23:3
+idv : void *(void *)    [scope=main]    [call-arg]    @ ../examples/demo1.c:24:3
+pv : int * => void * => ho⌜char * => void * => int *⌝ho    [scope=main]    [call-arg]    @ ../examples/demo1.c:24:3
+pv : int * => void * => char *    [scope=main]    [implicit-cast]    @ ../examples/demo1.c:28:16
+pv : int * => void * => int *    [scope=main]    [implicit-cast]    @ ../examples/demo1.c:31:16
+pc : int * => void * => char *    [scope=main]    [branch-join]    @ ../examples/demo1.c:27:3
+pi3 : int * => void * => int *    [scope=main]    [branch-join]    @ ../examples/demo1.c:27:3
+
+Function summaries:
+  f($0 : void * => char *)
+  idv($0 : void * => int *) -> void * [$0 => int * => void *]    [ret aliases $0]
+  ho($0 : void *(*)(void *), $1 : void * => char * => void * => $0.$0)
+  main() -> int [int]
+
+Recursive named-call fixpoint:
+  scheduler: scc-local-parameter-dependency-worklist
+  phases: cast-history-then-pointer-use
+  cast-history state: semantic atom/transition facts; rich histories retained for reporting
+  SCC components: 3 (recursive: 0)
+  SCC local worklist drains: 3
+  SCC components completed: 3 / 3
+  initial seed edges: 2
+  local dependency re-enqueues: 0
+  coalesced local dependency re-enqueues: 0
+  cross-component dependency signals: 0
+  edge executions: 2 / 32
+  recursive recurring-view collapses: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  cast semantic fact fail-open: 0
+  cast semantic state changes: 0
+  pointer-use phase: executed
+  pointer-use initial seed edges: 2
+  pointer-use local dependency re-enqueues: 0
+  pointer-use coalesced local dependency re-enqueues: 0
+  pointer-use cross-component dependency signals: 0
+  pointer-use operation candidates: 0
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 0
+  pointer-use frozen cast-attachment overlays: 0
+  pointer-use frozen cast-attachment fallbacks: 0
+  pointer-use report-only evidence merges: 0
+  pointer-use edge executions: 2 / 32
+  pointer-use termination: pointer-use-scc-worklist-quiescent
+  pointer-use reopened cast SCC: 0
+  status: converged
+  termination: scc-worklist-quiescent
+  domains: parameter-cast-histories, parameter-pointer-uses
+  phase dependency: pointer-use changes never reopen cast-history SCC solving
+  SCC component worklists (callee-first activation):
+    SCC #0 [acyclic] f; members=1; owned-edges=0; internal-edges=0; initial-seeds=0; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=0; pointer-use-initial-seeds=0; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=0; status=quiescent; pointer-use-status=quiescent; members={f}
+    SCC #1 [acyclic] ho; members=1; owned-edges=0; internal-edges=0; initial-seeds=0; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=0; pointer-use-initial-seeds=0; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=0; status=quiescent; pointer-use-status=quiescent; members={ho}
+    SCC #2 [acyclic] main; members=1; owned-edges=2; internal-edges=0; initial-seeds=2; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=2; pointer-use-initial-seeds=2; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=2; status=quiescent; pointer-use-status=quiescent; members={main}
+
+Direct cast histories (entity-oriented):
+  f::pvf : void * => char *
+  idv::x : void * => int *
+  ho::pvho : void * => char * => void * => $0.$0
+  ho::pcho : char * => void * => $0.$0
+  main::pi1 : int * => ⟨| void * => char *, void * => f⌜char *⌝f, void * => ho⌜char * => void * => int *⌝ho, ⟨[i > 0] void * => char *, [!(i > 0)] void * => int *⟩ |⟩
+  main::pv : void * => ⟨| char *, f⌜char *⌝f, ho⌜char * => void * => int *⌝ho, ⟨[i > 0] char *, [!(i > 0)] int *⟩ |⟩
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Storage-location cast histories:
+  f::pvf : void * => char *
+  idv::x : void * => int *
+  ho::pvho : void * => char * => void * => $0.$0
+  ho::pcho : void * => char * => void * => $0.$0
+  main::pi1 : int * => ⟨| void * => char *, void * => f⌜char *⌝f, void * => ho⌜char * => void * => int *⌝ho, ⟨[i > 0] void * => char *, [!(i > 0)] void * => int *⟩ |⟩
+  main::pv : int * => void * => ⟨| char *, f⌜char *⌝f, ho⌜char * => void * => int *⌝ho, ⟨[i > 0] char *, [!(i > 0)] int *⟩ |⟩
+
+Observed later interpretations (raw evidence):
+  f::pvf
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+  idv::x
+    - [always] int *    {init-projection, role=Intermediate}
+    - [always] int *    {init-projection-origin, role=Intermediate}
+  ho::pvho
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+    - [always] attach=char *, obs=void * => $0.$0    {higher-order-call-alias-parent, role=Semantic}
+  ho::pcho
+    - [always] void * => $0.$0    {higher-order-call, role=Semantic}
+  main::pi1
+    - [always] void *    {init-projection, role=Intermediate}
+    - [always] attach=void *, obs=char *    {init-projection-alias-parent, role=Semantic}
+    - [always] attach=void *, obs=f⌜char *⌝f    {call-through-f-alias-parent, role=Semantic}
+    - [always] attach=void *, obs=ho⌜char * => void * => int *⌝ho    {call-through-ho-alias-parent, role=Semantic}
+    - [i > 0] attach=void *, obs=char *    {init-projection-alias-parent, role=Semantic}
+    - [!(i > 0)] attach=void *, obs=int *    {init-projection-alias-parent, role=Semantic}
+  main::pv
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] f⌜char *⌝f    {call-through-f, role=Semantic}
+    - [always] ho⌜char * => void * => int *⌝ho    {call-through-ho, role=Semantic}
+    - [i > 0] char *    {init-projection, role=Intermediate}
+    - [!(i > 0)] int *    {init-projection, role=Intermediate}
+
+Derived observation summaries:
+  f::pvf
+    branch-cast: <none>
+    grouped: {char * @ always}
+  idv::x
+    branch-cast: <none>
+    grouped: {int * @ always}
+  ho::pvho
+    branch-cast: <none>
+    grouped: {$0.$0 @ always; char * @ always}
+  ho::pcho
+    branch-cast: <none>
+    grouped: {$0.$0 @ always}
+  main::pi1
+    branch-cast: ⟨[i > 0] void * => char *, [!(i > 0)] void * => int *⟩
+    grouped: {char * @ always || i > 0; f⌜char *⌝f @ always; ho⌜char * => void * => int *⌝ho @ always; int * @ !(i > 0); void * @ always}
+  main::pv
+    branch-cast: ⟨[i > 0] char *, [!(i > 0)] int *⟩
+    grouped: {char * @ always || i > 0; f⌜char *⌝f @ always; ho⌜char * => void * => int *⌝ho @ always; int * @ !(i > 0)}
+
+Pointer use summaries:
+  f::pvf
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ ../examples/demo1.c:2:14
+    - [always] attach=char *, as=char *, access=char : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:3:7
+  f::pc
+    - [always] attach=<id>, as=char *, access=char : deref-readwrite    {assignment-lhs-*}    [origin=local]    @ ../examples/demo1.c:3:7
+  idv::x
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to int *}    [origin=local]    @ ../examples/demo1.c:7:15
+    - [always] attach=int *, as=int *, access=int : deref-write    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:8:9
+    - [always] attach=int *, as=int *, access=int : deref    {unary-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:8:11
+    - [always] attach=int *, as=int * : returned    {return-alias-parent}    [origin=local]    @ ../examples/demo1.c:9:3
+  idv::pidv
+    - [always] attach=<id>, as=int *, access=int : deref-write    {assignment-lhs-*}    [origin=local]    @ ../examples/demo1.c:8:9
+    - [always] attach=<id>, as=int *, access=int : deref    {unary-*}    [origin=local]    @ ../examples/demo1.c:8:11
+    - [always] attach=<id>, as=int * : returned    {return}    [origin=local]    @ ../examples/demo1.c:9:3
+  ho::pvho
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ ../examples/demo1.c:13:16
+    - [always] attach=char *, as=char * : call-arg    {arg0 to <indirect>-alias-parent}    [origin=local]    @ ../examples/demo1.c:14:3
+  ho::pcho
+    - [always] attach=<id>, as=char * : call-arg    {arg0 to <indirect>}    [origin=local]    @ ../examples/demo1.c:14:3
+  main::pi1
+    - [always] attach=<id>, as=int * : init-rhs    {init-rhs to void *}    [origin=local]    @ ../examples/demo1.c:20:14
+    - [always] attach=void *, as=void * : init-rhs    {init-rhs to char *-alias-parent}    [origin=local]    @ ../examples/demo1.c:21:15
+    - [always] attach=void * => char *, as=char *, access=char : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:22:8
+    - [always] attach=void *, as=void * : call-arg    {arg0 to f-alias-parent}    [origin=local]    @ ../examples/demo1.c:23:3
+    - [always] attach=void *, as=void * : init-rhs    {via f.$0; init-rhs to char *}    [origin=same-tu-call, target=f, sig=fn:(ptr:void)->void, source=same-tu-named-call, edge=direct-call]    @ ../examples/demo1.c:23:3
+    - [always] attach=void * => char *, as=char *, access=char : deref-readwrite    {via f.$0; assignment-lhs-*-alias-parent}    [origin=same-tu-call, target=f, sig=fn:(ptr:void)->void, source=same-tu-named-call, edge=direct-call]    @ ../examples/demo1.c:23:3
+    - [always] attach=void *, as=void * : call-arg    {arg1 to ho-alias-parent}    [origin=local]    @ ../examples/demo1.c:24:3
+    - [always] attach=void *, as=void * : init-rhs    {via ho.$1; init-rhs to char *}    [origin=same-tu-call, target=ho, sig=fn:(fnptr:(void *)->void *,ptr:void)->void, source=same-tu-named-call, edge=direct-call]    @ ../examples/demo1.c:24:3
+    - [always] attach=void * => char *, as=char * : call-arg    {via ho.$1; arg0 to <indirect>-alias-parent}    [origin=same-tu-call, target=ho, sig=fn:(fnptr:(void *)->void *,ptr:void)->void, source=same-tu-named-call, edge=direct-call]    @ ../examples/demo1.c:24:3
+    - [always] attach=void * => char * => void *, as=void * : init-rhs    {via ho.$1 -> idv.$0; init-rhs to int *}    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, source=higher-order-direct-call, edge=higher-order-callback]    @ ../examples/demo1.c:24:3
+    - [always] attach=void * => char * => void * => int *, as=int *, access=int : deref-write    {via ho.$1 -> idv.$0; assignment-lhs-*-alias-parent}    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, source=higher-order-direct-call, edge=higher-order-callback]    @ ../examples/demo1.c:24:3
+    - [always] attach=void * => char * => void * => int *, as=int * : returned    {via ho.$1 -> idv.$0; return-alias-parent}    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, source=higher-order-direct-call, edge=higher-order-callback]    @ ../examples/demo1.c:24:3
+    - [i > 0] attach=void *, as=void * : init-rhs    {init-rhs to char *-alias-parent}    [origin=local]    @ ../examples/demo1.c:28:16
+    - [i > 0] attach=void * => char *, as=char *, access=char : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:29:9
+    - [!(i > 0)] attach=void *, as=void * : init-rhs    {init-rhs to int *-alias-parent}    [origin=local]    @ ../examples/demo1.c:31:16
+    - [!(i > 0)] attach=void * => int *, as=int *, access=int : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:32:10
+  main::pv
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ ../examples/demo1.c:21:15
+    - [always] attach=char *, as=char *, access=char : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:22:8
+    - [always] attach=<id>, as=void * : call-arg    {arg0 to f}    [origin=local]    @ ../examples/demo1.c:23:3
+    - [always] attach=<id>, as=void * : call-arg    {arg1 to ho}    [origin=local]    @ ../examples/demo1.c:24:3
+    - [i > 0] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ ../examples/demo1.c:28:16
+    - [i > 0] attach=char *, as=char *, access=char : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:29:9
+    - [!(i > 0)] attach=<id>, as=void * : init-rhs    {init-rhs to int *}    [origin=local]    @ ../examples/demo1.c:31:16
+    - [!(i > 0)] attach=int *, as=int *, access=int : deref-readwrite    {assignment-lhs-*-alias-parent}    [origin=local]    @ ../examples/demo1.c:32:10
+  main::pi2
+    - [always] attach=<id>, as=char *, access=char : deref-readwrite    {assignment-lhs-*}    [origin=local]    @ ../examples/demo1.c:22:8
+  main::pc
+    - [i > 0] attach=<id>, as=char *, access=char : deref-readwrite    {assignment-lhs-*}    [origin=local]    @ ../examples/demo1.c:29:9
+  main::pi3
+    - [!(i > 0)] attach=<id>, as=int *, access=int : deref-readwrite    {assignment-lhs-*}    [origin=local]    @ ../examples/demo1.c:32:10
+
+Semantic pointer-operation summaries:
+  f::pvf
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:2:14
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:3:7
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+  f::pc
+    - [always] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:3:7
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*
+  idv::x
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:7:15
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to int *
+    - [always] typed-deref-write as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:9
+        evidenceKinds: deref-write
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [always] typed-deref-read as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:11
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*-alias-parent
+    - [always] returned-flow as=int *    count=1    [origin=local]    first=@ ../examples/demo1.c:9:3
+        evidenceKinds: returned
+        sources: return-alias-continuation
+        details: return-alias-parent
+  idv::pidv
+    - [always] typed-deref-write as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:9
+        evidenceKinds: deref-write
+        sources: local-pointer-use
+        details: assignment-lhs-*
+    - [always] typed-deref-read as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:11
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*
+    - [always] returned-flow as=int *    count=1    [origin=local]    first=@ ../examples/demo1.c:9:3
+        evidenceKinds: returned
+        sources: local-pointer-use
+        details: return
+  ho::pvho
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:13:16
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] call-argument-flow as=char *    count=1    [origin=local]    first=@ ../examples/demo1.c:14:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument
+        details: arg0 to <indirect>-alias-parent
+  ho::pcho
+    - [always] call-argument-flow as=char *    count=1    [origin=local]    first=@ ../examples/demo1.c:14:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument
+        details: arg0 to <indirect>
+  main::pi1
+    - [always] init-flow as=int *    count=1    [origin=local]    first=@ ../examples/demo1.c:20:14
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to void *
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:21:15
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent
+    - [always] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:22:8
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [always] call-argument-flow as=void *    count=2    [origin=local]    first=@ ../examples/demo1.c:23:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to f-alias-parent; arg1 to ho-alias-parent
+    - [always] init-flow as=void *    count=1    [origin=same-tu-call, target=f, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:23:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via f.$0; init-rhs to char *
+    - [always] typed-deref-readwrite as=char *, access=char    count=1    [origin=same-tu-call, target=f, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:23:3
+        evidenceKinds: deref-readwrite
+        sources: same-tu-named-call-pointer-use
+        details: via f.$0; assignment-lhs-*-alias-parent
+    - [always] call-argument-flow as=char *    count=1    [origin=same-tu-call, target=ho, sig=fn:(fnptr:(void *)->void *,ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:24:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via ho.$1; arg0 to <indirect>-alias-parent
+    - [always] init-flow as=void *    count=1    [origin=same-tu-call, target=ho, sig=fn:(fnptr:(void *)->void *,ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:24:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via ho.$1; init-rhs to char *
+    - [always] init-flow as=void *    count=1    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, edge=higher-order-callback]    first=@ ../examples/demo1.c:24:3
+        evidenceKinds: init-rhs
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via ho.$1 -> idv.$0; init-rhs to int *
+    - [always] returned-flow as=int *    count=1    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, edge=higher-order-callback]    first=@ ../examples/demo1.c:24:3
+        evidenceKinds: returned
+        sources: resolved-higher-order-pointer-use, return-alias-continuation, same-tu-named-call-pointer-use
+        details: via ho.$1 -> idv.$0; return-alias-parent
+    - [always] typed-deref-write as=int *, access=int    count=1    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, edge=higher-order-callback]    first=@ ../examples/demo1.c:24:3
+        evidenceKinds: deref-write
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via ho.$1 -> idv.$0; assignment-lhs-*-alias-parent
+    - [i > 0] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:28:16
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent
+    - [i > 0] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:29:9
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [!(i > 0)] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:31:16
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to int *-alias-parent
+    - [!(i > 0)] typed-deref-readwrite as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:32:10
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+  main::pv
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:21:15
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:22:8
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [always] call-argument-flow as=void *    count=2    [origin=local]    first=@ ../examples/demo1.c:23:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to f; arg1 to ho
+    - [i > 0] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:28:16
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [i > 0] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:29:9
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [!(i > 0)] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:31:16
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to int *
+    - [!(i > 0)] typed-deref-readwrite as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:32:10
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+  main::pi2
+    - [always] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:22:8
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*
+  main::pc
+    - [i > 0] typed-deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:29:9
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*
+  main::pi3
+    - [!(i > 0)] typed-deref-readwrite as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:32:10
+        evidenceKinds: deref-readwrite
+        sources: local-pointer-use
+        details: assignment-lhs-*
+
+Grouped pointer-operation summaries (normalized rows):
+  f::pvf
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:2:14
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:3:7
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+  f::pc
+    - [always] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:3:7
+        sources: local-pointer-use
+        details: assignment-lhs-*
+  idv::x
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:7:15
+        sources: local-pointer-use
+        details: init-rhs to int *
+    - [always] deref-write as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:9
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [always] deref as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:11
+        sources: local-pointer-use
+        details: unary-*-alias-parent
+    - [always] returned as=int *    count=1    [origin=local]    first=@ ../examples/demo1.c:9:3
+        sources: return-alias-continuation
+        details: return-alias-parent
+  idv::pidv
+    - [always] deref-write as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:9
+        sources: local-pointer-use
+        details: assignment-lhs-*
+    - [always] deref as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:8:11
+        sources: local-pointer-use
+        details: unary-*
+    - [always] returned as=int *    count=1    [origin=local]    first=@ ../examples/demo1.c:9:3
+        sources: local-pointer-use
+        details: return
+  ho::pvho
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:13:16
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] call-arg as=char *    count=1    [origin=local]    first=@ ../examples/demo1.c:14:3
+        sources: indirect-call-argument
+        details: arg0 to <indirect>-alias-parent
+  ho::pcho
+    - [always] call-arg as=char *    count=1    [origin=local]    first=@ ../examples/demo1.c:14:3
+        sources: indirect-call-argument
+        details: arg0 to <indirect>
+  main::pi1
+    - [always] init-rhs as=int *    count=1    [origin=local]    first=@ ../examples/demo1.c:20:14
+        sources: local-pointer-use
+        details: init-rhs to void *
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:21:15
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent
+    - [always] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:22:8
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [always] call-arg as=void *    count=2    [origin=local]    first=@ ../examples/demo1.c:23:3
+        sources: local-pointer-use
+        details: arg0 to f-alias-parent; arg1 to ho-alias-parent
+    - [always] deref-readwrite as=char *, access=char    count=1    [origin=same-tu-call, target=f, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:23:3
+        sources: same-tu-named-call-pointer-use
+        details: via f.$0; assignment-lhs-*-alias-parent
+    - [always] init-rhs as=void *    count=1    [origin=same-tu-call, target=f, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:23:3
+        sources: same-tu-named-call-pointer-use
+        details: via f.$0; init-rhs to char *
+    - [always] call-arg as=char *    count=1    [origin=same-tu-call, target=ho, sig=fn:(fnptr:(void *)->void *,ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:24:3
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via ho.$1; arg0 to <indirect>-alias-parent
+    - [always] deref-write as=int *, access=int    count=1    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, edge=higher-order-callback]    first=@ ../examples/demo1.c:24:3
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via ho.$1 -> idv.$0; assignment-lhs-*-alias-parent
+    - [always] init-rhs as=void *    count=1    [origin=same-tu-call, target=ho, sig=fn:(fnptr:(void *)->void *,ptr:void)->void, edge=direct-call]    first=@ ../examples/demo1.c:24:3
+        sources: same-tu-named-call-pointer-use
+        details: via ho.$1; init-rhs to char *
+    - [always] init-rhs as=void *    count=1    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, edge=higher-order-callback]    first=@ ../examples/demo1.c:24:3
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via ho.$1 -> idv.$0; init-rhs to int *
+    - [always] returned as=int *    count=1    [origin=same-tu-call, target=idv, sig=fn:(ptr:void)->ptr:void, edge=higher-order-callback]    first=@ ../examples/demo1.c:24:3
+        sources: resolved-higher-order-pointer-use, return-alias-continuation, same-tu-named-call-pointer-use
+        details: via ho.$1 -> idv.$0; return-alias-parent
+    - [i > 0] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:28:16
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent
+    - [i > 0] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:29:9
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [!(i > 0)] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:31:16
+        sources: local-pointer-use
+        details: init-rhs to int *-alias-parent
+    - [!(i > 0)] deref-readwrite as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:32:10
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+  main::pv
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:21:15
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:22:8
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [always] call-arg as=void *    count=2    [origin=local]    first=@ ../examples/demo1.c:23:3
+        sources: local-pointer-use
+        details: arg0 to f; arg1 to ho
+    - [i > 0] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:28:16
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [i > 0] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:29:9
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+    - [!(i > 0)] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo1.c:31:16
+        sources: local-pointer-use
+        details: init-rhs to int *
+    - [!(i > 0)] deref-readwrite as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:32:10
+        sources: local-pointer-use
+        details: assignment-lhs-*-alias-parent
+  main::pi2
+    - [always] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:22:8
+        sources: local-pointer-use
+        details: assignment-lhs-*
+  main::pc
+    - [i > 0] deref-readwrite as=char *, access=char    count=1    [origin=local]    first=@ ../examples/demo1.c:29:9
+        sources: local-pointer-use
+        details: assignment-lhs-*
+  main::pi3
+    - [!(i > 0)] deref-readwrite as=int *, access=int    count=1    [origin=local]    first=@ ../examples/demo1.c:32:10
+        sources: local-pointer-use
+        details: assignment-lhs-*
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  f::pvf
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewWrite
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Moderate, interpretation=byte-oriented view with write evidence
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=f::pvf, behavior=ByteViewWrite, mediation=Direct, family=ByteView, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=yes, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: char *
+      writeDerefTypes: char *
+  idv::x
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    evidenceSources: local-pointer-use, return-alias-continuation
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=yes
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=ReturnAlias, semanticFamily=ReturnAliasMediatedConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=yes
+    stableClassification: entity=idv::x, behavior=ConcreteSpecializedWrite, mediation=ReturnAlias, family=ReturnAliasMediatedConcreteSpecialization, risk=Low, evidenceSourceKind=return-alias-continuation
+    surfaceReasons: void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {int *, void *}
+      pointerTypes: 2 {int *, void *}
+      nonVoidPointerTypes: 1 {int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: int *
+      writeDerefTypes: int *
+  ho::pvho
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument, local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=ho::pvho, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: byte-view, higher-order, void-interface
+    history:
+      seqDepth: 3
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=2, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      callbackInputView: byteView(char *) before callback
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  ho::pcho
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument
+    evidenceFlags: local=no, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=ho::pcho, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: byte-view, higher-order, void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      callbackInputView: byteView(char *) before callback
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  main::pi1
+    view: FullView
+    historyShape: BranchPolymorphic
+    historyRisk: Moderate
+    behavior: BranchTaggedUnionLike
+    evidenceSources: indirect-call-argument, local-pointer-use, resolved-higher-order-pointer-use, return-alias-continuation, same-tu-named-call-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=yes
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=BranchTaggedUnionLike, semanticRiskTier=Moderate, interpretation=branch/tag-structured pointer interpretation
+    semanticMediation: kind=ResolvedCallback, semanticFamily=ResolvedCallbackMediatedGuardedSpecialization, callbackState=ResolvedCallback, targets=f, ho, idv, edges=direct-call, higher-order-call, higher-order-callback, flags: dataField=no, nestedDataField=no, callback=yes, resolvedCallbackTarget=yes, externalBoundary=no, returnAlias=yes
+    stableClassification: entity=main::pi1, behavior=BranchTaggedUnionLike, mediation=ResolvedCallback, family=ResolvedCallbackMediatedGuardedSpecialization, callbackState=ResolvedCallback, risk=Moderate, evidenceSourceKind=same-tu-named-call, targets=f, ho, idv, edges=direct-call, higher-order-call, higher-order-callback
+    surfaceReasons: byte-view, cast-like-reinterpretation, higher-order, void-interface
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 4
+      maxBranchBreadth: 2
+      nodes: seq=7, parallel=1, branch=1, callwrap=2, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 3 {char *, int *, void *}
+      pointerTypes: 3 {char *, int *, void *}
+      nonVoidPointerTypes: 2 {char *, int *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+      branchClass: BranchSpecificConcreteWrite
+      branchPosition: earliest=2, latest=2, max=2
+      branchAltSeqLen: min=1, max=1, avg=1.00
+      branchAlternatives: total=2, maxBreadth=2, maxTypesPerNode=2
+      branchTypes: 2 {char *, int *}
+      branchNonVoidTypes: 2 {char *, int *}
+      branchGuards: !(i > 0), i > 0
+      branchFlags: differentTypes=yes, tagLike=no, negatedPair=yes, missingElse=no, write=yes, byteWrite=yes, concreteWrite=yes
+      branchWriteTypes: char *, int *
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=yes, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=yes, write=yes, branchSplit=yes
+      derefTypes: char *, int *
+      writeDerefTypes: char *, int *
+  main::pv
+    view: FullView
+    historyShape: BranchPolymorphic
+    historyRisk: Moderate
+    behavior: BranchTaggedUnionLike
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=BranchTaggedUnionLike, semanticRiskTier=Moderate, interpretation=branch/tag-structured pointer interpretation
+    semanticMediation: kind=Direct, semanticFamily=GuardedConcreteSpecialization, targets=f, ho, edges=direct-call, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=main::pv, behavior=BranchTaggedUnionLike, mediation=Direct, family=GuardedConcreteSpecialization, risk=Moderate, evidenceSourceKind=local-only, targets=f, ho, edges=direct-call
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 4
+      maxParallelBreadth: 4
+      maxBranchBreadth: 2
+      nodes: seq=2, parallel=1, branch=1, callwrap=2, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 3 {char *, int *, void *}
+      pointerTypes: 3 {char *, int *, void *}
+      nonVoidPointerTypes: 2 {char *, int *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=yes, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+      branchClass: BranchSpecificConcreteWrite
+      branchPosition: earliest=1, latest=1, max=1
+      branchAltSeqLen: min=1, max=1, avg=1.00
+      branchAlternatives: total=2, maxBreadth=2, maxTypesPerNode=2
+      branchTypes: 2 {char *, int *}
+      branchNonVoidTypes: 2 {char *, int *}
+      branchGuards: !(i > 0), i > 0
+      branchFlags: differentTypes=yes, tagLike=no, negatedPair=yes, missingElse=no, write=yes, byteWrite=yes, concreteWrite=yes
+      branchWriteTypes: char *, int *
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=yes, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=yes, write=yes, branchSplit=yes
+      derefTypes: char *, int *
+      writeDerefTypes: char *, int *
+
+Storage-location history metrics:
+  f::pvf
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  idv::x
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {int *, void *}
+    pointerTypes: 2 {int *, void *}
+    nonVoidPointerTypes: 1 {int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  ho::pvho
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=2, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  ho::pcho
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  main::pi1
+    historyShape: BranchPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 4
+    maxBranchBreadth: 2
+    nodes: seq=7, parallel=1, branch=1, callwrap=2, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    branchClass: BranchSpecificConcreteWrite
+    branchPosition: earliest=2, latest=2, max=2
+    branchAltSeqLen: min=1, max=1, avg=1.00
+    branchAlternatives: total=2, maxBreadth=2, maxTypesPerNode=2
+    branchTypes: 2 {char *, int *}
+    branchNonVoidTypes: 2 {char *, int *}
+    branchGuards: !(i > 0), i > 0
+    branchFlags: differentTypes=yes, tagLike=no, negatedPair=yes, missingElse=no, write=yes, byteWrite=yes, concreteWrite=yes
+    branchWriteTypes: char *, int *
+  main::pv
+    historyShape: BranchPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 4
+    maxBranchBreadth: 2
+    nodes: seq=2, parallel=1, branch=1, callwrap=2, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    branchClass: BranchSpecificConcreteWrite
+    branchPosition: earliest=2, latest=2, max=2
+    branchAltSeqLen: min=1, max=1, avg=1.00
+    branchAlternatives: total=2, maxBreadth=2, maxTypesPerNode=2
+    branchTypes: 2 {char *, int *}
+    branchNonVoidTypes: 2 {char *, int *}
+    branchGuards: !(i > 0), i > 0
+    branchFlags: differentTypes=yes, tagLike=no, negatedPair=yes, missingElse=no, write=yes, byteWrite=yes, concreteWrite=yes
+    branchWriteTypes: char *, int *
+
+Function parameter behavior metrics:
+  f.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewWrite
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Moderate, interpretation=byte-oriented view with write evidence
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=f.$0, behavior=ByteViewWrite, mediation=Direct, family=ByteView, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, void-interface
+    summary: char *
+    pointerTypes: char *, void *
+    nonVoidPointerTypes: char *
+    derefTypes: char *
+    writeDerefTypes: char *
+    flags: higherOrder=no, branchSplit=no, byteWrite=yes, multiTypeWrite=no
+  idv.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedWrite
+    evidenceSources: local-pointer-use, return-alias-continuation
+    evidenceSourceKind: return-alias-continuation
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=ReturnAlias, semanticFamily=ReturnAliasMediatedConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=yes
+    stableParamClassification: param=idv.$0, behavior=ConcreteSpecializedWrite, mediation=ReturnAlias, family=ReturnAliasMediatedConcreteSpecialization, risk=Low, evidenceSourceKind=return-alias-continuation
+    surfaceReasons: void-interface
+    summary: int *
+    pointerTypes: int *, void *
+    nonVoidPointerTypes: int *
+    derefTypes: int *
+    writeDerefTypes: int *
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  ho.$0 : void *(*)(void *)
+    paramRole: CallbackBehaviorProvider
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: NotWildLike
+    evidenceSources: <none>
+    evidenceSourceKind: no-pointer-use-evidence
+    wildLike: no
+    paperWildness: surfaceKind=not-wild-like, semanticFamily=NotWildLike, semanticRiskTier=Low, interpretation=ordinary/non-wild pointer behavior
+    semanticMediation: kind=Direct, semanticFamily=NotWildLike, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=ho.$0, behavior=NotWildLike, mediation=Direct, family=NotWildLike, risk=Low, evidenceSourceKind=no-pointer-use-evidence
+    surfaceReasons: not-wild-like
+    summary: <none>
+    pointerTypes: void *(*)(void *)
+    nonVoidPointerTypes: void *(*)(void *)
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: function-pointer parameter provides callback behavior; it is not an ordinary wild data pointer
+  ho.$1 : void *
+    paramRole: CallbackDependentDataPointer
+    callbackMediationState: FormalCallbackParameter
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument, local-pointer-use
+    evidenceSourceKind: indirect-call-argument
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=ho.$1, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: byte-view, higher-order, void-interface
+    summary: char * => void * => $0.$0
+    pointerTypes: char *, void *
+    nonVoidPointerTypes: char *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    callbackInputView: byteView(char *) before callback
+    roleNote: data pointer behavior depends on a callback/function-pointer parameter
+
+Function behavior classifications:
+  f
+    class: ReinterpretingWriteFunction
+    classificationEvidenceSourceKind: local-only
+    classificationEvidenceSources: local-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=deref-readwrite, init-rhs, derefSources=local-pointer-use, writeSources=local-pointer-use
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=yes, byteWrite=yes, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ByteViewWrite, semanticFamily=ByteView, mediatedSemanticFamily=ByteView, mediation=Direct, semanticRiskTier=Moderate, evidenceSourceKind=local-only, evidenceSources=local-pointer-use, summary=char *
+  idv
+    class: ReinterpretingWriteFunction
+    classificationEvidenceSourceKind: return-alias-continuation
+    classificationEvidenceSources: local-pointer-use, return-alias-continuation
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=yes, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=deref, deref-write, init-rhs, returned, derefSources=local-pointer-use, writeSources=local-pointer-use
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=yes, byteWrite=no, concreteWrite=yes, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecializedWrite, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=ReturnAliasMediatedConcreteSpecialization, mediation=ReturnAlias, semanticRiskTier=Low, evidenceSourceKind=return-alias-continuation, evidenceSources=local-pointer-use, return-alias-continuation, summary=int *
+  ho
+    class: CallbackAdapterFunction
+    classificationEvidenceSourceKind: indirect-call-argument
+    classificationEvidenceSources: indirect-call-argument, local-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=call-arg, init-rhs, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=yes, callbackDependent=yes, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=CallbackBehaviorProvider, behavior=NotWildLike, semanticFamily=NotWildLike, mediatedSemanticFamily=NotWildLike, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=no-pointer-use-evidence, evidenceSources=<none>
+      - $1 role=CallbackDependentDataPointer, behavior=CallbackDependentByteViewPointer, semanticFamily=CallbackDependent, mediatedSemanticFamily=CallbackDependent, mediation=Callback, semanticRiskTier=Moderate, evidenceSourceKind=indirect-call-argument, evidenceSources=indirect-call-argument, local-pointer-use, summary=char * => void * => $0.$0
+
+Unsupported / approximated language features:
+  <none>

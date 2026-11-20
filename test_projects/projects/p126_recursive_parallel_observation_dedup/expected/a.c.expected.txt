@@ -1,0 +1,688 @@
+Command:
+<tool-root>/build/cast-history-tool --enable-summary-import --summary-index <output-root>/p126_recursive_parallel_observation_dedup/project-summary-index.json --summary-dir <output-root>/p126_recursive_parallel_observation_dedup/.work/local-overlay-tmp/a.c/s --runtime-timing-dir <output-root>/p126_recursive_parallel_observation_dedup/.work/local-overlay-tmp/a.c/s --runtime-timing-project-id p126_recursive_parallel_observation_dedup --runtime-timing-stage local-index-overlay --extra-arg-before=-resource-dir=/usr/lib/llvm-20/lib/clang/20 -p <project-root> <project-root>/a.c 
+
+Output:
+p : void * => int *    [scope=relay_a]    [explicit-cast]    @ a.c:13:17
+p : void * => char *    [scope=relay_a]    [explicit-cast]    @ a.c:14:19
+as_int : void * => int * => void *    [scope=relay_a]    [call-arg]    @ a.c:18:3
+remaining - 1 : unsigned int    [scope=relay_a]    [call-arg]    @ a.c:18:3
+as_int : void * => int * => void *    [scope=relay_a]    [implicit-cast]    @ a.c:18:11
+as_char : void * => char * => void *    [scope=relay_a]    [call-arg]    @ a.c:19:3
+remaining - 1 : unsigned int    [scope=relay_a]    [call-arg]    @ a.c:19:3
+as_char : void * => char * => void *    [scope=relay_a]    [implicit-cast]    @ a.c:19:11
+p : void * => short *    [scope=relay_b]    [explicit-cast]    @ a.c:23:21
+as_short : void * => short * => void * => relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a    [scope=relay_b]    [call-arg]    @ a.c:27:3
+remaining - 1 : unsigned int    [scope=relay_b]    [call-arg]    @ a.c:27:3
+as_short : void * => short * => void *    [scope=relay_b]    [implicit-cast]    @ a.c:27:11
+p : void * => relay_a⌜⟨| int *, char * |⟩⌝relay_a    [scope=run_recursive_parallel_observations]    [call-arg]    @ a.c:31:3
+2 : int    [scope=run_recursive_parallel_observations]    [call-arg]    @ a.c:31:3
+
+Function summaries:
+  run_recursive_parallel_observations($0 : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩) -> int [int]
+  relay_a($0 : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩, $1 : unsigned int)
+  relay_b($0 : void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩, $1 : unsigned int)
+
+Project-solved parameter histories (canonical):
+  relay_a.$0 : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩    [derived-project-summary]
+      source: project-intra-scc-fork-aware-simple-path-fixpoint
+      fork=relay_a::fn:(ptr:void,int:unsigned int)->void.$0:call-actual-fork arm={"actualPathCore":{"first":{"kind":"asType","type":{"canonical":"char *","compatibilityKey":"ptr:byte","functionHasPrototype":false,"functionIsVariadic":false,"functionParamCanonical":[],"functionReturnCanonical":"","isArray":false,"isCharPointer":true,"isConstQualified":false,"isFloating":false,"isFunctionPointer":false,"isInteger":false,"isNullPointer":false,"isPointer":true,"isRecordPointer":false,"isVoid":false,"isVoidPointer":false,"isVolatileQualified":false,"kind":"char-pointer","pointeeCanonical":"char","pointeeConst":false,"pointeeText":"char","pointeeVolatile":false,"recordName":"","recordTag":"","semanticKey":"ptr:byte","text":"char *"}},"kind":"seq","second":{"kind":"asType","type":{"canonical":"","compatibilityKey":"text:void *","functionHasPrototype":false,"functionIsVariadic":false,"functionParamCanonical":[],"functionReturnCanonical":"","isArray":false,"isCharPointer":false,"isConstQualified":false,"isFloating":false,"isFunctionPointer":false,"isInteger":false,"isNullPointer":false,"isPointer":false,"isRecordPointer":false,"isVoid":false,"isVoidPointer":false,"isVolatileQualified":false,"kind":"unknown","pointeeCanonical":"","pointeeConst":false,"pointeeText":"","pointeeVolatile":false,"recordName":"","recordTag":"","semanticKey":"text:void *","text":"void *"}}},"calleeNode":"relay_b::fn:(ptr:void,int:unsigned int)->void","calleeParamIndex":0,"callerNode":"relay_a::fn:(ptr:void,int:unsigned int)->void","callerParamIndex":0,"guard":null,"kind":"direct-call-param-transfer"}    [origin=root-actual-path] : char * => void * => short * => void *
+      fork=relay_a::fn:(ptr:void,int:unsigned int)->void.$0:call-actual-fork arm={"actualPathCore":{"first":{"kind":"asType","type":{"canonical":"int *","compatibilityKey":"ptr:int","functionHasPrototype":false,"functionIsVariadic":false,"functionParamCanonical":[],"functionReturnCanonical":"","isArray":false,"isCharPointer":false,"isConstQualified":false,"isFloating":false,"isFunctionPointer":false,"isInteger":false,"isNullPointer":false,"isPointer":true,"isRecordPointer":false,"isVoid":false,"isVoidPointer":false,"isVolatileQualified":false,"kind":"other-pointer","pointeeCanonical":"int","pointeeConst":false,"pointeeText":"int","pointeeVolatile":false,"recordName":"","recordTag":"","semanticKey":"ptr:int","text":"int *"}},"kind":"seq","second":{"kind":"asType","type":{"canonical":"","compatibilityKey":"text:void *","functionHasPrototype":false,"functionIsVariadic":false,"functionParamCanonical":[],"functionReturnCanonical":"","isArray":false,"isCharPointer":false,"isConstQualified":false,"isFloating":false,"isFunctionPointer":false,"isInteger":false,"isNullPointer":false,"isPointer":false,"isRecordPointer":false,"isVoid":false,"isVoidPointer":false,"isVolatileQualified":false,"kind":"unknown","pointeeCanonical":"","pointeeConst":false,"pointeeText":"","pointeeVolatile":false,"recordName":"","recordTag":"","semanticKey":"text:void *","text":"void *"}}},"calleeNode":"relay_b::fn:(ptr:void,int:unsigned int)->void","calleeParamIndex":0,"callerNode":"relay_a::fn:(ptr:void,int:unsigned int)->void","callerParamIndex":0,"guard":null,"kind":"direct-call-param-transfer"}    [origin=root-actual-path] : int * => void * => short * => void *
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  relay_b.$0 : void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩    [derived-project-summary]
+      source: project-intra-scc-fork-aware-simple-path-fixpoint
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  run_recursive_parallel_observations.$0 : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩    [derived-project-summary]
+      source: canonical-project-param-transfer
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+
+Branch-family parameter-transfer metadata (C6g5w1d; C2 tagged-closure diagnostics):
+  family=branch-family:parallel-call-actuals:relay_a::fn:(ptr:void,int:unsigned int)->void.$0->relay_b::fn:(ptr:void,int:unsigned int)->void.$0    [kind=parallel-call-actuals]
+      owner=relay_a::fn:(ptr:void,int:unsigned int)->void.$0    origin=distinct direct-call actual paths from one caller formal to one callee formal
+      recursive-closure-key=branch-family:parallel-call-actuals:relay_a::fn:(ptr:void,int:unsigned int)->void.$0->relay_b::fn:(ptr:void,int:unsigned int)->void.$0
+      recursive-closure-consumed-by=C2 tagged recursive summary materialization; C1 live solver unchanged
+      arm=branch-family:parallel-call-actuals:relay_a::fn:(ptr:void,int:unsigned int)->void.$0->relay_b::fn:(ptr:void,int:unsigned int)->void.$0:arm@a.c:18:3:path=int * => void *    [kind=call-actual-path] : int * => void *
+        transfer=relay_a::fn:(ptr:void,int:unsigned int)->void.$0 -> relay_b::fn:(ptr:void,int:unsigned int)->void.$0    @ a.c:18:3
+        source-entity=relay_a::p
+        transport=tu-summary -> project-index -> SummaryIndex; recursive-closure-key-consumed-by=C2-tagged-solver; channel=summaryParamTransferEdges; project-metadata-rehydrated=yes
+      arm=branch-family:parallel-call-actuals:relay_a::fn:(ptr:void,int:unsigned int)->void.$0->relay_b::fn:(ptr:void,int:unsigned int)->void.$0:arm@a.c:19:3:path=char * => void *    [kind=call-actual-path] : char * => void *
+        transfer=relay_a::fn:(ptr:void,int:unsigned int)->void.$0 -> relay_b::fn:(ptr:void,int:unsigned int)->void.$0    @ a.c:19:3
+        source-entity=relay_a::p
+        transport=tu-summary -> project-index -> SummaryIndex; recursive-closure-key-consumed-by=C2-tagged-solver; channel=summaryParamTransferEdges; project-metadata-rehydrated=yes
+
+Recursive named-call fixpoint:
+  scheduler: scc-local-parameter-dependency-worklist
+  phases: cast-history-then-pointer-use
+  cast-history state: semantic atom/transition facts; rich histories retained for reporting
+  SCC components: 2 (recursive: 1)
+  SCC local worklist drains: 2
+  SCC components completed: 2 / 2
+  initial seed edges: 4
+  local dependency re-enqueues: 8
+  coalesced local dependency re-enqueues: 2
+  cross-component dependency signals: 4
+  edge executions: 12 / 64
+  recursive recurring-view collapses: 0
+  cast semantic fact candidates: 9
+  cast semantic fact insertions: 32
+  cast semantic fact subsumed: 4
+  cast semantic fact fail-open: 0
+  cast semantic state changes: 5
+  pointer-use phase: executed
+  pointer-use initial seed edges: 4
+  pointer-use local dependency re-enqueues: 2
+  pointer-use coalesced local dependency re-enqueues: 1
+  pointer-use cross-component dependency signals: 1
+  pointer-use operation candidates: 48
+  pointer-use operation insertions: 10
+  pointer-use operation subsumed: 38
+  pointer-use frozen cast-attachment overlays: 48
+  pointer-use frozen cast-attachment fallbacks: 0
+  pointer-use report-only evidence merges: 4
+  pointer-use edge executions: 6 / 64
+  pointer-use termination: pointer-use-scc-worklist-quiescent
+  pointer-use reopened cast SCC: 0
+  status: converged
+  termination: scc-worklist-quiescent
+  domains: parameter-cast-histories, parameter-pointer-uses
+  phase dependency: pointer-use changes never reopen cast-history SCC solving
+  SCC component worklists (callee-first activation):
+    SCC #0 [recursive] relay_a; members=2; owned-edges=3; internal-edges=3; initial-seeds=3; local-reenqueues=8; coalesced=2; cross-component-signals=4; edge-executions=11; pointer-use-initial-seeds=3; pointer-use-local-reenqueues=2; pointer-use-coalesced=1; pointer-use-cross-component-signals=1; pointer-use-edge-executions=5; status=quiescent; pointer-use-status=quiescent; members={relay_a, relay_b}
+    SCC #1 [acyclic] run_recursive_parallel_observations; members=1; owned-edges=1; internal-edges=0; initial-seeds=1; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=1; pointer-use-initial-seeds=1; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=1; status=quiescent; pointer-use-status=quiescent; members={run_recursive_parallel_observations}
+
+Direct cast histories (entity-oriented):
+  run_recursive_parallel_observations::p : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+  relay_a::p : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+  relay_b::p : void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩
+  relay_b::as_short : short * => void * => relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Cross-TU summary SCC awareness:
+  relay_a : SCC #0    [recursive]    [size=2]
+      members: relay_a::fn:(ptr:void,int:unsigned int)->void, relay_b::fn:(ptr:void,int:unsigned int)->void
+  relay_b : SCC #0    [recursive]    [size=2]
+      members: relay_a::fn:(ptr:void,int:unsigned int)->void, relay_b::fn:(ptr:void,int:unsigned int)->void
+
+Project-solved call-site provenance:
+  relay_a::fn:(ptr:void,int:unsigned int)->void.$0 -> relay_b::fn:(ptr:void,int:unsigned int)->void.$0 : char * => relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b    [display-only]
+      wrapper: relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b
+      parts: callerPrefix=char * formalEntry=void * calleeCore=⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩
+      @ a.c:19:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+  relay_a::fn:(ptr:void,int:unsigned int)->void.$0 -> relay_b::fn:(ptr:void,int:unsigned int)->void.$0 : int * => relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b    [display-only]
+      wrapper: relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b
+      parts: callerPrefix=int * formalEntry=void * calleeCore=⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩
+      @ a.c:18:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+  relay_b::fn:(ptr:void,int:unsigned int)->void.$0 -> relay_a::fn:(ptr:void,int:unsigned int)->void.$0 : short * => relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a    [display-only]
+      wrapper: relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a
+      parts: callerPrefix=short * formalEntry=void * calleeCore=⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+      @ a.c:27:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+  run_recursive_parallel_observations::fn:(ptr:void)->int:int.$0 -> relay_a::fn:(ptr:void,int:unsigned int)->void.$0 : relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a    [display-only]
+      wrapper: relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a
+      parts: formalEntry=void * calleeCore=⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+      @ a.c:31:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+
+Call-site specialized cast-history observations:
+  relay_b.$0 -> relay_a.$0 : short * => relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a    [AMBIGUOUS_GUARDED]
+      wrapper: relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a
+      actual=short *, formal=void *, selected=<unknown>
+      callee concrete path types: char * short * int *
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:27:3
+      note: display-only; not fed back into global summaries or SCC solving
+  run_recursive_parallel_observations.$0 -> relay_a.$0 : void * => relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a    [AMBIGUOUS_GUARDED]
+      wrapper: relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a
+      actual=void *, formal=void *, selected=<unknown>
+      callee concrete path types: char * short * int *
+      guard environment: remaining=2
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:31:3
+      note: display-only; not fed back into global summaries or SCC solving
+  relay_a.$0 -> relay_b.$0 : char * => relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b    [AMBIGUOUS_GUARDED]
+      wrapper: relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b
+      actual=char *, formal=void *, selected=<unknown>
+      callee concrete path types: short * char * int *
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:19:3
+      note: display-only; not fed back into global summaries or SCC solving
+  relay_a.$0 -> relay_b.$0 : int * => relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b    [AMBIGUOUS_GUARDED]
+      wrapper: relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b
+      actual=int *, formal=void *, selected=<unknown>
+      callee concrete path types: short * char * int *
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:18:3
+      note: display-only; not fed back into global summaries or SCC solving
+
+Call-site specialized function classification:
+  relay_a : AMBIGUOUS_GUARDED    [call-site-specialized]
+      relay_b.$0 -> relay_a.$0 : short * => relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a    [AMBIGUOUS_GUARDED]
+          wrapper: relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a
+          actual=short *, formal=void *, selected=<unknown>
+          callee concrete path types: char * short * int *
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:27:3
+          note: display-only; not fed back into global summaries or SCC solving; remaining guarded ambiguity
+      run_recursive_parallel_observations.$0 -> relay_a.$0 : void * => relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a    [AMBIGUOUS_GUARDED]
+          wrapper: relay_a⌜void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩⌝relay_a
+          actual=void *, formal=void *, selected=<unknown>
+          callee concrete path types: char * short * int *
+          guard environment: remaining=2
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:31:3
+          note: display-only; not fed back into global summaries or SCC solving; remaining guarded ambiguity
+  relay_b : AMBIGUOUS_GUARDED    [call-site-specialized]
+      relay_a.$0 -> relay_b.$0 : char * => relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b    [AMBIGUOUS_GUARDED]
+          wrapper: relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b
+          actual=char *, formal=void *, selected=<unknown>
+          callee concrete path types: short * char * int *
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:19:3
+          note: display-only; not fed back into global summaries or SCC solving; remaining guarded ambiguity
+      relay_a.$0 -> relay_b.$0 : int * => relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b    [AMBIGUOUS_GUARDED]
+          wrapper: relay_b⌜void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩⌝relay_b
+          actual=int *, formal=void *, selected=<unknown>
+          callee concrete path types: short * char * int *
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:18:3
+          note: display-only; not fed back into global summaries or SCC solving; remaining guarded ambiguity
+
+Cross-TU SCC parameter-summary fixpoint:
+  scheduler: project-scc-two-phase
+  phases: cast-history-then-pointer-use
+  phase dependency: pointer-use changes never reopen project cast-history SCC solving
+  iterations: 0 / 32
+  status: converged
+  recursive project SCC edges: 0
+  local-only SCCs skipped: 1
+  local-only edges skipped: 3
+  cast edge executions: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  pointer-use edge executions: 0
+  pointer-use operation candidates: 0
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 0
+  pointer-use frozen cast-attachment overlays: 0
+  pointer-use reopened project cast SCC: 0
+  pointer-use termination: <none>
+  changed edges: 0
+  note: skipped-local-only-sccs
+  domains: parameter-cast-histories, parameter-pointer-uses
+
+Cross-TU direct-call summary lookup:
+  <none>
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  run_recursive_parallel_observations::p : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+  relay_a::p : void * => ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+  relay_b::p : void * => ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩
+  relay_b::as_short : void * => short * => void * => relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a
+
+Observed later interpretations (raw evidence):
+  run_recursive_parallel_observations::p
+    - [always] relay_a⌜⟨| int *, char * |⟩⌝relay_a    {call-through-relay_a, role=Semantic}
+    - [always] relay_a⌜⟨| int *, char * |⟩⌝relay_a    {call-through-relay_a-origin, role=Semantic}
+  relay_a::p
+    - [always] int *    {init-projection, role=Intermediate}
+    - [always] int *    {init-projection-origin, role=Intermediate}
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+  relay_b::p
+    - [always] short *    {init-projection, role=Intermediate}
+    - [always] short *    {init-projection-origin, role=Intermediate}
+    - [always] attach=short *, obs=void * => relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a    {call-through-relay_a-origin, role=Semantic}
+  relay_b::as_short
+    - [always] void * => relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a    {call-through-relay_a, role=Semantic}
+
+Derived observation summaries:
+  run_recursive_parallel_observations::p
+    branch-cast: <none>
+    grouped: {relay_a⌜⟨| int *, char * |⟩⌝relay_a @ always}
+  relay_a::p
+    branch-cast: <none>
+    grouped: {char * @ always; int * @ always}
+  relay_b::p
+    branch-cast: <none>
+    grouped: {relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a @ always; short * @ always}
+  relay_b::as_short
+    branch-cast: <none>
+    grouped: {relay_a⌜void * => ⟨| int *, char * |⟩⌝relay_a @ always}
+
+Pointer use summaries:
+  run_recursive_parallel_observations::p
+    - [always] attach=<id>, as=void * : call-arg    {arg0 to relay_a}    [origin=local]    @ a.c:31:3
+    - [always] attach=int *, as=int * : init-rhs    {via relay_a.$0; init-rhs to int *-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:31:3
+    - [always] attach=char *, as=char * : init-rhs    {via relay_a.$0; init-rhs to char *-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:31:3
+    - [always] attach=int *, as=int * : call-arg    {via relay_a.$0; arg0 to relay_b-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:31:3
+    - [always] attach=char *, as=char * : call-arg    {via relay_a.$0; arg0 to relay_b-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:31:3
+  relay_a::p
+    - [always] attach=int *, as=int * : init-rhs    {init-rhs to int *-origin}    [origin=local]    @ a.c:13:17
+    - [always] attach=char *, as=char * : init-rhs    {init-rhs to char *-origin}    [origin=local]    @ a.c:14:19
+    - [always] attach=int *, as=int * : call-arg    {arg0 to relay_b-origin}    [origin=local]    @ a.c:18:3
+    - [always] attach=char *, as=char * : call-arg    {arg0 to relay_b-origin}    [origin=local]    @ a.c:19:3
+  relay_a::as_int
+    - [always] attach=<id>, as=int * : call-arg    {arg0 to relay_b}    [origin=local]    @ a.c:18:3
+  relay_a::as_char
+    - [always] attach=<id>, as=char * : call-arg    {arg0 to relay_b}    [origin=local]    @ a.c:19:3
+  relay_b::p
+    - [always] attach=short *, as=short * : init-rhs    {init-rhs to short *-origin}    [origin=local]    @ a.c:23:21
+    - [always] attach=short *, as=short * : call-arg    {arg0 to relay_a-origin}    [origin=local]    @ a.c:27:3
+    - [always] attach=short * => int *, as=int * : init-rhs    {via relay_a.$0; init-rhs to int *-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:27:3
+    - [always] attach=short * => char *, as=char * : init-rhs    {via relay_a.$0; init-rhs to char *-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:27:3
+    - [always] attach=short * => int *, as=int * : call-arg    {via relay_a.$0; arg0 to relay_b-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:27:3
+    - [always] attach=short * => char *, as=char * : call-arg    {via relay_a.$0; arg0 to relay_b-origin}    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:27:3
+  relay_b::as_short
+    - [always] attach=<id>, as=short * : call-arg    {arg0 to relay_a}    [origin=local]    @ a.c:27:3
+
+Semantic pointer-operation summaries:
+  run_recursive_parallel_observations::p
+    - [always] call-argument-flow as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        evidenceKinds: call-arg
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-argument-flow as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        evidenceKinds: call-arg
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-argument-flow as=void *    count=1    [origin=local]    first=@ a.c:31:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_a
+    - [always] init-flow as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to char *-origin
+    - [always] init-flow as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to int *-origin
+  relay_a::p
+    - [always] init-flow as=int *    count=1    [origin=local]    first=@ a.c:13:17
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to int *-origin
+    - [always] init-flow as=char *    count=1    [origin=local]    first=@ a.c:14:19
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *-origin
+    - [always] call-argument-flow as=int *    count=1    [origin=local]    first=@ a.c:18:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_b-origin
+    - [always] call-argument-flow as=char *    count=1    [origin=local]    first=@ a.c:19:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_b-origin
+  relay_a::as_int
+    - [always] call-argument-flow as=int *    count=1    [origin=local]    first=@ a.c:18:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_b
+  relay_a::as_char
+    - [always] call-argument-flow as=char *    count=1    [origin=local]    first=@ a.c:19:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_b
+  relay_b::p
+    - [always] init-flow as=short *    count=1    [origin=local]    first=@ a.c:23:21
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to short *-origin
+    - [always] call-argument-flow as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        evidenceKinds: call-arg
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-argument-flow as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        evidenceKinds: call-arg
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-argument-flow as=short *    count=1    [origin=local]    first=@ a.c:27:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_a-origin
+    - [always] init-flow as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to char *-origin
+    - [always] init-flow as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to int *-origin
+  relay_b::as_short
+    - [always] call-argument-flow as=short *    count=1    [origin=local]    first=@ a.c:27:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to relay_a
+
+Grouped pointer-operation summaries (normalized rows):
+  run_recursive_parallel_observations::p
+    - [always] call-arg as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-arg as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-arg as=void *    count=1    [origin=local]    first=@ a.c:31:3
+        sources: local-pointer-use
+        details: arg0 to relay_a
+    - [always] init-rhs as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to char *-origin
+    - [always] init-rhs as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:31:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to int *-origin
+  relay_a::p
+    - [always] init-rhs as=int *    count=1    [origin=local]    first=@ a.c:13:17
+        sources: local-pointer-use
+        details: init-rhs to int *-origin
+    - [always] init-rhs as=char *    count=1    [origin=local]    first=@ a.c:14:19
+        sources: local-pointer-use
+        details: init-rhs to char *-origin
+    - [always] call-arg as=int *    count=1    [origin=local]    first=@ a.c:18:3
+        sources: local-pointer-use
+        details: arg0 to relay_b-origin
+    - [always] call-arg as=char *    count=1    [origin=local]    first=@ a.c:19:3
+        sources: local-pointer-use
+        details: arg0 to relay_b-origin
+  relay_a::as_int
+    - [always] call-arg as=int *    count=1    [origin=local]    first=@ a.c:18:3
+        sources: local-pointer-use
+        details: arg0 to relay_b
+  relay_a::as_char
+    - [always] call-arg as=char *    count=1    [origin=local]    first=@ a.c:19:3
+        sources: local-pointer-use
+        details: arg0 to relay_b
+  relay_b::p
+    - [always] init-rhs as=short *    count=1    [origin=local]    first=@ a.c:23:21
+        sources: local-pointer-use
+        details: init-rhs to short *-origin
+    - [always] call-arg as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-arg as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; arg0 to relay_b-origin
+    - [always] call-arg as=short *    count=1    [origin=local]    first=@ a.c:27:3
+        sources: local-pointer-use
+        details: arg0 to relay_a-origin
+    - [always] init-rhs as=char *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to char *-origin
+    - [always] init-rhs as=int *    count=1    [origin=same-tu-call, target=relay_a, sig=fn:(ptr:void,int:unsigned int)->void, edge=direct-call]    first=@ a.c:27:3
+        sources: same-tu-named-call-pointer-use
+        details: via relay_a.$0; init-rhs to int *-origin
+  relay_b::as_short
+    - [always] call-arg as=short *    count=1    [origin=local]    first=@ a.c:27:3
+        sources: local-pointer-use
+        details: arg0 to relay_a
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  run_recursive_parallel_observations::p
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    evidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=yes, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=run_recursive_parallel_observations::p, behavior=ParallelSequentialReinterpretationNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=6, parallel=1, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 4 {char *, int *, short *, void *}
+      pointerTypes: 4 {char *, int *, short *, void *}
+      nonVoidPointerTypes: 3 {char *, int *, short *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=yes, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=yes, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  relay_a::p
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    evidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=yes, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=relay_a::p, behavior=ParallelSequentialReinterpretationNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=6, parallel=1, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 4 {char *, int *, short *, void *}
+      pointerTypes: 4 {char *, int *, short *, void *}
+      nonVoidPointerTypes: 3 {char *, int *, short *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=yes, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=yes, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  relay_b::p
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    evidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=yes, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=relay_b::p, behavior=ParallelSequentialReinterpretationNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=6, parallel=1, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 4 {char *, int *, short *, void *}
+      pointerTypes: 4 {char *, int *, short *, void *}
+      nonVoidPointerTypes: 3 {char *, int *, short *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=yes, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  relay_b::as_short
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: MultiTargetParallelNoDeref
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, edges=direct-call, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=relay_b::as_short, behavior=MultiTargetParallelNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=local-only, targets=relay_a, edges=direct-call
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 4
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=2, parallel=1, branch=0, callwrap=1, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 4 {char *, int *, short *, void *}
+      pointerTypes: 4 {char *, int *, short *, void *}
+      nonVoidPointerTypes: 3 {char *, int *, short *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=yes, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  run_recursive_parallel_observations::p
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=6, parallel=1, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 4 {char *, int *, short *, void *}
+    pointerTypes: 4 {char *, int *, short *, void *}
+    nonVoidPointerTypes: 3 {char *, int *, short *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  relay_a::p
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=6, parallel=1, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 4 {char *, int *, short *, void *}
+    pointerTypes: 4 {char *, int *, short *, void *}
+    nonVoidPointerTypes: 3 {char *, int *, short *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  relay_b::p
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=6, parallel=1, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 4 {char *, int *, short *, void *}
+    pointerTypes: 4 {char *, int *, short *, void *}
+    nonVoidPointerTypes: 3 {char *, int *, short *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  relay_b::as_short
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 5
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=2, parallel=1, branch=0, callwrap=1, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 4 {char *, int *, short *, void *}
+    pointerTypes: 4 {char *, int *, short *, void *}
+    nonVoidPointerTypes: 3 {char *, int *, short *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  run_recursive_parallel_observations.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    evidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=run_recursive_parallel_observations.$0, behavior=ParallelSequentialReinterpretationNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    summary: ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+    pointerTypes: char *, int *, short *, void *
+    nonVoidPointerTypes: char *, int *, short *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  relay_a.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    evidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=relay_a.$0, behavior=ParallelSequentialReinterpretationNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    summary: ⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+    pointerTypes: char *, int *, short *, void *
+    nonVoidPointerTypes: char *, int *, short *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  relay_b.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ParallelSequentialReinterpretationNoDeref
+    evidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=MultiTargetReinterpretation, semanticRiskTier=Moderate, interpretation=multiple possible concrete target views without multi-type access evidence
+    semanticMediation: kind=Direct, semanticFamily=MultiTargetReinterpretation, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=relay_b.$0, behavior=ParallelSequentialReinterpretationNoDeref, mediation=Direct, family=MultiTargetReinterpretation, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=relay_a, relay_b, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    summary: ⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩
+    pointerTypes: char *, int *, short *, void *
+    nonVoidPointerTypes: char *, int *, short *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+
+Function behavior classifications:
+  run_recursive_parallel_observations
+    class: MultiTargetReinterpretationFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=yes, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, init-rhs, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=yes, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ParallelSequentialReinterpretationNoDeref, semanticFamily=MultiTargetReinterpretation, mediatedSemanticFamily=MultiTargetReinterpretation, mediation=Direct, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use, summary=⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+  relay_a
+    class: MultiTargetReinterpretationFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=yes, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, init-rhs, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=yes, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ParallelSequentialReinterpretationNoDeref, semanticFamily=MultiTargetReinterpretation, mediatedSemanticFamily=MultiTargetReinterpretation, mediation=Direct, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use, summary=⟨| char * => void * => short * => void *, int * => void * => short * => void * |⟩
+  relay_b
+    class: MultiTargetReinterpretationFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=yes, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, init-rhs, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=yes, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ParallelSequentialReinterpretationNoDeref, semanticFamily=MultiTargetReinterpretation, mediatedSemanticFamily=MultiTargetReinterpretation, mediation=Direct, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, same-tu-recursive-pointer-use, summary=⟨| short * => void * => char * => void *, short * => void * => int * => void * |⟩
+
+Unsupported / approximated language features:
+  <none>

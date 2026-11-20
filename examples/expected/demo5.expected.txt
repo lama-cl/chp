@@ -1,0 +1,249 @@
+Command:
+./cast-history-tool --debug-dump "../examples/demo5.c" -- -std=c17
+
+Output:
+[cast] pv => int * => void *
+[cast] pv => int * => void *
+[cast] q => int * => void * => char *
+pv : int * => void *    [scope=main]    [implicit-cast]    @ ../examples/demo5.c:11:17
+pv : int * => void *    [scope=main]    [implicit-cast]    @ ../examples/demo5.c:12:18
+q : int * => void * => char *    [scope=main]    [implicit-cast]    @ ../examples/demo5.c:15:14
+
+Function summaries:
+  main() -> int [int]
+
+Direct cast histories (entity-oriented):
+  main::pv : int * => void * => char *
+  main::pdummy : void * => char *
+  main::q : void * => char *
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Storage-location cast histories:
+  main::pv : int * => void * => char *
+  main::pdummy : int * => void * => char *
+  main::q : int * => void * => char *
+
+Observed later interpretations (raw evidence):
+  main::pv
+    - [always] void *    {init-projection, role=Intermediate}
+    - [always] attach=void *, obs=char *    {init-projection-alias-parent, role=Semantic}
+  main::pdummy
+    - [always] attach=void *, obs=char *    {init-projection-alias-parent, role=Semantic}
+  main::q
+    - [always] char *    {init-projection, role=Intermediate}
+
+Derived observation summaries:
+  main::pv
+    branch-cast: <none>
+    grouped: {char * @ always; void * @ always}
+  main::pdummy
+    branch-cast: <none>
+    grouped: {char * @ always}
+  main::q
+    branch-cast: <none>
+    grouped: {char * @ always}
+
+Pointer use summaries:
+  main::pv
+    - [always] attach=<id>, as=int * : stored    {assignment-rhs}    [origin=local]    @ ../examples/demo5.c:11:15
+    - [always] attach=<id>, as=int * : init-rhs    {init-rhs to void *}    [origin=local]    @ ../examples/demo5.c:12:18
+    - [always] attach=void *, as=void * : init-rhs    {init-rhs to void *-alias-parent}    [origin=local]    @ ../examples/demo5.c:14:13
+    - [always] attach=void *, as=void * : init-rhs    {init-rhs to char *-alias-parent}    [origin=local]    @ ../examples/demo5.c:15:14
+  main::pdummy
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to void *}    [origin=local]    @ ../examples/demo5.c:14:13
+    - [always] attach=void *, as=void * : init-rhs    {init-rhs to char *-alias-parent}    [origin=local]    @ ../examples/demo5.c:15:14
+  main::q
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ ../examples/demo5.c:15:14
+
+Semantic pointer-operation summaries:
+  main::pv
+    - [always] stored-pointer as=int *    count=1    [origin=local]    first=@ ../examples/demo5.c:11:15
+        evidenceKinds: stored
+        sources: local-pointer-use
+        details: assignment-rhs
+    - [always] init-flow as=int *    count=1    [origin=local]    first=@ ../examples/demo5.c:12:18
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to void *
+    - [always] init-flow as=void *    count=2    [origin=local]    first=@ ../examples/demo5.c:14:13
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent; init-rhs to void *-alias-parent
+  main::pdummy
+    - [always] init-flow as=void *    count=2    [origin=local]    first=@ ../examples/demo5.c:14:13
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent; init-rhs to void *
+  main::q
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ ../examples/demo5.c:15:14
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+
+Grouped pointer-operation summaries (normalized rows):
+  main::pv
+    - [always] stored as=int *    count=1    [origin=local]    first=@ ../examples/demo5.c:11:15
+        sources: local-pointer-use
+        details: assignment-rhs
+    - [always] init-rhs as=int *    count=1    [origin=local]    first=@ ../examples/demo5.c:12:18
+        sources: local-pointer-use
+        details: init-rhs to void *
+    - [always] init-rhs as=void *    count=2    [origin=local]    first=@ ../examples/demo5.c:14:13
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent; init-rhs to void *-alias-parent
+  main::pdummy
+    - [always] init-rhs as=void *    count=2    [origin=local]    first=@ ../examples/demo5.c:14:13
+        sources: local-pointer-use
+        details: init-rhs to char *-alias-parent; init-rhs to void *
+  main::q
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ ../examples/demo5.c:15:14
+        sources: local-pointer-use
+        details: init-rhs to char *
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  main::pv
+    view: PartialView
+    historyShape: ByteView
+    historyRisk: Moderate
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    viewNote: intermediate/local view; downstream operation evidence may be projected to an earlier root or function parameter
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Moderate, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=main::pv, behavior=ByteViewNoDeref, mediation=Direct, family=ByteView, risk=Moderate, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 3
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 3 {char *, int *, void *}
+      pointerTypes: 3 {char *, int *, void *}
+      nonVoidPointerTypes: 2 {char *, int *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=no, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  main::pdummy
+    view: LocalView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    viewNote: intermediate/local view; downstream operation evidence may be projected to an earlier root or function parameter
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Low, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=main::pdummy, behavior=ByteViewNoDeref, mediation=Direct, family=ByteView, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, void-interface
+    history:
+      seqDepth: 3
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  main::q
+    view: LocalView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    viewNote: intermediate/local view; downstream operation evidence may be projected to an earlier root or function parameter
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Low, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=main::q, behavior=ByteViewNoDeref, mediation=Direct, family=ByteView, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  main::pv
+    historyShape: ByteView
+    historyRisk: Moderate
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  main::pdummy
+    historyShape: ByteView
+    historyRisk: Moderate
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  main::q
+    historyShape: ByteView
+    historyRisk: Moderate
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  <none>
+
+Function behavior classifications:
+  <none>
+
+Unsupported / approximated language features:
+  <none>

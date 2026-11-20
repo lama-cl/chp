@@ -1,0 +1,36 @@
+{
+  "casts": [],
+  "functionTypeVoidPointerPositions": [],
+  "pointerDeclarations": [],
+  "project": {
+    "id": "p126_recursive_parallel_observation_dedup",
+    "includeReturnTypes": false,
+    "root": "<project-root>"
+  },
+  "schemaName": "cast-history-prevalence-metrics",
+  "schemaVersion": 2,
+  "toolVersion": "cast-history-dev",
+  "tu": {
+    "compileCommandHash": "",
+    "configurationId": "",
+    "sourceFile": "a.c"
+  },
+  "tuCounts": {
+    "bytePointerCasts": 0,
+    "explicitCasts": 0,
+    "fromVoidPointerCasts": 0,
+    "functionPointerDeclarations": 0,
+    "functionTypeVoidPointerPositions": 0,
+    "implicitCasts": 0,
+    "pointerDeclarations": 0,
+    "pointerFieldDeclarations": 0,
+    "returnPointerDeclarations": 0,
+    "toVoidPointerCasts": 0,
+    "voidPointerDeclarations": 0,
+    "voidPointerFieldDeclarations": 0,
+    "voidPointerGlobalDeclarations": 0,
+    "voidPointerLocalDeclarations": 0,
+    "voidPointerParameterDeclarations": 0,
+    "voidPointerReturnDeclarations": 0
+  }
+}
