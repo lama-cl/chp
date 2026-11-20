@@ -264,7 +264,7 @@ Branch: `claude/regression-test-harness`.
 
 ## 10. Phase 2 results (2026-11-20)
 
-- `regress.py update` (LLVM 20.1.2) wrote 35 expected files plus a `meta.info` per `expected/` folder. They are committed on their own ("Add expected outputs for the regression set"): 41 files, ≈ 6.1 MB, 168k lines. Most of that is p126, whose summary (2.2 MB) and index (3.3 MB) are large.
+- `regress.py update` (LLVM 20.1.2) wrote 35 expected files plus a `meta.info` per `expected/` folder. They are committed on their own ("Add expected outputs for the regression set"): 41 files, ≈ 8.6 MB, 168k lines. About 6.9 MB of that is p126: its index (4.5 MB) and summary (2.3 MB).
 - `regress.py run` passed 11/11 twice in a row (exit 0).
 - T2.3: a cast added to `demo3.c` gave a 63-line diff and exit 1; reverted.
 - `regress.py perf --update` wrote 11 `runtime.expected.json` baselines (median of 3) in a separate commit. **They come from a 4-CPU x86_64 cloud container**; refresh them on the machine where perf is checked (`regress.py perf --update`) before trusting `SLOW` results.
