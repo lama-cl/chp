@@ -1,6 +1,6 @@
 # Regression Testing — Design & Plan
 
-Status: **Phase 0 done (§8), Phase 1 done (§9); waiting for go-ahead on Phase 2** (2026-11-20)
+Status: **Phases 0–2 done (§8–§10); waiting for go-ahead on Phase 3** (2026-11-20)
 Owner: project maintainers · Implementers: humans or agents (follow the task list in §5)
 
 ---
@@ -168,10 +168,10 @@ Each task ends with its **done when** condition. Do not start a phase until the 
   *Done when* `regress.py run` on a fresh build reports a clear "missing expected file" for every fixture (no crash).
 
 ### Phase 2: expected outputs
-- [ ] **T2.1** `regress.py update` (LLVM ≥ 19) creates `expected/*.expected*` files following §4.2.
-- [ ] **T2.2** Commit the expected files **in a separate commit** from the code changes.
+- [x] **T2.1** `regress.py update` (LLVM ≥ 19) creates `expected/*.expected*` files following §4.2.
+- [x] **T2.2** Commit the expected files **in a separate commit** from the code changes.
   *Done when* `regress.py run` passes twice in a row and `regress.py perf` runs without error.
-- [ ] **T2.3** Sanity check: make a deliberate change to one demo, confirm `run` fails with a readable diff, then revert.
+- [x] **T2.3** Sanity check: make a deliberate change to one demo, confirm `run` fails with a readable diff, then revert.
 
 ### Phase 3: ctest
 - [ ] **T3.1** Add `enable_testing()` and the tests from §4.6.
@@ -259,3 +259,12 @@ Branch: `claude/regression-test-harness`.
   - `perf` without baselines prints `NOBASE` and exits 0; after `perf --update`, a baseline edited to be 7× too fast is flagged `SLOWER` and `--strict` exits 1.
   - Unknown `--only` names and a missing tool exit 2.
 - Runtime of the full set: ≈ 15 s (p126 ≈ 12 s, almost all in the index build).
+
+---
+
+## 10. Phase 2 results (2026-11-20)
+
+- `regress.py update` (LLVM 20.1.2) wrote 35 expected files plus a `meta.info` per `expected/` folder. They are committed on their own ("Add expected outputs for the regression set"): 41 files, ≈ 6.1 MB, 168k lines. Most of that is p126, whose summary (2.2 MB) and index (3.3 MB) are large.
+- `regress.py run` passed 11/11 twice in a row (exit 0).
+- T2.3: a cast added to `demo3.c` gave a 63-line diff and exit 1; reverted.
+- `regress.py perf --update` wrote 11 `runtime.expected.json` baselines (median of 3) in a separate commit. **They come from a 4-CPU x86_64 cloud container**; refresh them on the machine where perf is checked (`regress.py perf --update`) before trusting `SLOW` results.
