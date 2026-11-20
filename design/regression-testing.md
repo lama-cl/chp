@@ -75,7 +75,7 @@ examples/
   expected/
     demo1.expected.txt                      # normalized --debug-dump output
     demo1.runtime.expected.json             # timing baseline (perf check only)
-    regress-meta.expected.json              # LLVM version the files came from
+    meta.info                               # LLVM version the files came from (not compared)
 
 test_projects/projects/<project>/
   a.c  b.c
@@ -87,12 +87,12 @@ test_projects/projects/<project>/
     prevalence-metrics/a.c.cast-prevalence.expected.json # normalized, key-sorted
     project-summary-index.expected.json     # normalized, key-sorted index
     runtime.expected.json                   # timing baseline (perf check only)
-    regress-meta.expected.json              # LLVM version the files came from
+    meta.info                               # LLVM version the files came from (not compared)
 ```
 
 Rule: the driver's output path, with `.expected` inserted before the last extension (`a.c.txt` → `a.c.expected.txt`). Subfolders mirror the driver output, so an expected file maps back to its source with no lookup table. The `.expected` part sits just before the real extension, so editors keep syntax highlighting.
 
-`regress.py` owns every `*.expected.txt|json` in these folders **except** `README.expected.txt`, `runtime.expected.json` and `regress-meta.expected.json`. It never touches other files (`verify_*.py`, `README.expected.txt`).
+`regress.py` owns every `*.expected.txt|json` in these folders **except** `README.expected.txt` and `runtime.expected.json`. It never touches other files (`verify_*.py`, `README.expected.txt`).
 
 Find everything: `find examples test_projects/projects -path '*/expected/*' -name '*.expected*'`
 
@@ -120,7 +120,7 @@ regress.py perf --update                           # rewrite runtime baselines
 - Reports expected files that are missing and expected files that are no longer produced (`STALE`). `update` deletes stale ones.
 - Refuses to `update` if any fixture fails.
 - Prints a unified diff for each mismatched file and ends with a `PASS n / FAIL m` summary.
-- Reads the LLVM version from `cast-history-tool --version` and refuses `update` / `perf --update` if it is below 19. Picks `clang-<major>` for builtin headers. `run` warns when `regress-meta.expected.json` names a different LLVM major version.
+- Reads the LLVM version from `cast-history-tool --version` and refuses `update` / `perf --update` if it is below 19. Picks `clang-<major>` for builtin headers. `run` warns when `expected/meta.info` names a different LLVM major version.
 - Builds `compile_commands.json` for each project before running (as `CLAUDE.md` requires), using `scripts/regenerate_compile_commands.py` or the driver.
 - Uses only Python standard-library modules (`json`, `difflib`, `subprocess`, `argparse`).
 

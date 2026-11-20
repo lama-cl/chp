@@ -19,7 +19,7 @@ Expected-file layout:
   <project>/expected/<output path>.expected.<ext>    every compared output file,
                                                      mirroring the driver output
   <project>/expected/runtime.expected.json           perf baseline
-  <dir>/expected/regress-meta.expected.json          LLVM version the files came from
+  <dir>/expected/meta.info                           LLVM version the files came from (not compared)
 
 Exit status: 0 ok, 1 mismatch / fixture failure / strict perf regression,
 2 usage or environment problem.
@@ -86,7 +86,7 @@ def is_compared_project_file(rel: Path) -> bool:
 
 
 EXPECTED_MARK = ".expected"
-META_NAME = "regress-meta.expected.json"
+META_NAME = "meta.info"   # not compared; records the LLVM version
 RUNTIME_NAME = "runtime.expected.json"
 
 
@@ -100,7 +100,7 @@ def is_managed_expected(path: Path) -> bool:
     """Expected files owned by this script (everything else in expected/ is
     left alone, e.g. README.expected.txt or verify_*.py)."""
     name = path.name
-    if name in ("README.expected.txt", META_NAME, RUNTIME_NAME):
+    if name in ("README.expected.txt", RUNTIME_NAME):
         return False
     return bool(re.search(r"\.expected\.(txt|json)$", name))
 
