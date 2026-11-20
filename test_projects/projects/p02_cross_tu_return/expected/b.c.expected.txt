@@ -1,0 +1,203 @@
+Command:
+<tool-root>/build/cast-history-tool --enable-summary-import --summary-index <output-root>/p02_cross_tu_return/import-round-01-index-input.json --summary-dir <output-root>/p02_cross_tu_return/.work/imp01-tmp/b.c/s --runtime-timing-dir <output-root>/p02_cross_tu_return/.work/imp01-tmp/b.c/s --runtime-timing-project-id p02_cross_tu_return --runtime-timing-stage import-round-01 --extra-arg-before=-resource-dir=/usr/lib/llvm-20/lib/clang/20 -p <project-root> <project-root>/b.c 
+
+Output:
+y : void * => char *    [scope=g]    [implicit-cast]    @ b.c:8:13
+p : void * => char * => void *    [scope=g]    [implicit-cast]    @ b.c:9:10
+
+Function summaries:
+  g($0 : void * => char *) -> void * [$0 => char * => void *]    [ret aliases $0]
+
+Project-solved parameter histories (canonical):
+  g.$0 : void * => char *    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+
+Branch-family parameter-transfer metadata (C6g5w1d; C2 tagged-closure diagnostics):
+  <none>
+
+Direct cast histories (entity-oriented):
+  g::y : void * => char *
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Cross-TU summary SCC awareness:
+  <none>
+
+Project-solved call-site provenance:
+  <none>
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Cross-TU SCC parameter-summary fixpoint:
+  scheduler: project-scc-two-phase
+  phases: cast-history-then-pointer-use
+  phase dependency: pointer-use changes never reopen project cast-history SCC solving
+  iterations: 0 / 32
+  status: converged
+  recursive project SCC edges: 0
+  local-only SCCs skipped: 0
+  local-only edges skipped: 0
+  cast edge executions: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  pointer-use edge executions: 0
+  pointer-use operation candidates: 0
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 0
+  pointer-use frozen cast-attachment overlays: 0
+  pointer-use reopened project cast SCC: 0
+  pointer-use termination: <none>
+  changed edges: 0
+  note: no-named-call-edges
+  domains: parameter-cast-histories, parameter-pointer-uses
+
+Cross-TU direct-call summary lookup:
+  <none>
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  g::y : void * => char *
+
+Observed later interpretations (raw evidence):
+  g::y
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+
+Derived observation summaries:
+  g::y
+    branch-cast: <none>
+    grouped: {char * @ always}
+
+Pointer use summaries:
+  g::y
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ b.c:8:13
+    - [always] attach=char *, as=char * : returned    {return-alias-parent}    [origin=local]    @ b.c:9:3
+  g::p
+    - [always] attach=<id>, as=char * : returned    {return}    [origin=local]    @ b.c:9:3
+
+Semantic pointer-operation summaries:
+  g::y
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ b.c:8:13
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] returned-flow as=char *    count=1    [origin=local]    first=@ b.c:9:3
+        evidenceKinds: returned
+        sources: return-alias-continuation
+        details: return-alias-parent
+  g::p
+    - [always] returned-flow as=char *    count=1    [origin=local]    first=@ b.c:9:3
+        evidenceKinds: returned
+        sources: local-pointer-use
+        details: return
+
+Grouped pointer-operation summaries (normalized rows):
+  g::y
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ b.c:8:13
+        sources: local-pointer-use
+        details: init-rhs to char *
+    - [always] returned as=char *    count=1    [origin=local]    first=@ b.c:9:3
+        sources: return-alias-continuation
+        details: return-alias-parent
+  g::p
+    - [always] returned as=char *    count=1    [origin=local]    first=@ b.c:9:3
+        sources: local-pointer-use
+        details: return
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  g::y
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use, return-alias-continuation
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=yes
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Low, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=ReturnAlias, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=yes
+    stableClassification: entity=g::y, behavior=ByteViewNoDeref, mediation=ReturnAlias, family=ByteView, risk=Low, evidenceSourceKind=return-alias-continuation
+    surfaceReasons: byte-view, void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  g::y
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  g.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use, return-alias-continuation
+    evidenceSourceKind: return-alias-continuation
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Low, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=ReturnAlias, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=yes
+    stableParamClassification: param=g.$0, behavior=ByteViewNoDeref, mediation=ReturnAlias, family=ByteView, risk=Low, evidenceSourceKind=return-alias-continuation
+    surfaceReasons: byte-view, void-interface
+    summary: char *
+    pointerTypes: char *, void *
+    nonVoidPointerTypes: char *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+
+Function behavior classifications:
+  g
+    class: BytewiseGenericFunction
+    classificationEvidenceSourceKind: return-alias-continuation
+    classificationEvidenceSources: local-pointer-use, return-alias-continuation
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=yes, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=init-rhs, returned, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=yes, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ByteViewNoDeref, semanticFamily=ByteView, mediatedSemanticFamily=ByteView, mediation=ReturnAlias, semanticRiskTier=Low, evidenceSourceKind=return-alias-continuation, evidenceSources=local-pointer-use, return-alias-continuation, summary=char *
+
+Unsupported / approximated language features:
+  <none>

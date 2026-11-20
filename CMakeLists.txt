@@ -44,3 +44,10 @@ if (MSVC)
 else()
   target_compile_options(cast-history-tool PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+# Regression tests (ctest); see design/regression-testing.md.
+option(CAST_HISTORY_ENABLE_TESTS "Register regression tests with ctest" ON)
+if (CAST_HISTORY_ENABLE_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()

@@ -1,0 +1,259 @@
+Command:
+<tool-root>/build/cast-history-tool --enable-summary-import --summary-index <output-root>/p01_direct_cross_tu/import-round-01-index-input.json --summary-dir <output-root>/p01_direct_cross_tu/.work/imp01-tmp/a.c/s --runtime-timing-dir <output-root>/p01_direct_cross_tu/.work/imp01-tmp/a.c/s --runtime-timing-project-id p01_direct_cross_tu --runtime-timing-stage import-round-01 --extra-arg-before=-resource-dir=/usr/lib/llvm-20/lib/clang/20 -p <project-root> <project-root>/a.c 
+
+Output:
+x : void * => g⌜⟨| char * => void *, int * |⟩⌝g    [scope=f]    [imported-call-arg]    @ a.c:13:3
+x : void *    [scope=f]    [call-arg]    @ a.c:13:3
+&i : int * => void * => f⌜void * => g⌜⟨| char * => void *, int * |⟩⌝g⌝f    [scope=main]    [call-arg]    @ a.c:18:3
+&i : int * => void *    [scope=main]    [implicit-cast]    @ a.c:18:5
+
+Function summaries:
+  f($0 : void * => g⌜⟨| char * => void *, int * |⟩⌝g)
+  main() -> int [int]
+
+Project-solved parameter histories (canonical):
+  f.$0 : void * => g⌜⟨| char * => void *, int * |⟩⌝g    [derived-project-summary]
+      source: project-param-transfer-fixpoint
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+
+Branch-family parameter-transfer metadata (C6g5w1d; C2 tagged-closure diagnostics):
+  <none>
+
+Recursive named-call fixpoint:
+  scheduler: scc-local-parameter-dependency-worklist
+  phases: cast-history-then-pointer-use
+  cast-history state: semantic atom/transition facts; rich histories retained for reporting
+  SCC components: 3 (recursive: 0)
+  SCC local worklist drains: 3
+  SCC components completed: 3 / 3
+  initial seed edges: 2
+  local dependency re-enqueues: 0
+  coalesced local dependency re-enqueues: 0
+  cross-component dependency signals: 0
+  edge executions: 2 / 32
+  recursive recurring-view collapses: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  cast semantic fact fail-open: 0
+  cast semantic state changes: 0
+  pointer-use phase: executed
+  pointer-use initial seed edges: 2
+  pointer-use local dependency re-enqueues: 0
+  pointer-use coalesced local dependency re-enqueues: 0
+  pointer-use cross-component dependency signals: 0
+  pointer-use operation candidates: 0
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 0
+  pointer-use frozen cast-attachment overlays: 0
+  pointer-use frozen cast-attachment fallbacks: 0
+  pointer-use report-only evidence merges: 0
+  pointer-use edge executions: 2 / 32
+  pointer-use termination: pointer-use-scc-worklist-quiescent
+  pointer-use reopened cast SCC: 0
+  status: converged
+  termination: scc-worklist-quiescent
+  domains: parameter-cast-histories, parameter-pointer-uses
+  phase dependency: pointer-use changes never reopen cast-history SCC solving
+  SCC component worklists (callee-first activation):
+    SCC #0 [acyclic] g; members=1; owned-edges=0; internal-edges=0; initial-seeds=0; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=0; pointer-use-initial-seeds=0; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=0; status=quiescent; pointer-use-status=quiescent; members={g}
+    SCC #1 [acyclic] f; members=1; owned-edges=1; internal-edges=0; initial-seeds=1; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=1; pointer-use-initial-seeds=1; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=1; status=quiescent; pointer-use-status=quiescent; members={f}
+    SCC #2 [acyclic] main; members=1; owned-edges=1; internal-edges=0; initial-seeds=1; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=1; pointer-use-initial-seeds=1; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=1; status=quiescent; pointer-use-status=quiescent; members={main}
+
+Direct cast histories (entity-oriented):
+  f::x : void * => g⌜⟨| char * => void *, int * |⟩⌝g
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Cross-TU summary SCC awareness:
+  <none>
+
+Project-solved call-site provenance:
+  f::fn:(ptr:void)->void.$0 -> g::fn:(ptr:void)->void.$0 : g⌜void * => ⟨| char * => void *, int * |⟩⌝g    [display-only]
+      wrapper: g⌜void * => ⟨| char * => void *, int * |⟩⌝g
+      parts: formalEntry=void * calleeCore=⟨| char * => void *, int * |⟩
+      @ a.c:13:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Cross-TU SCC parameter-summary fixpoint:
+  scheduler: project-scc-two-phase
+  phases: cast-history-then-pointer-use
+  phase dependency: pointer-use changes never reopen project cast-history SCC solving
+  iterations: 0 / 32
+  status: converged
+  recursive project SCC edges: 0
+  local-only SCCs skipped: 0
+  local-only edges skipped: 0
+  cast edge executions: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  pointer-use edge executions: 0
+  pointer-use operation candidates: 0
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 0
+  pointer-use frozen cast-attachment overlays: 0
+  pointer-use reopened project cast SCC: 0
+  pointer-use termination: <none>
+  changed edges: 0
+  note: no-cross-tu-recursive-import-edges
+  domains: parameter-cast-histories, parameter-pointer-uses
+
+Cross-TU direct-call summary lookup:
+  f -> g : fn:(ptr:void)->void    [found]    [summary=.work/c1-summaries/b.c.cast-summary.json]    [behavior=ReinterpretingWriteFunction]    [composed]    [paramImport=composed]    [pointerUseImport=composed]    [importedUses=4]    @ a.c:13:3
+      C3a/C6d2 imported callee parameter, data-field, and pointer-use summaries onto actual arguments
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  f::x : void * => g⌜⟨| char * => void *, int * |⟩⌝g
+
+Observed later interpretations (raw evidence):
+  f::x
+    - [always] g⌜⟨| char * => void *, int * |⟩⌝g    {imported-call-through-g, role=Semantic}
+    - [always] g⌜⟨| char * => void *, int * |⟩⌝g    {imported-call-through-g-origin, role=Semantic}
+
+Derived observation summaries:
+  f::x
+    branch-cast: <none>
+    grouped: {g⌜⟨| char * => void *, int * |⟩⌝g @ always}
+
+Pointer use summaries:
+  f::x
+    - [always] attach=<id>, as=void * : call-arg    {arg0 to g}    [origin=local]    @ a.c:13:3
+    - [always] attach=<id>, as=void * : init-rhs    {imported via g.$0; init-rhs to char *}    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, source=summary-import, edge=direct-call]    @ a.c:13:3
+    - [always] attach=char *, as=char * : init-rhs    {imported via g.$0; init-rhs to void *-alias-parent}    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, source=summary-import, edge=direct-call]    @ a.c:13:3
+    - [always] attach=<id>, as=void * : init-rhs    {imported via g.$0; init-rhs to int *}    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, source=summary-import, edge=direct-call]    @ a.c:13:3
+    - [always] attach=int *, as=int *, access=int : deref-readwrite    {imported via g.$0; assignment-lhs-*-alias-parent}    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, source=summary-import, edge=direct-call]    @ a.c:13:3
+
+Semantic pointer-operation summaries:
+  f::x
+    - [always] call-argument-flow as=void *    count=1    [origin=local]    first=@ a.c:13:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg0 to g
+    - [always] init-flow as=char *    count=1    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ a.c:13:3
+        evidenceKinds: init-rhs
+        sources: imported-direct-call-pointer-use
+        details: imported via g.$0; init-rhs to void *-alias-parent
+    - [always] init-flow as=void *    count=2    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ a.c:13:3
+        evidenceKinds: init-rhs
+        sources: imported-direct-call-pointer-use
+        details: imported via g.$0; init-rhs to char *; imported via g.$0; init-rhs to int *
+    - [always] typed-deref-readwrite as=int *, access=int    count=1    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ a.c:13:3
+        evidenceKinds: deref-readwrite
+        sources: imported-direct-call-pointer-use
+        details: imported via g.$0; assignment-lhs-*-alias-parent
+
+Grouped pointer-operation summaries (normalized rows):
+  f::x
+    - [always] call-arg as=void *    count=1    [origin=local]    first=@ a.c:13:3
+        sources: local-pointer-use
+        details: arg0 to g
+    - [always] deref-readwrite as=int *, access=int    count=1    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ a.c:13:3
+        sources: imported-direct-call-pointer-use
+        details: imported via g.$0; assignment-lhs-*-alias-parent
+    - [always] init-rhs as=char *    count=1    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ a.c:13:3
+        sources: imported-direct-call-pointer-use
+        details: imported via g.$0; init-rhs to void *-alias-parent
+    - [always] init-rhs as=void *    count=2    [origin=cross-tu-direct, target=g, sig=fn:(ptr:void)->void, edge=direct-call]    first=@ a.c:13:3
+        sources: imported-direct-call-pointer-use
+        details: imported via g.$0; init-rhs to char *; imported via g.$0; init-rhs to int *
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  f::x
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ConcreteSpecializedWrite
+    evidenceSources: imported-direct-call-pointer-use, local-pointer-use, project-scc-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=yes, importedFnPtr=no, projectSCC=yes, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Moderate, interpretation=surface-wild interface with concrete operation evidence and structurally mixed history
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, targets=g, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=f::x, behavior=ConcreteSpecializedWrite, mediation=Direct, family=DirectConcreteSpecialization, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=g, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    history:
+      seqDepth: 3
+      maxParallelBreadth: 2
+      maxBranchBreadth: 0
+      nodes: seq=1, parallel=1, branch=0, callwrap=1, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 3 {char *, int *, void *}
+      pointerTypes: 3 {char *, int *, void *}
+      nonVoidPointerTypes: 2 {char *, int *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=yes
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=yes
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: int *
+      writeDerefTypes: int *
+
+Storage-location history metrics:
+  f::x
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    seqDepth: 3
+    maxParallelBreadth: 2
+    maxBranchBreadth: 0
+    nodes: seq=1, parallel=1, branch=0, callwrap=1, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {char *, int *, void *}
+    pointerTypes: 3 {char *, int *, void *}
+    nonVoidPointerTypes: 2 {char *, int *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  f.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: ParallelPolymorphic
+    historyRisk: Moderate
+    behavior: ConcreteSpecializedWrite
+    evidenceSources: imported-direct-call-pointer-use, local-pointer-use, project-scc-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Moderate, interpretation=surface-wild interface with concrete operation evidence and structurally mixed history
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, targets=g, edges=direct-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=f.$0, behavior=ConcreteSpecializedWrite, mediation=Direct, family=DirectConcreteSpecialization, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=g, edges=direct-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, void-interface
+    summary: g⌜⟨| char * => void *, int * |⟩⌝g
+    pointerTypes: char *, int *, void *
+    nonVoidPointerTypes: char *, int *
+    derefTypes: int *
+    writeDerefTypes: int *
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+
+Function behavior classifications:
+  f
+    class: ReinterpretingWriteFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: imported-direct-call-pointer-use, local-pointer-use, project-scc-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=yes, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, deref-readwrite, init-rhs, derefSources=imported-direct-call-pointer-use, project-scc-pointer-use, writeSources=imported-direct-call-pointer-use, project-scc-pointer-use
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=yes, byteWrite=no, concreteWrite=yes, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecializedWrite, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=DirectConcreteSpecialization, mediation=Direct, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=imported-direct-call-pointer-use, local-pointer-use, project-scc-pointer-use, summary=g⌜⟨| char * => void *, int * |⟩⌝g
+
+Unsupported / approximated language features:
+  <none>

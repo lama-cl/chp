@@ -1,0 +1,731 @@
+{
+  "functionSummaryDetails": [
+    {
+      "function": "f",
+      "functionBehavior": "ReinterpretingWriteFunction",
+      "identity": {
+        "linkage": "external",
+        "location": {
+          "column": 6,
+          "file": "a.c",
+          "line": 12
+        },
+        "name": "f",
+        "qualifiedName": "f",
+        "signatureKey": "fn:(ptr:void)->void",
+        "sourceFile": "a.c",
+        "usr": ""
+      },
+      "params": [
+        {
+          "dataFieldObservations": [],
+          "dataFieldPointerUses": [],
+          "declaredType": "void *",
+          "directLocalSummary": {
+            "ir": {
+              "kind": "none"
+            }
+          },
+          "index": 0,
+          "name": "x",
+          "pointerUses": [
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                }
+              },
+              "detail": "arg0 to g",
+              "guard": null,
+              "kind": "call-arg",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "ast-leaf",
+              "operationSiteSpan": {
+                "column": 3,
+                "file": "a.c",
+                "line": 13
+              },
+              "pointerType": "void *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "local",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "",
+                "source": "",
+                "targetFunction": "",
+                "targetLookupKey": "",
+                "targetQualifiedName": "",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 3,
+                "file": "a.c",
+                "line": 13
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                }
+              },
+              "detail": "imported via g.$0; init-rhs to char *",
+              "guard": null,
+              "kind": "init-rhs",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 14,
+                "file": "b.c",
+                "line": 8
+              },
+              "pointerType": "void *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "direct-call",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "cross-tu-direct",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "summary-import",
+                "targetFunction": "g",
+                "targetLookupKey": "g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 3,
+                "file": "a.c",
+                "line": 13
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:char *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:char *",
+                    "text": "char *"
+                  }
+                }
+              },
+              "detail": "imported via g.$0; init-rhs to void *-alias-parent",
+              "guard": null,
+              "kind": "init-rhs",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 14,
+                "file": "b.c",
+                "line": 9
+              },
+              "pointerType": "char *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "direct-call",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "cross-tu-direct",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "summary-import",
+                "targetFunction": "g",
+                "targetLookupKey": "g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 3,
+                "file": "a.c",
+                "line": 13
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                }
+              },
+              "detail": "imported via g.$0; init-rhs to int *",
+              "guard": null,
+              "kind": "init-rhs",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 12,
+                "file": "b.c",
+                "line": 10
+              },
+              "pointerType": "void *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "direct-call",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "cross-tu-direct",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "summary-import",
+                "targetFunction": "g",
+                "targetLookupKey": "g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 3,
+                "file": "a.c",
+                "line": 13
+              }
+            },
+            {
+              "accessType": "int",
+              "attachPath": {
+                "ir": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:int *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:int *",
+                    "text": "int *"
+                  }
+                }
+              },
+              "detail": "imported via g.$0; assignment-lhs-*-alias-parent",
+              "guard": null,
+              "kind": "deref-readwrite",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 6,
+                "file": "b.c",
+                "line": 11
+              },
+              "pointerType": "int *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "direct-call",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "cross-tu-direct",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "summary-import",
+                "targetFunction": "g",
+                "targetLookupKey": "g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 3,
+                "file": "a.c",
+                "line": 13
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                }
+              },
+              "detail": "project-scc via g::fn:(ptr:void)->void.$0; init-rhs to char *",
+              "guard": null,
+              "kind": "init-rhs",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 14,
+                "file": "b.c",
+                "line": 8
+              },
+              "pointerType": "void *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "summary-param-transfer",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "project-scc",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "project-pointer-use-transfer-fixpoint",
+                "targetFunction": "g",
+                "targetLookupKey": "external::g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": "summary-param-transfer"
+              },
+              "span": {
+                "column": 14,
+                "file": "b.c",
+                "line": 8
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:char *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:char *",
+                    "text": "char *"
+                  }
+                }
+              },
+              "detail": "project-scc via g::fn:(ptr:void)->void.$0; init-rhs to void *-alias-parent",
+              "guard": null,
+              "kind": "init-rhs",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 14,
+                "file": "b.c",
+                "line": 9
+              },
+              "pointerType": "char *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "summary-param-transfer",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "project-scc",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "project-pointer-use-transfer-fixpoint",
+                "targetFunction": "g",
+                "targetLookupKey": "external::g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": "summary-param-transfer"
+              },
+              "span": {
+                "column": 14,
+                "file": "b.c",
+                "line": 9
+              }
+            },
+            {
+              "accessType": "int",
+              "attachPath": {
+                "ir": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:int *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:int *",
+                    "text": "int *"
+                  }
+                }
+              },
+              "detail": "project-scc via g::fn:(ptr:void)->void.$0; assignment-lhs-*-alias-parent",
+              "guard": null,
+              "kind": "deref-readwrite",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "preserved-transfer",
+              "operationSiteSpan": {
+                "column": 6,
+                "file": "b.c",
+                "line": 11
+              },
+              "pointerType": "int *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "summary-param-transfer",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "project-scc",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "fn:(ptr:void)->void",
+                "source": "project-pointer-use-transfer-fixpoint",
+                "targetFunction": "g",
+                "targetLookupKey": "external::g::fn:(ptr:void)->void",
+                "targetQualifiedName": "g",
+                "transferKind": "summary-param-transfer"
+              },
+              "span": {
+                "column": 6,
+                "file": "b.c",
+                "line": 11
+              }
+            }
+          ],
+          "summary": {
+            "ir": {
+              "callee": "g",
+              "inner": {
+                "arms": [
+                  {
+                    "first": {
+                      "kind": "asType",
+                      "type": {
+                        "canonical": "",
+                        "compatibilityKey": "text:char *",
+                        "functionHasPrototype": false,
+                        "functionIsVariadic": false,
+                        "functionParamCanonical": [],
+                        "functionReturnCanonical": "",
+                        "isArray": false,
+                        "isCharPointer": false,
+                        "isConstQualified": false,
+                        "isFloating": false,
+                        "isFunctionPointer": false,
+                        "isInteger": false,
+                        "isNullPointer": false,
+                        "isPointer": false,
+                        "isRecordPointer": false,
+                        "isVoid": false,
+                        "isVoidPointer": false,
+                        "isVolatileQualified": false,
+                        "kind": "unknown",
+                        "pointeeCanonical": "",
+                        "pointeeConst": false,
+                        "pointeeText": "",
+                        "pointeeVolatile": false,
+                        "recordName": "",
+                        "recordTag": "",
+                        "semanticKey": "text:char *",
+                        "text": "char *"
+                      }
+                    },
+                    "kind": "seq",
+                    "second": {
+                      "kind": "asType",
+                      "type": {
+                        "canonical": "void *",
+                        "compatibilityKey": "ptr:void",
+                        "functionHasPrototype": false,
+                        "functionIsVariadic": false,
+                        "functionParamCanonical": [],
+                        "functionReturnCanonical": "",
+                        "isArray": false,
+                        "isCharPointer": false,
+                        "isConstQualified": false,
+                        "isFloating": false,
+                        "isFunctionPointer": false,
+                        "isInteger": false,
+                        "isNullPointer": false,
+                        "isPointer": true,
+                        "isRecordPointer": false,
+                        "isVoid": false,
+                        "isVoidPointer": true,
+                        "isVolatileQualified": false,
+                        "kind": "void-pointer",
+                        "pointeeCanonical": "void",
+                        "pointeeConst": false,
+                        "pointeeText": "void",
+                        "pointeeVolatile": false,
+                        "recordName": "",
+                        "recordTag": "",
+                        "semanticKey": "ptr:void",
+                        "text": "void *"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "asType",
+                    "type": {
+                      "canonical": "int *",
+                      "compatibilityKey": "ptr:int",
+                      "functionHasPrototype": false,
+                      "functionIsVariadic": false,
+                      "functionParamCanonical": [],
+                      "functionReturnCanonical": "",
+                      "isArray": false,
+                      "isCharPointer": false,
+                      "isConstQualified": false,
+                      "isFloating": false,
+                      "isFunctionPointer": false,
+                      "isInteger": false,
+                      "isNullPointer": false,
+                      "isPointer": true,
+                      "isRecordPointer": false,
+                      "isVoid": false,
+                      "isVoidPointer": false,
+                      "isVolatileQualified": false,
+                      "kind": "other-pointer",
+                      "pointeeCanonical": "int",
+                      "pointeeConst": false,
+                      "pointeeText": "int",
+                      "pointeeVolatile": false,
+                      "recordName": "",
+                      "recordTag": "",
+                      "semanticKey": "ptr:int",
+                      "text": "int *"
+                    }
+                  }
+                ],
+                "kind": "parallel"
+              },
+              "kind": "callWrap"
+            }
+          }
+        }
+      ],
+      "return": {
+        "aliasedParamIndex": null,
+        "declaredType": "void",
+        "mayAliasParam": false,
+        "summary": {
+          "ir": {
+            "kind": "none"
+          }
+        }
+      }
+    },
+    {
+      "function": "main",
+      "functionBehavior": "OrdinaryFunction",
+      "identity": {
+        "linkage": "external",
+        "location": {
+          "column": 5,
+          "file": "a.c",
+          "line": 16
+        },
+        "name": "main",
+        "qualifiedName": "main",
+        "signatureKey": "fn:()->int:int",
+        "sourceFile": "a.c",
+        "usr": ""
+      },
+      "params": [],
+      "return": {
+        "aliasedParamIndex": null,
+        "declaredType": "int",
+        "mayAliasParam": false,
+        "summary": {
+          "ir": {
+            "kind": "asType",
+            "type": {
+              "canonical": "int",
+              "compatibilityKey": "int:int",
+              "functionHasPrototype": false,
+              "functionIsVariadic": false,
+              "functionParamCanonical": [],
+              "functionReturnCanonical": "",
+              "isArray": false,
+              "isCharPointer": false,
+              "isConstQualified": false,
+              "isFloating": false,
+              "isFunctionPointer": false,
+              "isInteger": true,
+              "isNullPointer": false,
+              "isPointer": false,
+              "isRecordPointer": false,
+              "isVoid": false,
+              "isVoidPointer": false,
+              "isVolatileQualified": false,
+              "kind": "integer",
+              "pointeeCanonical": "",
+              "pointeeConst": false,
+              "pointeeText": "",
+              "pointeeVolatile": false,
+              "recordName": "",
+              "recordTag": "",
+              "semanticKey": "int:int",
+              "text": "int"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "returnAliasPointerUseContinuations": [],
+  "schemaName": "cast-history-tu-link-summary",
+  "schemaVersion": 1,
+  "summaryDependencyEdges": [
+    {
+      "callee": "g",
+      "calleeArgumentIndex": null,
+      "calleeExpr": "",
+      "calleeHasLocalDefinition": false,
+      "calleeParamIndex": null,
+      "calleePublicLookupKey": "g::fn:(ptr:void)->void",
+      "calleeQualifiedName": "g",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "f",
+      "callerArgumentIndex": null,
+      "callerQualifiedName": "f",
+      "callerSignatureKey": "fn:(ptr:void)->void",
+      "crossTUCandidate": true,
+      "detail": "direct named call",
+      "guard": null,
+      "importedSummaryCandidate": true,
+      "kind": "direct-call",
+      "location": {
+        "column": 3,
+        "file": "a.c",
+        "line": 13
+      },
+      "resolvedBySummaryIndex": true,
+      "via": ""
+    },
+    {
+      "callee": "f",
+      "calleeArgumentIndex": null,
+      "calleeExpr": "",
+      "calleeHasLocalDefinition": true,
+      "calleeParamIndex": null,
+      "calleePublicLookupKey": "f::fn:(ptr:void)->void",
+      "calleeQualifiedName": "f",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "main",
+      "callerArgumentIndex": null,
+      "callerQualifiedName": "main",
+      "callerSignatureKey": "fn:()->int:int",
+      "crossTUCandidate": false,
+      "detail": "direct named call",
+      "guard": null,
+      "importedSummaryCandidate": false,
+      "kind": "direct-call",
+      "location": {
+        "column": 3,
+        "file": "a.c",
+        "line": 18
+      },
+      "resolvedBySummaryIndex": false,
+      "via": ""
+    }
+  ],
+  "summaryParamTransferEdges": [
+    {
+      "actualPathFromCallerParam": {
+        "ir": {
+          "kind": "none"
+        }
+      },
+      "callee": "g",
+      "calleeExpr": "",
+      "calleeNode": "g::fn:(ptr:void)->void",
+      "calleeParamIndex": 0,
+      "calleePublicLookupKey": "g::fn:(ptr:void)->void",
+      "calleeQualifiedName": "g",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "f",
+      "callerNode": "f::fn:(ptr:void)->void",
+      "callerParamIndex": 0,
+      "callerQualifiedName": "f",
+      "callerSignatureKey": "fn:(ptr:void)->void",
+      "fieldEntity": "",
+      "fieldPath": "",
+      "fieldSignatureKey": "",
+      "formalType": "void *",
+      "guard": null,
+      "isFieldFunctionPointerCall": false,
+      "kind": "direct-call-param-transfer",
+      "location": {
+        "column": 3,
+        "file": "a.c",
+        "line": 13
+      },
+      "resolvedHigherOrderActuals": []
+    }
+  ],
+  "toolVersion": "cast-history-dev",
+  "tu": {
+    "compileCommandHash": "",
+    "configurationId": "",
+    "sourceFile": "a.c"
+  }
+}

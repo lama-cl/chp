@@ -1,0 +1,1650 @@
+{
+  "ambiguityGroups": [],
+  "branchFamilyTransferMetadata": {
+    "counts": {
+      "arms": 0,
+      "families": 0,
+      "malformedEdges": 0
+    },
+    "families": [],
+    "malformedEdges": [],
+    "purpose": "C6g5w1d transport and consumption report. Source-defined branch-family and arm metadata survives ordinary parameter-transfer export and C2 index construction; recursiveClosureKey is consumed only by the tagged C2 recursive summary materializer for supported family kinds.",
+    "rehydrationContract": "SummaryIndex reads ordinary summaryParamTransferEdges first and deduplicates this companion metadata as an import-side fallback. The companion is not a second solver input.",
+    "transportInvariant": "Metadata is carried on summaryParamTransferEdges. C6g5w1d consumes recursiveClosureKey only for parallel-call-actuals and guarded-local-ptrarith inside a recursive SCC; untagged solvedParamSummaries and pointer-use facts remain on their established solver paths."
+  },
+  "buildMetadata": {
+    "buildReason": "final",
+    "builderVersion": "C6g5w1d-tagged-recursive-closure-key-materialization",
+    "inputSummaryBytes": 21575
+  },
+  "duplicateGroups": [],
+  "functions": [
+    {
+      "function": "f",
+      "functionBehavior": "OpaquePolymorphicFunction",
+      "linkage": "external",
+      "location": {
+        "column": 6,
+        "file": "a.c",
+        "line": 9
+      },
+      "locationKey": "a.c:9:6",
+      "lookupKey": "external::f::fn:(ptr:void)->void",
+      "name": "f",
+      "paramDeclaredTypes": [
+        "void *"
+      ],
+      "publicLookupKey": "f::fn:(ptr:void)->void",
+      "qualifiedName": "f",
+      "resolution": "safe",
+      "signatureKey": "fn:(ptr:void)->void",
+      "solvedPointerUseSummaries": [
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "ast-leaf",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "local",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "",
+              "source": "",
+              "targetFunction": "",
+              "targetLookupKey": "",
+              "targetQualifiedName": "",
+              "transferKind": ""
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "imported via g.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "direct-call",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "cross-tu-direct",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "summary-import",
+              "targetFunction": "g",
+              "targetLookupKey": "g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": ""
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "imported via g.$0; project-scc via f::fn:(ptr:void)->void.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "direct-call",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "summary-import",
+              "targetFunction": "f",
+              "targetLookupKey": "external::f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "project-scc via g.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-scc-pointer-use",
+              "targetFunction": "g",
+              "targetLookupKey": "g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": ""
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "project-scc via g.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-scc-pointer-use",
+              "targetFunction": "f",
+              "targetLookupKey": "external::f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "project-scc via g::fn:(ptr:void)->void.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-pointer-use-transfer-fixpoint",
+              "targetFunction": "g",
+              "targetLookupKey": "external::g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "project-pointer-use-transfer-fixpoint",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": null,
+              "rendered": "<id>"
+            },
+            "detail": "project-scc via g::fn:(ptr:void)->void.$0; imported via f.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "cross-tu-direct",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-pointer-use-transfer-fixpoint",
+              "targetFunction": "f",
+              "targetLookupKey": "f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "project-pointer-use-transfer-fixpoint",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "project-pointer-use-transfer-fixpoint",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": null,
+              "rendered": "<id>"
+            },
+            "detail": "project-scc via g::fn:(ptr:void)->void.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-pointer-use-transfer-fixpoint",
+              "targetFunction": "f",
+              "targetLookupKey": "f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "project-pointer-use-transfer-fixpoint",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        }
+      ],
+      "sourceFile": "a.c",
+      "status": "unambiguous",
+      "summaryFile": "summaries/a.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "a.c"
+    },
+    {
+      "function": "g",
+      "functionBehavior": "OpaquePolymorphicFunction",
+      "linkage": "external",
+      "location": {
+        "column": 6,
+        "file": "b.c",
+        "line": 9
+      },
+      "locationKey": "b.c:9:6",
+      "lookupKey": "external::g::fn:(ptr:void)->void",
+      "name": "g",
+      "paramDeclaredTypes": [
+        "void *"
+      ],
+      "publicLookupKey": "g::fn:(ptr:void)->void",
+      "qualifiedName": "g",
+      "resolution": "safe",
+      "signatureKey": "fn:(ptr:void)->void",
+      "solvedPointerUseSummaries": [
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "ast-leaf",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "local",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "",
+              "source": "",
+              "targetFunction": "",
+              "targetLookupKey": "",
+              "targetQualifiedName": "",
+              "transferKind": ""
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "imported via f.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "direct-call",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "cross-tu-direct",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "summary-import",
+              "targetFunction": "f",
+              "targetLookupKey": "f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": ""
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "imported via f.$0; project-scc via g::fn:(ptr:void)->void.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "direct-call",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "summary-import",
+              "targetFunction": "g",
+              "targetLookupKey": "external::g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "project-scc via f.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-scc-pointer-use",
+              "targetFunction": "f",
+              "targetLookupKey": "f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": ""
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "project-scc via f.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-scc-pointer-use",
+              "targetFunction": "g",
+              "targetLookupKey": "external::g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "materialized-from-function-summary-detail",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": {
+                "kind": "none"
+              }
+            },
+            "detail": "project-scc via f::fn:(ptr:void)->void.$0; arg0 to g",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-pointer-use-transfer-fixpoint",
+              "targetFunction": "f",
+              "targetLookupKey": "external::f::fn:(ptr:void)->void",
+              "targetQualifiedName": "f",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "materialized-from-function-summary-detail",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "project-pointer-use-transfer-fixpoint",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": null,
+              "rendered": "<id>"
+            },
+            "detail": "project-scc via f::fn:(ptr:void)->void.$0; imported via g.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "cross-tu-direct",
+              "recursiveNamedCallEvidence": false,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-pointer-use-transfer-fixpoint",
+              "targetFunction": "g",
+              "targetLookupKey": "g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "project-pointer-use-transfer-fixpoint",
+            "span": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            }
+          }
+        },
+        {
+          "index": 0,
+          "source": "project-pointer-use-transfer-fixpoint",
+          "use": {
+            "accessType": null,
+            "attachPath": {
+              "ir": null,
+              "rendered": "<id>"
+            },
+            "detail": "project-scc via f::fn:(ptr:void)->void.$0; arg0 to f",
+            "guard": null,
+            "kind": "call-arg",
+            "operationLocalGuard": null,
+            "operationLocalGuardOrigin": "preserved-transfer",
+            "operationSiteSpan": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "pointerType": "void *",
+            "provenance": {
+              "calleeExpr": "",
+              "edgeKind": "summary-param-transfer",
+              "fieldEntity": "",
+              "fieldPath": "",
+              "originKind": "project-scc",
+              "recursiveNamedCallEvidence": true,
+              "signatureKey": "fn:(ptr:void)->void",
+              "source": "project-pointer-use-transfer-fixpoint",
+              "targetFunction": "g",
+              "targetLookupKey": "g::fn:(ptr:void)->void",
+              "targetQualifiedName": "g",
+              "transferKind": "summary-param-transfer"
+            },
+            "source": "project-pointer-use-transfer-fixpoint",
+            "span": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            }
+          }
+        }
+      ],
+      "sourceFile": "b.c",
+      "status": "unambiguous",
+      "summaryFile": "summaries/b.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "b.c"
+    },
+    {
+      "function": "main",
+      "functionBehavior": "OrdinaryFunction",
+      "linkage": "external",
+      "location": {
+        "column": 5,
+        "file": "a.c",
+        "line": 13
+      },
+      "locationKey": "a.c:13:5",
+      "lookupKey": "external::main::fn:()->int:int",
+      "name": "main",
+      "paramDeclaredTypes": [],
+      "publicLookupKey": "main::fn:()->int:int",
+      "qualifiedName": "main",
+      "resolution": "safe",
+      "signatureKey": "fn:()->int:int",
+      "solvedReturnSummary": {
+        "aliasedParamIndex": null,
+        "declaredType": "int",
+        "derivation": "used existing return-specific summary path; full parameter summary was not folded into the return value",
+        "ir": {
+          "kind": "asType",
+          "type": {
+            "canonical": "int",
+            "compatibilityKey": "int:int",
+            "functionHasPrototype": false,
+            "functionIsVariadic": false,
+            "functionParamCanonical": [],
+            "functionReturnCanonical": "",
+            "isArray": false,
+            "isCharPointer": false,
+            "isConstQualified": false,
+            "isFloating": false,
+            "isFunctionPointer": false,
+            "isInteger": true,
+            "isNullPointer": false,
+            "isPointer": false,
+            "isRecordPointer": false,
+            "isVoid": false,
+            "isVoidPointer": false,
+            "isVolatileQualified": false,
+            "kind": "integer",
+            "pointeeCanonical": "",
+            "pointeeConst": false,
+            "pointeeText": "",
+            "pointeeVolatile": false,
+            "recordName": "",
+            "recordTag": "",
+            "semanticKey": "int:int",
+            "text": "int"
+          }
+        },
+        "mayAliasParam": false,
+        "rawIr": {
+          "kind": "asType",
+          "type": {
+            "canonical": "int",
+            "compatibilityKey": "int:int",
+            "functionHasPrototype": false,
+            "functionIsVariadic": false,
+            "functionParamCanonical": [],
+            "functionReturnCanonical": "",
+            "isArray": false,
+            "isCharPointer": false,
+            "isConstQualified": false,
+            "isFloating": false,
+            "isFunctionPointer": false,
+            "isInteger": true,
+            "isNullPointer": false,
+            "isPointer": false,
+            "isRecordPointer": false,
+            "isVoid": false,
+            "isVoidPointer": false,
+            "isVolatileQualified": false,
+            "kind": "integer",
+            "pointeeCanonical": "",
+            "pointeeConst": false,
+            "pointeeText": "",
+            "pointeeVolatile": false,
+            "recordName": "",
+            "recordTag": "",
+            "semanticKey": "int:int",
+            "text": "int"
+          }
+        },
+        "rawRendered": "int",
+        "rendered": "int",
+        "source": "materialized-return-slice-fact",
+        "usedReturnSlicePath": true
+      },
+      "sourceFile": "a.c",
+      "status": "unambiguous",
+      "summaryFile": "summaries/a.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "a.c"
+    }
+  ],
+  "groupCounts": {
+    "ambiguities": 0,
+    "duplicates": 0,
+    "problems": 0,
+    "scopedNameGroups": 0
+  },
+  "issues": [],
+  "lookups": {
+    "byLookupKey": {
+      "external::f::fn:(ptr:void)->void": [
+        0
+      ],
+      "external::g::fn:(ptr:void)->void": [
+        1
+      ],
+      "external::main::fn:()->int:int": [
+        2
+      ]
+    },
+    "byPublicLookupKey": {
+      "f::fn:(ptr:void)->void": [
+        0
+      ],
+      "g::fn:(ptr:void)->void": [
+        1
+      ],
+      "main::fn:()->int:int": [
+        2
+      ]
+    },
+    "byQualifiedName": {
+      "f": [
+        0
+      ],
+      "g": [
+        1
+      ],
+      "main": [
+        2
+      ]
+    }
+  },
+  "numBranchFamilies": 0,
+  "numBranchFamilyTransferEdges": 0,
+  "numFunctions": 3,
+  "numMaterializedSolvedParamSummaryFunctions": 0,
+  "numMaterializedSolvedPointerUseSummaryFunctions": 2,
+  "numMaterializedSolvedReturnSummaryFunctions": 1,
+  "numReturnAliasPointerUseContinuations": 0,
+  "numSummaryDependencyEdges": 3,
+  "numSummaryFiles": 2,
+  "numSummaryParamTransferEdges": 2,
+  "problemGroups": [],
+  "projectKind": "real",
+  "projectSummaryAlgebra": {
+    "cycleControl": {
+      "repetitionUnit": "function-parameter nodes and transfer-edge provenance, not concrete pointer type text",
+      "rootStop": "when an edge returns to the root parameter, keep the call-boundary path and stop before replaying the root local contribution",
+      "sameSCC": "bounded simple paths over summaryParamTransferEdges"
+    },
+    "domain": "project-solver-semantic-core",
+    "maxParallelArms": 8,
+    "maxSameSCCSeqAtoms": 16,
+    "operations": {
+      "boundSameSCC": "bound sequence length for safety; do not remove repeated concrete pointer types",
+      "compose": "sequentially compose path summaries while preserving void* call-boundary connectors",
+      "join": "join downstream alternatives and prefer prefix-extending evidence when possible",
+      "normalize": "normalize seq/parallel/join forms and remove empty summaries",
+      "representative": "choose the bounded simple SCC path with richer non-void/sequential evidence",
+      "semanticCore": "strip callWrap nodes for project solving only"
+    },
+    "reportDomain": "materialized solvedParamSummaries.ir preserves call wrappers/guards/provenance for final reporting",
+    "solverDomain": "wrapper-stripped semantic core tracked separately as semanticCoreIr for convergence",
+    "terminalVoidPointer": "A trailing '=> void *' may be intentional: it records an SCC call-boundary erasure when the path returns to a void* formal and the solver stops before the next SCC lap.",
+    "version": "C4O-structured-project-summary-algebra"
+  },
+  "resolutionCounts": {
+    "safe": 3
+  },
+  "returnAliasPointerUseContinuationSummary": {
+    "byOperationKind": {},
+    "bySourceEntity": {},
+    "byTranslationUnit": {},
+    "note": "C4Q1 reporting-only facts. These explain pointer-use payloads propagated through returned aliases; they are not yet SCC-solved project-level pointer-use summaries.",
+    "numFacts": 0
+  },
+  "returnAliasPointerUseContinuations": [],
+  "schemaName": "cast-history-project-summary-index",
+  "schemaVersion": 5,
+  "scopedNameGroups": [],
+  "solvedParamCallProvenance": {
+    "counts": {
+      "calleeNodes": 0,
+      "callerNodes": 0,
+      "records": 0
+    },
+    "intendedUse": "Experiments such as type-preserving polymorphism checks over void* functions can compare the caller prefix with the callee wrapper body.",
+    "purpose": "Display-only call-site-specialized wrapper renderings for solved parameter summaries.",
+    "records": [],
+    "solverInvariant": "Wrappers are not reintroduced into solvedParamSummaries[*].ir and are not fed back into fixpoint solving."
+  },
+  "solvedParamSummaryDebug": {
+    "algebraVersion": "C4O-structured-project-summary-algebra",
+    "algorithm": "tagged-recursive-closure-key-simple-paths-plus-untagged-c6g5s-simple-paths-plus-cross-scc-transfer-fixpoint",
+    "authoritativeFacts": "functions[*].solvedParamSummaries",
+    "counts": {
+      "downstreamFunctions": 0,
+      "explainedParamRecords": 0,
+      "functionsWithSolvedParams": 0,
+      "recursiveSCCFunctions": 0,
+      "simpleSCCPathsEnumerated": 0,
+      "solvedParamRecords": 0
+    },
+    "functions": [],
+    "interpretation": {
+      "downstream": "For acyclic/downstream callers, solvedParamSummaries are propagated from already-solved callees through exported summaryParamTransferEdges.",
+      "finalReporting": "The project index computes solved summary facts only. Final text output, entity/storage histories, pointer metrics, and behavior classifications are still produced by cast-history-tool in the final import pass.",
+      "perParameterExplanation": "Each solved parameter record may include an explanation array. Steps describe local/base contributions, summaryParamTransferEdges, imported solved callee summaries, joins, and stop reasons.",
+      "recursiveSCC": "For recursive SCC members, solvedParamSummaries summarize one bounded simple SCC path. The path stops before replaying the root function parameter's local contribution.",
+      "structuredAlgebra": "C4O names the project-level algebra operations explicitly. The solver still stores ordinary IR under solvedParamSummaries[*].ir for compatibility, while solvedParamSummaryDebug.summaryAlgebra documents the normalize/semantic-core/compose/join/bound operations used to produce it.",
+      "terminalVoidPointer": "A trailing '=> void *' can be intentional: it records the SCC call-boundary erasure when a value is passed back into a void* formal and the solver stops before starting the next SCC lap."
+    },
+    "purpose": "Explain materialized solvedParamSummaries with per-parameter derivation traces, without replacing final cast-history-tool reporting.",
+    "summaryAlgebra": {
+      "cycleControl": {
+        "repetitionUnit": "function-parameter nodes and transfer-edge provenance, not concrete pointer type text",
+        "rootStop": "when an edge returns to the root parameter, keep the call-boundary path and stop before replaying the root local contribution",
+        "sameSCC": "bounded simple paths over summaryParamTransferEdges"
+      },
+      "domain": "project-solver-semantic-core",
+      "maxParallelArms": 8,
+      "maxSameSCCSeqAtoms": 16,
+      "operations": {
+        "boundSameSCC": "bound sequence length for safety; do not remove repeated concrete pointer types",
+        "compose": "sequentially compose path summaries while preserving void* call-boundary connectors",
+        "join": "join downstream alternatives and prefer prefix-extending evidence when possible",
+        "normalize": "normalize seq/parallel/join forms and remove empty summaries",
+        "representative": "choose the bounded simple SCC path with richer non-void/sequential evidence",
+        "semanticCore": "strip callWrap nodes for project solving only"
+      },
+      "reportDomain": "materialized solvedParamSummaries.ir preserves call wrappers/guards/provenance for final reporting",
+      "solverDomain": "wrapper-stripped semantic core tracked separately as semanticCoreIr for convergence",
+      "terminalVoidPointer": "A trailing '=> void *' may be intentional: it records an SCC call-boundary erasure when the path returns to a void* formal and the solver stops before the next SCC lap.",
+      "version": "C4O-structured-project-summary-algebra"
+    }
+  },
+  "solvedParamSummaryFixpoint": {
+    "algebraVersion": "C4O-structured-project-summary-algebra",
+    "canonicalDisplay": {
+      "crossSCCTransferEdgesChanged": 0,
+      "crossSCCTransferEdgesConsidered": 0,
+      "intraSCCTransferEdgesChanged": 0,
+      "intraSCCTransferEdgesConsidered": 2,
+      "iterations": 1,
+      "note": "display-only; excluded from solvedParamSummaries import channel",
+      "simpleSCCPathsEnumerated": 0
+    },
+    "changedTransferEdges": 0,
+    "consideredTransferEdges": 2,
+    "converged": true,
+    "crossSCCTransferEdgesChanged": 0,
+    "crossSCCTransferEdgesConsidered": 0,
+    "intraSCCTransferEdgesChanged": 0,
+    "intraSCCTransferEdgesConsidered": 2,
+    "intraSCCTransfersSkipped": false,
+    "iterations": 1,
+    "maxIterations": 32,
+    "maxSameSCCSeqAtoms": 16,
+    "maxSeconds": 30.0,
+    "numFunctions": 0,
+    "recursiveClosureKey": {
+      "changedRoots": 0,
+      "closureKeyStops": 0,
+      "consideredEdges": 0,
+      "consumedClosureKeys": [],
+      "consumedFamilyIds": [],
+      "enabled": false,
+      "paths": 0,
+      "scope": "Only parallel-call-actuals and guarded-local-ptrarith branch families inside recursive SCCs consume recursiveClosureKey; untagged SCC roots remain on the established C6g5s solver.",
+      "seededGuardedTransformerClosures": 0,
+      "taggedRecursiveNodes": []
+    },
+    "recursiveSCCFunctions": 2,
+    "simpleSCCPathsEnumerated": 0,
+    "stoppedByTimeLimit": false,
+    "summaryAlgebra": {
+      "cycleControl": {
+        "repetitionUnit": "function-parameter nodes and transfer-edge provenance, not concrete pointer type text",
+        "rootStop": "when an edge returns to the root parameter, keep the call-boundary path and stop before replaying the root local contribution",
+        "sameSCC": "bounded simple paths over summaryParamTransferEdges"
+      },
+      "domain": "project-solver-semantic-core",
+      "maxParallelArms": 8,
+      "maxSameSCCSeqAtoms": 16,
+      "operations": {
+        "boundSameSCC": "bound sequence length for safety; do not remove repeated concrete pointer types",
+        "compose": "sequentially compose path summaries while preserving void* call-boundary connectors",
+        "join": "join downstream alternatives and prefer prefix-extending evidence when possible",
+        "normalize": "normalize seq/parallel/join forms and remove empty summaries",
+        "representative": "choose the bounded simple SCC path with richer non-void/sequential evidence",
+        "semanticCore": "strip callWrap nodes for project solving only"
+      },
+      "reportDomain": "materialized solvedParamSummaries.ir preserves call wrappers/guards/provenance for final reporting",
+      "solverDomain": "wrapper-stripped semantic core tracked separately as semanticCoreIr for convergence",
+      "terminalVoidPointer": "A trailing '=> void *' may be intentional: it records an SCC call-boundary erasure when the path returns to a void* formal and the solver stops before the next SCC lap.",
+      "version": "C4O-structured-project-summary-algebra"
+    },
+    "transferEdgeFilter": {
+      "identity": "public-key solver preserved; ambiguous internal/static endpoints are skipped rather than guessed",
+      "numInputEdges": 2,
+      "numKeptEdges": 2,
+      "numSkippedAmbiguousInternalEdges": 0,
+      "skippedAmbiguousInternalEdges": []
+    },
+    "widening": "tagged-recursive-closure-key-simple-paths-plus-untagged-c6g5s-simple-paths-plus-cross-scc-transfer-fixpoint"
+  },
+  "solvedPointerUseSummaryFixpoint": {
+    "algorithm": "bounded-simple-parameter-path-pointer-use-transfer",
+    "changedTransferUses": 6,
+    "consideredTransferUses": 24,
+    "converged": true,
+    "edgeResolution": {
+      "identity": "precise lookupKey for pointer-use solver; source-scoped endpoints require same summary/TU resolution",
+      "numInputEdges": 2,
+      "numResolvedEdges": 2,
+      "numSkippedEdges": 0,
+      "skippedEdges": []
+    },
+    "iterations": 2,
+    "maxIterations": 32,
+    "maxSeconds": 30.0,
+    "note": "C4Q2c materializes project-level pointer-use summaries with source-scoped endpoint resolution in project-summary-index.json.  It does not modify solvedParamSummaries or encode operations as cast-history observations.",
+    "numFunctions": 2,
+    "numRecords": 16,
+    "recursiveSCCFunctions": 0,
+    "recursiveSCCNodes": 2,
+    "solverDomain": "parameter-pointer-uses separate from parameter-cast-histories",
+    "stoppedByTimeLimit": false,
+    "widening": "simple-parameter-path-visited-set; caller actual inherits callee formal uses"
+  },
+  "solvedReturnSummaryFixpoint": {
+    "algorithm": "return-summary-fact-join-and-alias-path-materialization",
+    "functions": [
+      {
+        "aliasedParamIndex": null,
+        "function": "main",
+        "mayAliasParam": false,
+        "publicLookupKey": "main::fn:()->int:int",
+        "qualifiedName": "main",
+        "rendered": "int",
+        "signatureKey": "fn:()->int:int",
+        "source": "materialized-return-slice-fact"
+      }
+    ],
+    "note": "C4P2 materializes return-domain facts in project-summary-index.json. Alias-return facts are represented as paths from the aliased parameter, for example $0 => int * => void *.  The final cast-history-tool import path instantiates these facts at call sites through the same return-alias mechanism used for single-TU callees; wrappers remain display-only and are not fed back into SCC solving.",
+    "numAliasReturningFunctions": 0,
+    "numFunctions": 1,
+    "solverDomain": "wrapper-free return facts joined with explicit return-alias metadata; provenance IR kept separately when available"
+  },
+  "statusCounts": {
+    "unambiguous": 3
+  },
+  "summaryDependencyEdges": [
+    {
+      "callee": "g",
+      "calleeArgumentIndex": null,
+      "calleeExpr": "",
+      "calleeHasLocalDefinition": false,
+      "calleeNode": "g::fn:(ptr:void)->void",
+      "calleeParamIndex": null,
+      "calleePublicLookupKey": "g::fn:(ptr:void)->void",
+      "calleeQualifiedName": "g",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "f",
+      "callerArgumentIndex": null,
+      "callerNode": "f::fn:(ptr:void)->void",
+      "callerQualifiedName": "f",
+      "callerSignatureKey": "fn:(ptr:void)->void",
+      "crossTUCandidate": true,
+      "detail": "direct named call",
+      "edgeKey": "direct-call::f::fn:(ptr:void)->void::g::fn:(ptr:void)->void::::a.c:10:3",
+      "guard": null,
+      "importedSummaryCandidate": true,
+      "kind": "direct-call",
+      "location": {
+        "column": 3,
+        "file": "a.c",
+        "line": 10
+      },
+      "resolvedBySummaryIndex": true,
+      "summaryFile": "summaries/a.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "a.c",
+      "via": ""
+    },
+    {
+      "callee": "f",
+      "calleeArgumentIndex": null,
+      "calleeExpr": "",
+      "calleeHasLocalDefinition": false,
+      "calleeNode": "f::fn:(ptr:void)->void",
+      "calleeParamIndex": null,
+      "calleePublicLookupKey": "f::fn:(ptr:void)->void",
+      "calleeQualifiedName": "f",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "g",
+      "callerArgumentIndex": null,
+      "callerNode": "g::fn:(ptr:void)->void",
+      "callerQualifiedName": "g",
+      "callerSignatureKey": "fn:(ptr:void)->void",
+      "crossTUCandidate": true,
+      "detail": "direct named call",
+      "edgeKey": "direct-call::g::fn:(ptr:void)->void::f::fn:(ptr:void)->void::::b.c:10:3",
+      "guard": null,
+      "importedSummaryCandidate": true,
+      "kind": "direct-call",
+      "location": {
+        "column": 3,
+        "file": "b.c",
+        "line": 10
+      },
+      "resolvedBySummaryIndex": true,
+      "summaryFile": "summaries/b.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "b.c",
+      "via": ""
+    },
+    {
+      "callee": "f",
+      "calleeArgumentIndex": null,
+      "calleeExpr": "",
+      "calleeHasLocalDefinition": true,
+      "calleeNode": "f::fn:(ptr:void)->void",
+      "calleeParamIndex": null,
+      "calleePublicLookupKey": "f::fn:(ptr:void)->void",
+      "calleeQualifiedName": "f",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "main",
+      "callerArgumentIndex": null,
+      "callerNode": "main::fn:()->int:int",
+      "callerQualifiedName": "main",
+      "callerSignatureKey": "fn:()->int:int",
+      "crossTUCandidate": false,
+      "detail": "direct named call",
+      "edgeKey": "direct-call::main::fn:()->int:int::f::fn:(ptr:void)->void::::a.c:15:3",
+      "guard": null,
+      "importedSummaryCandidate": false,
+      "kind": "direct-call",
+      "location": {
+        "column": 3,
+        "file": "a.c",
+        "line": 15
+      },
+      "resolvedBySummaryIndex": false,
+      "summaryFile": "summaries/a.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "a.c",
+      "via": ""
+    }
+  ],
+  "summaryDependencyGraph": {
+    "kindCounts": {
+      "direct-call": 3
+    },
+    "numCalleeNodes": 2,
+    "numCallerNodes": 3,
+    "numConcreteEdges": 3,
+    "numConcreteGraphNodes": 3,
+    "numConcreteUniqueEdges": 3,
+    "numEdges": 3,
+    "numFullGraphNodes": 3,
+    "numRawEdges": 3,
+    "numSymbolicEdges": 0,
+    "numSymbolicUniqueEdges": 0,
+    "numUniqueEdges": 3,
+    "uniqueConcreteEdges": [
+      {
+        "calleeNode": "g::fn:(ptr:void)->void",
+        "callerNode": "f::fn:(ptr:void)->void",
+        "concrete": true,
+        "count": 1,
+        "kinds": {
+          "direct-call": 1
+        },
+        "sites": [
+          {
+            "calleeExpr": "",
+            "kind": "direct-call",
+            "location": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "via": ""
+          }
+        ],
+        "summaryFiles": [
+          "summaries/a.c.cast-summary.json"
+        ],
+        "symbolic": false,
+        "tuSourceFiles": [
+          "a.c"
+        ]
+      },
+      {
+        "calleeNode": "f::fn:(ptr:void)->void",
+        "callerNode": "g::fn:(ptr:void)->void",
+        "concrete": true,
+        "count": 1,
+        "kinds": {
+          "direct-call": 1
+        },
+        "sites": [
+          {
+            "calleeExpr": "",
+            "kind": "direct-call",
+            "location": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "via": ""
+          }
+        ],
+        "summaryFiles": [
+          "summaries/b.c.cast-summary.json"
+        ],
+        "symbolic": false,
+        "tuSourceFiles": [
+          "b.c"
+        ]
+      },
+      {
+        "calleeNode": "f::fn:(ptr:void)->void",
+        "callerNode": "main::fn:()->int:int",
+        "concrete": true,
+        "count": 1,
+        "kinds": {
+          "direct-call": 1
+        },
+        "sites": [
+          {
+            "calleeExpr": "",
+            "kind": "direct-call",
+            "location": {
+              "column": 3,
+              "file": "a.c",
+              "line": 15
+            },
+            "via": ""
+          }
+        ],
+        "summaryFiles": [
+          "summaries/a.c.cast-summary.json"
+        ],
+        "symbolic": false,
+        "tuSourceFiles": [
+          "a.c"
+        ]
+      }
+    ],
+    "uniqueEdges": [
+      {
+        "calleeNode": "g::fn:(ptr:void)->void",
+        "callerNode": "f::fn:(ptr:void)->void",
+        "concrete": true,
+        "count": 1,
+        "kinds": {
+          "direct-call": 1
+        },
+        "sites": [
+          {
+            "calleeExpr": "",
+            "kind": "direct-call",
+            "location": {
+              "column": 3,
+              "file": "a.c",
+              "line": 10
+            },
+            "via": ""
+          }
+        ],
+        "summaryFiles": [
+          "summaries/a.c.cast-summary.json"
+        ],
+        "symbolic": false,
+        "tuSourceFiles": [
+          "a.c"
+        ]
+      },
+      {
+        "calleeNode": "f::fn:(ptr:void)->void",
+        "callerNode": "g::fn:(ptr:void)->void",
+        "concrete": true,
+        "count": 1,
+        "kinds": {
+          "direct-call": 1
+        },
+        "sites": [
+          {
+            "calleeExpr": "",
+            "kind": "direct-call",
+            "location": {
+              "column": 3,
+              "file": "b.c",
+              "line": 10
+            },
+            "via": ""
+          }
+        ],
+        "summaryFiles": [
+          "summaries/b.c.cast-summary.json"
+        ],
+        "symbolic": false,
+        "tuSourceFiles": [
+          "b.c"
+        ]
+      },
+      {
+        "calleeNode": "f::fn:(ptr:void)->void",
+        "callerNode": "main::fn:()->int:int",
+        "concrete": true,
+        "count": 1,
+        "kinds": {
+          "direct-call": 1
+        },
+        "sites": [
+          {
+            "calleeExpr": "",
+            "kind": "direct-call",
+            "location": {
+              "column": 3,
+              "file": "a.c",
+              "line": 15
+            },
+            "via": ""
+          }
+        ],
+        "summaryFiles": [
+          "summaries/a.c.cast-summary.json"
+        ],
+        "symbolic": false,
+        "tuSourceFiles": [
+          "a.c"
+        ]
+      }
+    ]
+  },
+  "summaryDependencySCCs": {
+    "concreteFunctionGraph": {
+      "components": [
+        {
+          "concreteEdgeCount": 2,
+          "importedEdgeCount": 2,
+          "localEdgeCount": 0,
+          "members": [
+            "f::fn:(ptr:void)->void",
+            "g::fn:(ptr:void)->void"
+          ],
+          "recursive": true,
+          "sccId": 0,
+          "selfLoop": false,
+          "size": 2,
+          "translationUnits": [
+            "a.c",
+            "b.c"
+          ]
+        },
+        {
+          "concreteEdgeCount": 0,
+          "importedEdgeCount": 0,
+          "localEdgeCount": 0,
+          "members": [
+            "main::fn:()->int:int"
+          ],
+          "recursive": false,
+          "sccId": 1,
+          "selfLoop": false,
+          "size": 1,
+          "translationUnits": []
+        }
+      ],
+      "edgeTopologyVersion": 1,
+      "graphKind": "concrete-function",
+      "nodeToScc": {
+        "f::fn:(ptr:void)->void": 0,
+        "g::fn:(ptr:void)->void": 0,
+        "main::fn:()->int:int": 1
+      },
+      "nontrivialComponents": [
+        {
+          "concreteEdgeCount": 2,
+          "importedEdgeCount": 2,
+          "localEdgeCount": 0,
+          "members": [
+            "f::fn:(ptr:void)->void",
+            "g::fn:(ptr:void)->void"
+          ],
+          "recursive": true,
+          "sccId": 0,
+          "selfLoop": false,
+          "size": 2,
+          "translationUnits": [
+            "a.c",
+            "b.c"
+          ]
+        }
+      ],
+      "numNodes": 3,
+      "numNontrivialSCCs": 1,
+      "numSCCs": 2,
+      "numUniqueEdges": 3
+    },
+    "fullGraph": {
+      "components": [
+        {
+          "concreteEdgeCount": 2,
+          "importedEdgeCount": 2,
+          "localEdgeCount": 0,
+          "members": [
+            "f::fn:(ptr:void)->void",
+            "g::fn:(ptr:void)->void"
+          ],
+          "recursive": true,
+          "sccId": 0,
+          "selfLoop": false,
+          "size": 2,
+          "translationUnits": [
+            "a.c",
+            "b.c"
+          ]
+        },
+        {
+          "concreteEdgeCount": 0,
+          "importedEdgeCount": 0,
+          "localEdgeCount": 0,
+          "members": [
+            "main::fn:()->int:int"
+          ],
+          "recursive": false,
+          "sccId": 1,
+          "selfLoop": false,
+          "size": 1,
+          "translationUnits": []
+        }
+      ],
+      "edgeTopologyVersion": 1,
+      "graphKind": "full-summary",
+      "nodeToScc": {
+        "f::fn:(ptr:void)->void": 0,
+        "g::fn:(ptr:void)->void": 0,
+        "main::fn:()->int:int": 1
+      },
+      "nontrivialComponents": [
+        {
+          "concreteEdgeCount": 2,
+          "importedEdgeCount": 2,
+          "localEdgeCount": 0,
+          "members": [
+            "f::fn:(ptr:void)->void",
+            "g::fn:(ptr:void)->void"
+          ],
+          "recursive": true,
+          "sccId": 0,
+          "selfLoop": false,
+          "size": 2,
+          "translationUnits": [
+            "a.c",
+            "b.c"
+          ]
+        }
+      ],
+      "numNodes": 3,
+      "numNontrivialSCCs": 1,
+      "numSCCs": 2,
+      "numUniqueEdges": 3
+    }
+  },
+  "summaryParamTransferEdgeFilter": {
+    "identity": "public-key solver preserved; ambiguous internal/static endpoints are skipped rather than guessed",
+    "numInputEdges": 2,
+    "numKeptEdges": 2,
+    "numSkippedAmbiguousInternalEdges": 0,
+    "skippedAmbiguousInternalEdges": []
+  },
+  "summaryParamTransferEdges": [
+    {
+      "_inputOrder": 0,
+      "actualPathFromCallerParam": {
+        "ir": {
+          "kind": "none"
+        }
+      },
+      "callee": "g",
+      "calleeExpr": "",
+      "calleeNode": "g::fn:(ptr:void)->void",
+      "calleeParamIndex": 0,
+      "calleePublicLookupKey": "g::fn:(ptr:void)->void",
+      "calleeQualifiedName": "g",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "f",
+      "callerNode": "f::fn:(ptr:void)->void",
+      "callerParamIndex": 0,
+      "callerQualifiedName": "f",
+      "callerSignatureKey": "fn:(ptr:void)->void",
+      "edgeKey": "param-transfer::f::fn:(ptr:void)->void::g::fn:(ptr:void)->void::0::0::a.c:10:3",
+      "fieldEntity": "",
+      "fieldPath": "",
+      "fieldSignatureKey": "",
+      "formalType": "void *",
+      "guard": null,
+      "isFieldFunctionPointerCall": false,
+      "kind": "direct-call-param-transfer",
+      "location": {
+        "column": 3,
+        "file": "a.c",
+        "line": 10
+      },
+      "resolvedHigherOrderActuals": [],
+      "summaryFile": "summaries/a.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "a.c"
+    },
+    {
+      "_inputOrder": 1,
+      "actualPathFromCallerParam": {
+        "ir": {
+          "kind": "none"
+        }
+      },
+      "callee": "f",
+      "calleeExpr": "",
+      "calleeNode": "f::fn:(ptr:void)->void",
+      "calleeParamIndex": 0,
+      "calleePublicLookupKey": "f::fn:(ptr:void)->void",
+      "calleeQualifiedName": "f",
+      "calleeSignatureKey": "fn:(ptr:void)->void",
+      "caller": "g",
+      "callerNode": "g::fn:(ptr:void)->void",
+      "callerParamIndex": 0,
+      "callerQualifiedName": "g",
+      "callerSignatureKey": "fn:(ptr:void)->void",
+      "edgeKey": "param-transfer::g::fn:(ptr:void)->void::f::fn:(ptr:void)->void::0::0::b.c:10:3",
+      "fieldEntity": "",
+      "fieldPath": "",
+      "fieldSignatureKey": "",
+      "formalType": "void *",
+      "guard": null,
+      "isFieldFunctionPointerCall": false,
+      "kind": "direct-call-param-transfer",
+      "location": {
+        "column": 3,
+        "file": "b.c",
+        "line": 10
+      },
+      "resolvedHigherOrderActuals": [],
+      "summaryFile": "summaries/b.c.cast-summary.json",
+      "tuCompileCommandHash": "",
+      "tuConfigurationId": "",
+      "tuSourceFile": "b.c"
+    }
+  ],
+  "summaryRoot": "<output-root>/projects/p03_cross_tu_mutual_recursion/p03_cross_tu_mutual_recursion",
+  "translationUnits": [
+    {
+      "compileCommandHash": "",
+      "configurationId": "",
+      "numFunctionSummaries": 2,
+      "numReturnAliasPointerUseContinuations": 0,
+      "numSummaryDependencyEdges": 2,
+      "numSummaryParamTransferEdges": 1,
+      "sourceFile": "a.c",
+      "summaryFile": "summaries/a.c.cast-summary.json"
+    },
+    {
+      "compileCommandHash": "",
+      "configurationId": "",
+      "numFunctionSummaries": 1,
+      "numReturnAliasPointerUseContinuations": 0,
+      "numSummaryDependencyEdges": 1,
+      "numSummaryParamTransferEdges": 1,
+      "sourceFile": "b.c",
+      "summaryFile": "summaries/b.c.cast-summary.json"
+    }
+  ]
+}

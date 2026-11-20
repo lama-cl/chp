@@ -1,0 +1,1366 @@
+Command:
+<tool-root>/build/cast-history-tool --enable-summary-import --summary-index <output-root>/p91_deref_fnptr_higher_order_callee_normalization/project-summary-index.json --summary-dir <output-root>/p91_deref_fnptr_higher_order_callee_normalization/.work/local-overlay-tmp/a.c/s --runtime-timing-dir <output-root>/p91_deref_fnptr_higher_order_callee_normalization/.work/local-overlay-tmp/a.c/s --runtime-timing-project-id p91_deref_fnptr_higher_order_callee_normalization --runtime-timing-stage local-index-overlay --extra-arg-before=-resource-dir=/usr/lib/llvm-20/lib/clang/20 -p <project-root> <project-root>/a.c 
+
+Output:
+lhs : const void * => const int *    [scope=compare_ints]    [implicit-cast]    @ a.c:13:21
+rhs : const void * => const int *    [scope=compare_ints]    [implicit-cast]    @ a.c:14:22
+(const char *)base + index * size : const char * => const void *    [scope=at_index]    [explicit-cast]    @ a.c:19:10
+base : const void * => const char *    [scope=at_index]    [explicit-cast]    @ a.c:19:25
+base : const void *    [scope=invoke_direct]    [call-arg]    @ a.c:27:27
+index : unsigned long    [scope=invoke_direct]    [call-arg]    @ a.c:27:27
+size : unsigned long    [scope=invoke_direct]    [call-arg]    @ a.c:27:27
+key : const void * => compare.$0    [scope=invoke_direct]    [higher-order-call]    @ a.c:28:9
+candidate : at_index⌜$2 => const char * => ptrarith(const char *) => const void *⌝at_index => const void * => compare.$1    [scope=invoke_direct]    [higher-order-call]    @ a.c:28:9
+base : const void *    [scope=invoke_deref]    [call-arg]    @ a.c:36:27
+index : unsigned long    [scope=invoke_deref]    [call-arg]    @ a.c:36:27
+size : unsigned long    [scope=invoke_deref]    [call-arg]    @ a.c:36:27
+key : const void * => compare.$0    [scope=invoke_deref]    [higher-order-call]    @ a.c:37:9
+candidate : at_index⌜$2 => const char * => ptrarith(const char *) => const void *⌝at_index => const void * => compare.$1    [scope=invoke_deref]    [higher-order-call]    @ a.c:37:9
+compare_ints : int (const void *, const void *)    [scope=exercise]    [call-arg]    @ a.c:41:3
+key : const int * => const void * => invoke_direct⌜const void * => const int *⌝invoke_direct    [scope=exercise]    [call-arg]    @ a.c:41:3
+base : const int * => const void * => invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_direct    [scope=exercise]    [call-arg]    @ a.c:41:3
+0UL : unsigned long    [scope=exercise]    [call-arg]    @ a.c:41:3
+sizeof (*base) : unsigned long    [scope=exercise]    [call-arg]    @ a.c:41:3
+key : const int * => const void *    [scope=exercise]    [implicit-cast]    @ a.c:41:31
+base : const int * => const void *    [scope=exercise]    [implicit-cast]    @ a.c:41:36
+compare_ints : int (const void *, const void *)    [scope=exercise]    [call-arg]    @ a.c:42:3
+key : const int * => const void * => invoke_deref⌜const void * => const int *⌝invoke_deref    [scope=exercise]    [call-arg]    @ a.c:42:3
+base : const int * => const void * => invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_deref    [scope=exercise]    [call-arg]    @ a.c:42:3
+0UL : unsigned long    [scope=exercise]    [call-arg]    @ a.c:42:3
+sizeof (*base) : unsigned long    [scope=exercise]    [call-arg]    @ a.c:42:3
+key : const int * => const void *    [scope=exercise]    [implicit-cast]    @ a.c:42:30
+base : const int * => const void *    [scope=exercise]    [implicit-cast]    @ a.c:42:35
+
+Function summaries:
+  compare_ints($0 : const void * => const int *, $1 : const void * => const int *) -> int [int]
+  at_index($0 : const void *, $1 : unsigned long, $2 : unsigned long) -> const void * [$0 => const char * => ptrarith(const char *) => const void *]    [ret aliases $0]
+  invoke_direct($0 : int (*)(const void *, const void *), $1 : const void * => $0.$0, $2 : const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1, $3 : unsigned long, $4 : unsigned long)
+  invoke_deref($0 : int (*)(const void *, const void *), $1 : const void * => $0.$0, $2 : const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1, $3 : unsigned long, $4 : unsigned long)
+  exercise($0 : const int * => const void * => const int *, $1 : const int * => const void * => const char * => ptrarith(const char *) => const void * => const int *)
+
+Project-solved parameter histories (canonical):
+  compare_ints.$0 : const void * => const int *    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  compare_ints.$1 : const void * => const int *    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  exercise.$0 : const int * => const void * => const int *    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  exercise.$1 : const int * => const void * => const char * => ptrarith(const char *) => const void * => const int *    [derived-project-summary]
+      source: project-param-transfer-fixpoint
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  invoke_deref.$1 : const void * => $0.$0    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  invoke_deref.$2 : const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  invoke_direct.$1 : const void * => $0.$0    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+  invoke_direct.$2 : const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1    [derived-project-summary]
+      source: materialized-from-function-summary-detail
+      note: canonical C2 materialization; direct AST-local entity histories above are not rewritten by this view.
+
+Branch-family parameter-transfer metadata (C6g5w1d; C2 tagged-closure diagnostics):
+  <none>
+
+Recursive named-call fixpoint:
+  scheduler: scc-local-parameter-dependency-worklist
+  phases: cast-history-then-pointer-use
+  cast-history state: semantic atom/transition facts; rich histories retained for reporting
+  SCC components: 4 (recursive: 0)
+  SCC local worklist drains: 4
+  SCC components completed: 4 / 4
+  initial seed edges: 4
+  local dependency re-enqueues: 0
+  coalesced local dependency re-enqueues: 0
+  cross-component dependency signals: 0
+  edge executions: 4 / 64
+  recursive recurring-view collapses: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  cast semantic fact fail-open: 0
+  cast semantic state changes: 0
+  pointer-use phase: executed
+  pointer-use initial seed edges: 4
+  pointer-use local dependency re-enqueues: 0
+  pointer-use coalesced local dependency re-enqueues: 0
+  pointer-use cross-component dependency signals: 0
+  pointer-use operation candidates: 16
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 16
+  pointer-use frozen cast-attachment overlays: 16
+  pointer-use frozen cast-attachment fallbacks: 0
+  pointer-use report-only evidence merges: 0
+  pointer-use edge executions: 4 / 64
+  pointer-use termination: pointer-use-scc-worklist-quiescent
+  pointer-use reopened cast SCC: 0
+  status: converged
+  termination: scc-worklist-quiescent
+  domains: parameter-cast-histories, parameter-pointer-uses
+  phase dependency: pointer-use changes never reopen cast-history SCC solving
+  SCC component worklists (callee-first activation):
+    SCC #0 [acyclic] at_index; members=1; owned-edges=0; internal-edges=0; initial-seeds=0; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=0; pointer-use-initial-seeds=0; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=0; status=quiescent; pointer-use-status=quiescent; members={at_index}
+    SCC #1 [acyclic] invoke_direct; members=1; owned-edges=1; internal-edges=0; initial-seeds=1; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=1; pointer-use-initial-seeds=1; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=1; status=quiescent; pointer-use-status=quiescent; members={invoke_direct}
+    SCC #2 [acyclic] invoke_deref; members=1; owned-edges=1; internal-edges=0; initial-seeds=1; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=1; pointer-use-initial-seeds=1; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=1; status=quiescent; pointer-use-status=quiescent; members={invoke_deref}
+    SCC #3 [acyclic] exercise; members=1; owned-edges=2; internal-edges=0; initial-seeds=2; local-reenqueues=0; coalesced=0; cross-component-signals=0; edge-executions=2; pointer-use-initial-seeds=2; pointer-use-local-reenqueues=0; pointer-use-coalesced=0; pointer-use-cross-component-signals=0; pointer-use-edge-executions=2; status=quiescent; pointer-use-status=quiescent; members={exercise}
+
+Direct cast histories (entity-oriented):
+  compare_ints::lhs : const void * => const int *
+  compare_ints::rhs : const void * => const int *
+  invoke_direct::key : const void * => $0.$0
+  invoke_direct::base : const void * => $0.$1
+  invoke_direct::candidate : at_index⌜$2 => const char * => ptrarith(const char *) => const void *⌝at_index => const void * => $0.$1
+  invoke_deref::key : const void * => $0.$0
+  invoke_deref::base : const void * => $0.$1
+  invoke_deref::candidate : at_index⌜$2 => const char * => ptrarith(const char *) => const void *⌝at_index => const void * => $0.$1
+  exercise::key : const int * => const void * => const int *
+  exercise::base : const int * => const void * => const char * => ptrarith(const char *) => const void * => const int *
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Cross-TU summary SCC awareness:
+  <none>
+
+Project-solved call-site provenance:
+  exercise::fn:(ptr:const int,ptr:const int)->void.$0 -> invoke_deref::fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void.$1 : invoke_deref⌜const void * => $0.$0⌝invoke_deref    [display-only]
+      wrapper: invoke_deref⌜const void * => $0.$0⌝invoke_deref
+      parts: formalEntry=const void * calleeCore=$0.$0
+      @ a.c:42:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+  exercise::fn:(ptr:const int,ptr:const int)->void.$0 -> invoke_direct::fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void.$1 : invoke_direct⌜const void * => $0.$0⌝invoke_direct    [display-only]
+      wrapper: invoke_direct⌜const void * => $0.$0⌝invoke_direct
+      parts: formalEntry=const void * calleeCore=$0.$0
+      @ a.c:41:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+  exercise::fn:(ptr:const int,ptr:const int)->void.$1 -> invoke_deref::fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void.$2 : invoke_deref⌜const void * => const char * => ptrarith(const char *) => const void * => $0.$1⌝invoke_deref    [display-only]
+      wrapper: invoke_deref⌜const void * => const char * => ptrarith(const char *) => const void * => $0.$1⌝invoke_deref
+      parts: formalEntry=const void * calleeCore=const char * => ptrarith(const char *) => const void * => $0.$1
+      @ a.c:42:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+  exercise::fn:(ptr:const int,ptr:const int)->void.$1 -> invoke_direct::fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void.$2 : invoke_direct⌜const void * => const char * => ptrarith(const char *) => const void * => $0.$1⌝invoke_direct    [display-only]
+      wrapper: invoke_direct⌜const void * => const char * => ptrarith(const char *) => const void * => $0.$1⌝invoke_direct
+      parts: formalEntry=const void * calleeCore=const char * => ptrarith(const char *) => const void * => $0.$1
+      @ a.c:41:3
+      note: Display-only provenance view; not fed back into the SCC solver or solvedParamSummaries[*].ir.
+
+Call-site specialized cast-history observations:
+  exercise.$0 -> invoke_deref.$1 : const int * => invoke_deref⌜const void * => $0.$0⌝invoke_deref    [REINTERPRETING_OBSERVED]
+      wrapper: invoke_deref⌜const void * => $0.$0⌝invoke_deref
+      actual=const int *, formal=const void *, selected=$0.$0
+      guard environment: index=0
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:42:3
+      note: display-only; not fed back into global summaries or SCC solving
+  exercise.$1 -> invoke_deref.$2 : const int * => invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_deref    [REINTERPRETING_OBSERVED]
+      wrapper: invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_deref
+      actual=const int *, formal=const void *, selected=$0.$1
+      callee concrete path types: const char * const void *
+      guard environment: index=0
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:42:3
+      note: display-only; not fed back into global summaries or SCC solving
+  exercise.$0 -> invoke_direct.$1 : const int * => invoke_direct⌜const void * => $0.$0⌝invoke_direct    [REINTERPRETING_OBSERVED]
+      wrapper: invoke_direct⌜const void * => $0.$0⌝invoke_direct
+      actual=const int *, formal=const void *, selected=$0.$0
+      guard environment: index=0
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:41:3
+      note: display-only; not fed back into global summaries or SCC solving
+  exercise.$1 -> invoke_direct.$2 : const int * => invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_direct    [REINTERPRETING_OBSERVED]
+      wrapper: invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_direct
+      actual=const int *, formal=const void *, selected=$0.$1
+      callee concrete path types: const char * const void *
+      guard environment: index=0
+      specialization: no guarded alternative was simplified at this call site
+      @ a.c:41:3
+      note: display-only; not fed back into global summaries or SCC solving
+
+Call-site specialized function classification:
+  invoke_deref : REINTERPRETING_OBSERVED    [call-site-specialized]
+      exercise.$0 -> invoke_deref.$1 : const int * => invoke_deref⌜const void * => $0.$0⌝invoke_deref    [REINTERPRETING_OBSERVED]
+          wrapper: invoke_deref⌜const void * => $0.$0⌝invoke_deref
+          actual=const int *, formal=const void *, selected=$0.$0
+          guard environment: index=0
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:42:3
+          note: display-only; not fed back into global summaries or SCC solving
+      exercise.$1 -> invoke_deref.$2 : const int * => invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_deref    [REINTERPRETING_OBSERVED]
+          wrapper: invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_deref
+          actual=const int *, formal=const void *, selected=$0.$1
+          callee concrete path types: const char * const void *
+          guard environment: index=0
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:42:3
+          note: display-only; not fed back into global summaries or SCC solving
+  invoke_direct : REINTERPRETING_OBSERVED    [call-site-specialized]
+      exercise.$0 -> invoke_direct.$1 : const int * => invoke_direct⌜const void * => $0.$0⌝invoke_direct    [REINTERPRETING_OBSERVED]
+          wrapper: invoke_direct⌜const void * => $0.$0⌝invoke_direct
+          actual=const int *, formal=const void *, selected=$0.$0
+          guard environment: index=0
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:41:3
+          note: display-only; not fed back into global summaries or SCC solving
+      exercise.$1 -> invoke_direct.$2 : const int * => invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_direct    [REINTERPRETING_OBSERVED]
+          wrapper: invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1⌝invoke_direct
+          actual=const int *, formal=const void *, selected=$0.$1
+          callee concrete path types: const char * const void *
+          guard environment: index=0
+          specialization: no guarded alternative was simplified at this call site
+          @ a.c:41:3
+          note: display-only; not fed back into global summaries or SCC solving
+
+Cross-TU SCC parameter-summary fixpoint:
+  scheduler: project-scc-two-phase
+  phases: cast-history-then-pointer-use
+  phase dependency: pointer-use changes never reopen project cast-history SCC solving
+  iterations: 0 / 32
+  status: converged
+  recursive project SCC edges: 0
+  local-only SCCs skipped: 0
+  local-only edges skipped: 0
+  cast edge executions: 0
+  cast semantic fact candidates: 0
+  cast semantic fact insertions: 0
+  cast semantic fact subsumed: 0
+  pointer-use edge executions: 0
+  pointer-use operation candidates: 0
+  pointer-use operation insertions: 0
+  pointer-use operation subsumed: 0
+  pointer-use frozen cast-attachment overlays: 0
+  pointer-use reopened project cast SCC: 0
+  pointer-use termination: <none>
+  changed edges: 0
+  note: no-cross-tu-recursive-import-edges
+  domains: parameter-cast-histories, parameter-pointer-uses
+
+Cross-TU direct-call summary lookup:
+  <none>
+
+Cross-TU function-pointer summary lookup:
+  <none>
+
+Cross-TU function-pointer target-set lookup:
+  <none>
+
+Storage-location cast histories:
+  compare_ints::lhs : const void * => const int *
+  compare_ints::rhs : const void * => const int *
+  invoke_direct::key : const void * => $0.$0
+  invoke_direct::base : const void * => $0.$1
+  invoke_direct::candidate : at_index⌜$2 => const char * => ptrarith(const char *) => const void *⌝at_index => const void * => $0.$1
+  invoke_deref::key : const void * => $0.$0
+  invoke_deref::base : const void * => $0.$1
+  invoke_deref::candidate : at_index⌜$2 => const char * => ptrarith(const char *) => const void *⌝at_index => const void * => $0.$1
+  exercise::key : const int * => const void * => const int *
+  exercise::base : const int * => const void * => const char * => ptrarith(const char *) => const void * => const int *
+
+Observed later interpretations (raw evidence):
+  compare_ints::lhs
+    - [always] const int *    {init-projection, role=Intermediate}
+    - [always] const int *    {init-projection-origin, role=Intermediate}
+  compare_ints::rhs
+    - [always] const int *    {init-projection, role=Intermediate}
+    - [always] const int *    {init-projection-origin, role=Intermediate}
+  invoke_direct::key
+    - [always] $0.$0    {higher-order-call, role=Semantic}
+    - [always] $0.$0    {higher-order-call-origin, role=Semantic}
+  invoke_direct::base
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, obs=$0.$1    {higher-order-call-origin, role=Semantic}
+  invoke_direct::candidate
+    - [always] $0.$1    {higher-order-call, role=Semantic}
+  invoke_deref::key
+    - [always] $0.$0    {higher-order-call, role=Semantic}
+    - [always] $0.$0    {higher-order-call-origin, role=Semantic}
+  invoke_deref::base
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, obs=$0.$1    {higher-order-call-origin, role=Semantic}
+  invoke_deref::candidate
+    - [always] $0.$1    {higher-order-call, role=Semantic}
+  exercise::key
+    - [always] const void * => invoke_direct⌜const void * => const int *⌝invoke_direct    {call-through-invoke_direct, role=Semantic}
+    - [always] const void * => invoke_direct⌜const void * => const int *⌝invoke_direct    {call-through-invoke_direct-origin, role=Semantic}
+    - [always] const void * => invoke_deref⌜const void * => const int *⌝invoke_deref    {call-through-invoke_deref, role=Semantic}
+    - [always] const void * => invoke_deref⌜const void * => const int *⌝invoke_deref    {call-through-invoke_deref-origin, role=Semantic}
+  exercise::base
+    - [always] const void * => invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_direct    {call-through-invoke_direct, role=Semantic}
+    - [always] const void * => invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_direct    {call-through-invoke_direct-origin, role=Semantic}
+    - [always] const void * => invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_deref    {call-through-invoke_deref, role=Semantic}
+    - [always] const void * => invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_deref    {call-through-invoke_deref-origin, role=Semantic}
+
+Derived observation summaries:
+  compare_ints::lhs
+    branch-cast: <none>
+    grouped: {const int * @ always}
+  compare_ints::rhs
+    branch-cast: <none>
+    grouped: {const int * @ always}
+  invoke_direct::key
+    branch-cast: <none>
+    grouped: {$0.$0 @ always}
+  invoke_direct::base
+    branch-cast: <none>
+    grouped: {$0.$1 @ always}
+  invoke_direct::candidate
+    branch-cast: <none>
+    grouped: {$0.$1 @ always}
+  invoke_deref::key
+    branch-cast: <none>
+    grouped: {$0.$0 @ always}
+  invoke_deref::base
+    branch-cast: <none>
+    grouped: {$0.$1 @ always}
+  invoke_deref::candidate
+    branch-cast: <none>
+    grouped: {$0.$1 @ always}
+  exercise::key
+    branch-cast: <none>
+    grouped: {invoke_deref⌜const void * => const int *⌝invoke_deref @ always; invoke_direct⌜const void * => const int *⌝invoke_direct @ always}
+  exercise::base
+    branch-cast: <none>
+    grouped: {invoke_deref⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_deref @ always; invoke_direct⌜const void * => at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *⌝invoke_direct @ always}
+
+Pointer use summaries:
+  compare_ints::lhs
+    - [always] attach=<id>, as=const void * : init-rhs    {init-rhs to const int *}    [origin=local]    @ a.c:13:21
+    - [always] attach=const int *, as=const int *, access=const int : deref    {unary-*-alias-parent}    [origin=local]    @ a.c:15:11
+    - [always] attach=const int *, as=const int *, access=const int : deref    {unary-*-alias-parent}    [origin=local]    @ a.c:15:30
+  compare_ints::rhs
+    - [always] attach=<id>, as=const void * : init-rhs    {init-rhs to const int *}    [origin=local]    @ a.c:14:22
+    - [always] attach=const int *, as=const int *, access=const int : deref    {unary-*-alias-parent}    [origin=local]    @ a.c:15:19
+    - [always] attach=const int *, as=const int *, access=const int : deref    {unary-*-alias-parent}    [origin=local]    @ a.c:15:38
+  compare_ints::left
+    - [always] attach=<id>, as=const int *, access=const int : deref    {unary-*}    [origin=local]    @ a.c:15:11
+    - [always] attach=<id>, as=const int *, access=const int : deref    {unary-*}    [origin=local]    @ a.c:15:30
+  compare_ints::right
+    - [always] attach=<id>, as=const int *, access=const int : deref    {unary-*}    [origin=local]    @ a.c:15:19
+    - [always] attach=<id>, as=const int *, access=const int : deref    {unary-*}    [origin=local]    @ a.c:15:38
+  at_index::base
+    - [always] attach=const char * => ptrarith(const char *) => const void *, as=const void * : returned    {return-origin}    [origin=local]    @ a.c:19:3
+    - [always] attach=const char *, as=const char * : pointer-arithmetic    {binary-pointer-arithmetic-origin}    [origin=local]    @ a.c:19:44
+  invoke_direct::key
+    - [always] attach=<id>, as=const void * : call-arg    {arg0 to <indirect>}    [origin=local]    @ a.c:28:9
+  invoke_direct::base
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : init-rhs    {init-rhs to const void *-origin}    [origin=local]    @ a.c:27:27
+    - [always] attach=<id>, as=const void * : call-arg    {arg0 to at_index}    [origin=local]    @ a.c:27:27
+    - [always] attach=const char * => ptrarith(const char *) => const void *, as=const void * : returned    {via at_index.$0; return-origin}    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, source=same-tu-named-call, edge=direct-call]    @ a.c:27:27
+    - [always] attach=const char *, as=const char * : pointer-arithmetic    {via at_index.$0; binary-pointer-arithmetic-origin}    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, source=same-tu-named-call, edge=direct-call]    @ a.c:27:27
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : call-arg    {arg1 to <indirect>-origin}    [origin=local]    @ a.c:28:9
+  invoke_direct::candidate
+    - [always] attach=<id>, as=const void * : call-arg    {arg1 to <indirect>}    [origin=local]    @ a.c:28:9
+  invoke_deref::compare
+    - [always] attach=<id>, as=int (*)(const void *, const void *), access=int (const void *, const void *) : deref    {unary-*}    [origin=local]    @ a.c:37:10
+  invoke_deref::key
+    - [always] attach=<id>, as=const void * : call-arg    {arg0 to <indirect>}    [origin=local]    @ a.c:37:9
+  invoke_deref::base
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : init-rhs    {init-rhs to const void *-origin}    [origin=local]    @ a.c:36:27
+    - [always] attach=<id>, as=const void * : call-arg    {arg0 to at_index}    [origin=local]    @ a.c:36:27
+    - [always] attach=const char * => ptrarith(const char *) => const void *, as=const void * : returned    {via at_index.$0; return-origin}    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, source=same-tu-named-call, edge=direct-call]    @ a.c:36:27
+    - [always] attach=const char *, as=const char * : pointer-arithmetic    {via at_index.$0; binary-pointer-arithmetic-origin}    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, source=same-tu-named-call, edge=direct-call]    @ a.c:36:27
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : call-arg    {arg1 to <indirect>-origin}    [origin=local]    @ a.c:37:9
+  invoke_deref::candidate
+    - [always] attach=<id>, as=const void * : call-arg    {arg1 to <indirect>}    [origin=local]    @ a.c:37:9
+  exercise::key
+    - [always] attach=<id>, as=const int * : call-arg    {arg1 to invoke_direct}    [origin=local]    @ a.c:41:3
+    - [always] attach=<id>, as=const void * : call-arg    {via invoke_direct.$1; arg0 to <indirect>}    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:41:3
+    - [always] attach=<id>, as=const void * : init-rhs    {via invoke_direct.$1 -> compare_ints.$0; init-rhs to const int *}    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, source=higher-order-direct-call, edge=higher-order-callback]    @ a.c:41:3
+    - [always] attach=const int *, as=const int *, access=const int : deref    {via invoke_direct.$1 -> compare_ints.$0; unary-*-alias-parent}    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, source=higher-order-direct-call, edge=higher-order-callback]    @ a.c:41:3
+    - [always] attach=<id>, as=const int * : call-arg    {arg1 to invoke_deref}    [origin=local]    @ a.c:42:3
+    - [always] attach=<id>, as=const void * : call-arg    {via invoke_deref.$1; arg0 to <indirect>}    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:42:3
+    - [always] attach=const int *, as=const int *, access=const int : deref    {via invoke_deref.$1 -> compare_ints.$0; unary-*-alias-parent}    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, source=higher-order-direct-call, edge=higher-order-callback]    @ a.c:42:3
+  exercise::base
+    - [always] attach=<id>, as=const int * : call-arg    {arg2 to invoke_direct}    [origin=local]    @ a.c:41:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : init-rhs    {via invoke_direct.$2; init-rhs to const void *-origin}    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:41:3
+    - [always] attach=<id>, as=const void * : call-arg    {via invoke_direct.$2; arg0 to at_index}    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:41:3
+    - [always] attach=const char * => ptrarith(const char *) => const void *, as=const void * : returned    {via invoke_direct.$2; via at_index.$0; return-origin}    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, source=same-tu-named-call, edge=direct-call]    @ a.c:41:3
+    - [always] attach=const char *, as=const char * : pointer-arithmetic    {via invoke_direct.$2; via at_index.$0; binary-pointer-arithmetic-origin}    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, source=same-tu-named-call, edge=direct-call]    @ a.c:41:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : call-arg    {via invoke_direct.$2; arg1 to <indirect>-origin}    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:41:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : init-rhs    {via invoke_direct.$2 -> compare_ints.$1; init-rhs to const int *}    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, source=higher-order-direct-call, edge=higher-order-callback]    @ a.c:41:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *, as=const int *, access=const int : deref    {via invoke_direct.$2 -> compare_ints.$1; unary-*-alias-parent}    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, source=higher-order-direct-call, edge=higher-order-callback]    @ a.c:41:3
+    - [always] attach=<id>, as=const int *, access=const int : deref    {unary-*}    [origin=local]    @ a.c:41:54
+    - [always] attach=<id>, as=const int * : call-arg    {arg2 to invoke_deref}    [origin=local]    @ a.c:42:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : init-rhs    {via invoke_deref.$2; init-rhs to const void *-origin}    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:42:3
+    - [always] attach=<id>, as=const void * : call-arg    {via invoke_deref.$2; arg0 to at_index}    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:42:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index, as=const void * : call-arg    {via invoke_deref.$2; arg1 to <indirect>-origin}    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, source=same-tu-named-call, edge=direct-call]    @ a.c:42:3
+    - [always] attach=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => const int *, as=const int *, access=const int : deref    {via invoke_deref.$2 -> compare_ints.$1; unary-*-alias-parent}    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, source=higher-order-direct-call, edge=higher-order-callback]    @ a.c:42:3
+    - [always] attach=<id>, as=const int *, access=const int : deref    {unary-*}    [origin=local]    @ a.c:42:53
+
+Semantic pointer-operation summaries:
+  compare_ints::lhs
+    - [always] init-flow as=const void *    count=1    [origin=local]    first=@ a.c:13:21
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to const int *
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:11
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*-alias-parent
+  compare_ints::rhs
+    - [always] init-flow as=const void *    count=1    [origin=local]    first=@ a.c:14:22
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to const int *
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:19
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*-alias-parent
+  compare_ints::left
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:11
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*
+  compare_ints::right
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:19
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*
+  at_index::base
+    - [always] returned-flow as=const void *    count=1    [origin=local]    first=@ a.c:19:3
+        evidenceKinds: returned
+        sources: local-pointer-use
+        details: return-origin
+    - [always] derived-address as=const char *    count=1    [origin=local]    first=@ a.c:19:44
+        evidenceKinds: pointer-arithmetic
+        sources: local-pointer-use
+        details: binary-pointer-arithmetic-origin
+  invoke_direct::key
+    - [always] call-argument-flow as=const void *    count=1    [origin=local]    first=@ a.c:28:9
+        evidenceKinds: call-arg
+        sources: indirect-call-argument
+        details: arg0 to <indirect>
+  invoke_direct::base
+    - [always] call-argument-flow as=const void *    count=2    [origin=local]    first=@ a.c:27:27
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, local-pointer-use
+        details: arg0 to at_index; arg1 to <indirect>-origin
+    - [always] derived-address-reinterpretation from=at_index⌜const char *, to=const void *    count=1    [origin=local]    first=@ a.c:27:27
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to const void *-origin
+    - [always] derived-address as=const char *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:27:27
+        evidenceKinds: pointer-arithmetic
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; binary-pointer-arithmetic-origin
+    - [always] returned-flow as=const void *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:27:27
+        evidenceKinds: returned
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; return-origin
+  invoke_direct::candidate
+    - [always] call-argument-flow as=const void *    count=1    [origin=local]    first=@ a.c:28:9
+        evidenceKinds: call-arg
+        sources: indirect-call-argument
+        details: arg1 to <indirect>
+  invoke_deref::compare
+    - [always] typed-deref-read as=int (*)(const void *, const void *), access=int (const void *, const void *)    count=1    [origin=local]    first=@ a.c:37:10
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*
+  invoke_deref::key
+    - [always] call-argument-flow as=const void *    count=1    [origin=local]    first=@ a.c:37:9
+        evidenceKinds: call-arg
+        sources: indirect-call-argument
+        details: arg0 to <indirect>
+  invoke_deref::base
+    - [always] call-argument-flow as=const void *    count=2    [origin=local]    first=@ a.c:36:27
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, local-pointer-use
+        details: arg0 to at_index; arg1 to <indirect>-origin
+    - [always] derived-address-reinterpretation from=at_index⌜const char *, to=const void *    count=1    [origin=local]    first=@ a.c:36:27
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to const void *-origin
+    - [always] derived-address as=const char *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:36:27
+        evidenceKinds: pointer-arithmetic
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; binary-pointer-arithmetic-origin
+    - [always] returned-flow as=const void *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:36:27
+        evidenceKinds: returned
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; return-origin
+  invoke_deref::candidate
+    - [always] call-argument-flow as=const void *    count=1    [origin=local]    first=@ a.c:37:9
+        evidenceKinds: call-arg
+        sources: indirect-call-argument
+        details: arg1 to <indirect>
+  exercise::key
+    - [always] call-argument-flow as=const int *    count=2    [origin=local]    first=@ a.c:41:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg1 to invoke_deref; arg1 to invoke_direct
+    - [always] call-argument-flow as=const void *    count=1    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:41:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_direct.$1; arg0 to <indirect>
+    - [always] init-flow as=const void *    count=1    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        evidenceKinds: init-rhs
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_direct.$1 -> compare_ints.$0; init-rhs to const int *
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        evidenceKinds: deref
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_deref.$1 -> compare_ints.$0; unary-*-alias-parent; via invoke_direct.$1 -> compare_ints.$0; unary-*-alias-parent
+    - [always] call-argument-flow as=const void *    count=1    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:42:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_deref.$1; arg0 to <indirect>
+  exercise::base
+    - [always] call-argument-flow as=const int *    count=2    [origin=local]    first=@ a.c:41:3
+        evidenceKinds: call-arg
+        sources: local-pointer-use
+        details: arg2 to invoke_deref; arg2 to invoke_direct
+    - [always] call-argument-flow as=const void *    count=2    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:41:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; arg0 to at_index; via invoke_direct.$2; arg1 to <indirect>-origin
+    - [always] derived-address-reinterpretation from=at_index⌜const char *, to=const void *    count=1    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        evidenceKinds: init-rhs
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_direct.$2 -> compare_ints.$1; init-rhs to const int *
+    - [always] derived-address-reinterpretation from=at_index⌜const char *, to=const void *    count=1    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:41:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; init-rhs to const void *-origin
+    - [always] derived-address as=const char *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:41:3
+        evidenceKinds: pointer-arithmetic
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; via at_index.$0; binary-pointer-arithmetic-origin
+    - [always] returned-flow as=const void *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:41:3
+        evidenceKinds: returned
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; via at_index.$0; return-origin
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        evidenceKinds: deref
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_deref.$2 -> compare_ints.$1; unary-*-alias-parent; via invoke_direct.$2 -> compare_ints.$1; unary-*-alias-parent
+    - [always] typed-deref-read as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:41:54
+        evidenceKinds: deref
+        sources: local-pointer-use
+        details: unary-*
+    - [always] call-argument-flow as=const void *    count=2    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:42:3
+        evidenceKinds: call-arg
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_deref.$2; arg0 to at_index; via invoke_deref.$2; arg1 to <indirect>-origin
+    - [always] derived-address-reinterpretation from=at_index⌜const char *, to=const void *    count=1    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:42:3
+        evidenceKinds: init-rhs
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_deref.$2; init-rhs to const void *-origin
+
+Grouped pointer-operation summaries (normalized rows):
+  compare_ints::lhs
+    - [always] init-rhs as=const void *    count=1    [origin=local]    first=@ a.c:13:21
+        sources: local-pointer-use
+        details: init-rhs to const int *
+    - [always] deref as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:11
+        sources: local-pointer-use
+        details: unary-*-alias-parent
+  compare_ints::rhs
+    - [always] init-rhs as=const void *    count=1    [origin=local]    first=@ a.c:14:22
+        sources: local-pointer-use
+        details: init-rhs to const int *
+    - [always] deref as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:19
+        sources: local-pointer-use
+        details: unary-*-alias-parent
+  compare_ints::left
+    - [always] deref as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:11
+        sources: local-pointer-use
+        details: unary-*
+  compare_ints::right
+    - [always] deref as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:15:19
+        sources: local-pointer-use
+        details: unary-*
+  at_index::base
+    - [always] returned as=const void *    count=1    [origin=local]    first=@ a.c:19:3
+        sources: local-pointer-use
+        details: return-origin
+    - [always] pointer-arithmetic as=const char *    count=1    [origin=local]    first=@ a.c:19:44
+        sources: local-pointer-use
+        details: binary-pointer-arithmetic-origin
+  invoke_direct::key
+    - [always] call-arg as=const void *    count=1    [origin=local]    first=@ a.c:28:9
+        sources: indirect-call-argument
+        details: arg0 to <indirect>
+  invoke_direct::base
+    - [always] call-arg as=const void *    count=2    [origin=local]    first=@ a.c:27:27
+        sources: indirect-call-argument, local-pointer-use
+        details: arg0 to at_index; arg1 to <indirect>-origin
+    - [always] init-rhs as=const void *    count=1    [origin=local]    first=@ a.c:27:27
+        sources: local-pointer-use
+        details: init-rhs to const void *-origin
+    - [always] pointer-arithmetic as=const char *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:27:27
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; binary-pointer-arithmetic-origin
+    - [always] returned as=const void *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:27:27
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; return-origin
+  invoke_direct::candidate
+    - [always] call-arg as=const void *    count=1    [origin=local]    first=@ a.c:28:9
+        sources: indirect-call-argument
+        details: arg1 to <indirect>
+  invoke_deref::compare
+    - [always] deref as=int (*)(const void *, const void *), access=int (const void *, const void *)    count=1    [origin=local]    first=@ a.c:37:10
+        sources: local-pointer-use
+        details: unary-*
+  invoke_deref::key
+    - [always] call-arg as=const void *    count=1    [origin=local]    first=@ a.c:37:9
+        sources: indirect-call-argument
+        details: arg0 to <indirect>
+  invoke_deref::base
+    - [always] call-arg as=const void *    count=2    [origin=local]    first=@ a.c:36:27
+        sources: indirect-call-argument, local-pointer-use
+        details: arg0 to at_index; arg1 to <indirect>-origin
+    - [always] init-rhs as=const void *    count=1    [origin=local]    first=@ a.c:36:27
+        sources: local-pointer-use
+        details: init-rhs to const void *-origin
+    - [always] pointer-arithmetic as=const char *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:36:27
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; binary-pointer-arithmetic-origin
+    - [always] returned as=const void *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:36:27
+        sources: same-tu-named-call-pointer-use
+        details: via at_index.$0; return-origin
+  invoke_deref::candidate
+    - [always] call-arg as=const void *    count=1    [origin=local]    first=@ a.c:37:9
+        sources: indirect-call-argument
+        details: arg1 to <indirect>
+  exercise::key
+    - [always] call-arg as=const int *    count=2    [origin=local]    first=@ a.c:41:3
+        sources: local-pointer-use
+        details: arg1 to invoke_deref; arg1 to invoke_direct
+    - [always] call-arg as=const void *    count=1    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:41:3
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_direct.$1; arg0 to <indirect>
+    - [always] deref as=const int *, access=const int    count=2    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_deref.$1 -> compare_ints.$0; unary-*-alias-parent; via invoke_direct.$1 -> compare_ints.$0; unary-*-alias-parent
+    - [always] init-rhs as=const void *    count=1    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_direct.$1 -> compare_ints.$0; init-rhs to const int *
+    - [always] call-arg as=const void *    count=1    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:42:3
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_deref.$1; arg0 to <indirect>
+  exercise::base
+    - [always] call-arg as=const int *    count=2    [origin=local]    first=@ a.c:41:3
+        sources: local-pointer-use
+        details: arg2 to invoke_deref; arg2 to invoke_direct
+    - [always] call-arg as=const void *    count=2    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:41:3
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; arg0 to at_index; via invoke_direct.$2; arg1 to <indirect>-origin
+    - [always] deref as=const int *, access=const int    count=2    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_deref.$2 -> compare_ints.$1; unary-*-alias-parent; via invoke_direct.$2 -> compare_ints.$1; unary-*-alias-parent
+    - [always] init-rhs as=const void *    count=1    [origin=same-tu-call, target=compare_ints, sig=fn:(ptr:void,ptr:void)->int:int, edge=higher-order-callback]    first=@ a.c:41:3
+        sources: resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+        details: via invoke_direct.$2 -> compare_ints.$1; init-rhs to const int *
+    - [always] init-rhs as=const void *    count=1    [origin=same-tu-call, target=invoke_direct, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:41:3
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; init-rhs to const void *-origin
+    - [always] pointer-arithmetic as=const char *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:41:3
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; via at_index.$0; binary-pointer-arithmetic-origin
+    - [always] returned as=const void *    count=1    [origin=same-tu-call, target=at_index, sig=fn:(ptr:void,int:unsigned long,int:unsigned long)->ptr:void, edge=direct-call]    first=@ a.c:41:3
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_direct.$2; via at_index.$0; return-origin
+    - [always] deref as=const int *, access=const int    count=2    [origin=local]    first=@ a.c:41:54
+        sources: local-pointer-use
+        details: unary-*
+    - [always] call-arg as=const void *    count=2    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:42:3
+        sources: indirect-call-argument, same-tu-named-call-pointer-use
+        details: via invoke_deref.$2; arg0 to at_index; via invoke_deref.$2; arg1 to <indirect>-origin
+    - [always] init-rhs as=const void *    count=1    [origin=same-tu-call, target=invoke_deref, sig=fn:(fnptr:(const void *,const void *)->int,ptr:void,ptr:void,int:unsigned long,int:unsigned long)->void, edge=direct-call]    first=@ a.c:42:3
+        sources: same-tu-named-call-pointer-use
+        details: via invoke_deref.$2; init-rhs to const void *-origin
+
+Return-alias pointer-use continuations:
+  exercise::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : call-arg    {via invoke_direct.$2; arg1 to <indirect>-origin}    @ a.c:41:3
+  exercise::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : init-rhs    {via invoke_direct.$2; init-rhs to const void *-origin}    @ a.c:41:3
+  exercise::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : call-arg    {via invoke_deref.$2; arg1 to <indirect>-origin}    @ a.c:42:3
+  exercise::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : init-rhs    {via invoke_deref.$2; init-rhs to const void *-origin}    @ a.c:42:3
+  invoke_deref::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : init-rhs    {init-rhs to const void *-origin}    @ a.c:36:27
+  invoke_deref::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : call-arg    {arg1 to <indirect>-origin}    @ a.c:37:9
+  invoke_direct::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : init-rhs    {init-rhs to const void *-origin}    @ a.c:27:27
+  invoke_direct::base : at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index    [semantic-core=const char * => ptrarith(const char *) => const void *]    as=const void * : call-arg    {arg1 to <indirect>-origin}    @ a.c:28:9
+      note: Structured C4Q1 explanation records; the propagation payload remains in Pointer use summaries.
+
+Pointer behavior metrics:
+  compare_ints::lhs
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedRead
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=compare_ints::lhs, behavior=ConcreteSpecializedRead, mediation=Direct, family=DirectConcreteSpecialization, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {const int *, const void *}
+      pointerTypes: 2 {const int *, const void *}
+      nonVoidPointerTypes: 1 {const int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: const int *
+      writeDerefTypes: <none>
+  compare_ints::rhs
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedRead
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=compare_ints::rhs, behavior=ConcreteSpecializedRead, mediation=Direct, family=DirectConcreteSpecialization, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {const int *, const void *}
+      pointerTypes: 2 {const int *, const void *}
+      nonVoidPointerTypes: 1 {const int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: const int *
+      writeDerefTypes: <none>
+  invoke_direct::key
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentPointer
+    evidenceSources: indirect-call-argument
+    evidenceFlags: local=no, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=invoke_direct::key, behavior=CallbackDependentPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: higher-order, void-interface
+    history:
+      seqDepth: 1
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 1 {const void *}
+      pointerTypes: 1 {const void *}
+      nonVoidPointerTypes: 0 {<none>}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  invoke_direct::base
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentPointer
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, return-alias-continuation, same-tu-named-call-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=yes
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=yes
+    stableClassification: entity=invoke_direct::base, behavior=CallbackDependentPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=project-scc-solved, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer
+    surfaceReasons: higher-order, void-interface
+    history:
+      seqDepth: 1
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 1 {const void *}
+      pointerTypes: 1 {const void *}
+      nonVoidPointerTypes: 0 {<none>}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  invoke_direct::candidate
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument
+    evidenceFlags: local=no, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=invoke_direct::candidate, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: byte-view, higher-order, void-interface
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 3 {at_index⌜$2, const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+      pointerTypes: 2 {const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+      nonVoidPointerTypes: 1 {const char *, ptrarith(const char *)}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      callbackInputView: byteView(char *) before callback
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  invoke_deref::key
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentPointer
+    evidenceSources: indirect-call-argument
+    evidenceFlags: local=no, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=invoke_deref::key, behavior=CallbackDependentPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: higher-order, void-interface
+    history:
+      seqDepth: 1
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 1 {const void *}
+      pointerTypes: 1 {const void *}
+      nonVoidPointerTypes: 0 {<none>}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  invoke_deref::base
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentPointer
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, return-alias-continuation, same-tu-named-call-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=yes
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=yes
+    stableClassification: entity=invoke_deref::base, behavior=CallbackDependentPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=project-scc-solved, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer
+    surfaceReasons: higher-order, void-interface
+    history:
+      seqDepth: 1
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 1 {const void *}
+      pointerTypes: 1 {const void *}
+      nonVoidPointerTypes: 0 {<none>}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  invoke_deref::candidate
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument
+    evidenceFlags: local=no, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=invoke_deref::candidate, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: byte-view, higher-order, void-interface
+    history:
+      seqDepth: 5
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+      distinctTypes: 3 {at_index⌜$2, const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+      pointerTypes: 2 {const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+      nonVoidPointerTypes: 1 {const char *, ptrarith(const char *)}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      callbackInputView: byteView(char *) before callback
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  exercise::key
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedRead
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=ResolvedCallback, semanticFamily=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, targets=compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, resolvedCallbackTarget=yes, externalBoundary=no, returnAlias=no
+    stableClassification: entity=exercise::key, behavior=ConcreteSpecializedRead, mediation=ResolvedCallback, family=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, risk=Low, evidenceSourceKind=project-scc-solved, targets=compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer
+    surfaceReasons: higher-order, void-interface
+    history:
+      seqDepth: 3
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {const int *, const void *}
+      pointerTypes: 2 {const int *, const void *}
+      nonVoidPointerTypes: 1 {const int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=yes, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: const int *
+      writeDerefTypes: <none>
+  exercise::base
+    view: FullView
+    historyShape: ByteView
+    historyRisk: Moderate
+    behavior: ConcreteSpecializedRead
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, return-alias-continuation, same-tu-named-call-pointer-use
+    evidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=yes
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=ConcreteSpecialization, semanticRiskTier=Moderate, interpretation=surface-wild interface with concrete operation evidence and structurally mixed history
+    semanticMediation: kind=ResolvedCallback, semanticFamily=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, targets=at_index, compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, resolvedCallbackTarget=yes, externalBoundary=no, returnAlias=yes
+    stableClassification: entity=exercise::base, behavior=ConcreteSpecializedRead, mediation=ResolvedCallback, family=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=at_index, compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, higher-order, pointer-arithmetic, void-interface
+    history:
+      seqDepth: 6
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=4, parallel=0, branch=0, callwrap=0, ptrarith=1, higherOrderRefs=0
+      distinctTypes: 3 {const char *, const int *, const void *}
+      pointerTypes: 3 {const char *, const int *, const void *}
+      nonVoidPointerTypes: 2 {const char *, const int *}
+      flags: void=yes, charPtr=yes, ptrArith=yes, intToPtr=no, ptrToInt=no, externalSink=no
+      ptrArithTypes: const char *
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=yes, byteOffsetDifferentConcrete=no, typeErasureToVoid=yes, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=yes, higherOrder=yes, ptrArith=yes, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=yes, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: const int *
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  compare_ints::lhs
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {const int *, const void *}
+    pointerTypes: 2 {const int *, const void *}
+    nonVoidPointerTypes: 1 {const int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  compare_ints::rhs
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {const int *, const void *}
+    pointerTypes: 2 {const int *, const void *}
+    nonVoidPointerTypes: 1 {const int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  invoke_direct::key
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 1
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 1 {const void *}
+    pointerTypes: 1 {const void *}
+    nonVoidPointerTypes: 0 {<none>}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  invoke_direct::base
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 1
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 1 {const void *}
+    pointerTypes: 1 {const void *}
+    nonVoidPointerTypes: 0 {<none>}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  invoke_direct::candidate
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 5
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 3 {at_index⌜$2, const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+    pointerTypes: 2 {const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+    nonVoidPointerTypes: 1 {const char *, ptrarith(const char *)}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  invoke_deref::key
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 1
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 1 {const void *}
+    pointerTypes: 1 {const void *}
+    nonVoidPointerTypes: 0 {<none>}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  invoke_deref::base
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 1
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 1 {const void *}
+    pointerTypes: 1 {const void *}
+    nonVoidPointerTypes: 0 {<none>}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  invoke_deref::candidate
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    seqDepth: 5
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=1
+    distinctTypes: 3 {at_index⌜$2, const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+    pointerTypes: 2 {const char *, const void *, const void *⌝at_index, ptrarith(const char *)}
+    nonVoidPointerTypes: 1 {const char *, ptrarith(const char *)}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  exercise::key
+    historyShape: SequentialConcreteReinterpretation
+    historyRisk: Moderate
+    seqDepth: 3
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=1, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 3 {const int *, const void *}
+    pointerTypes: 3 {const int *, const void *}
+    nonVoidPointerTypes: 2 {const int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  exercise::base
+    historyShape: ByteView
+    historyRisk: DangerousReinterpretation
+    seqDepth: 6
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=4, parallel=0, branch=0, callwrap=0, ptrarith=1, higherOrderRefs=0
+    distinctTypes: 4 {const char *, const int *, const void *}
+    pointerTypes: 4 {const char *, const int *, const void *}
+    nonVoidPointerTypes: 3 {const char *, const int *}
+    flags: void=yes, charPtr=yes, ptrArith=yes, intToPtr=no, ptrToInt=no, externalSink=no
+    ptrArithTypes: const char *
+
+Function parameter behavior metrics:
+  compare_ints.$0 : const void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedRead
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=compare_ints.$0, behavior=ConcreteSpecializedRead, mediation=Direct, family=DirectConcreteSpecialization, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    summary: const int *
+    pointerTypes: const int *, const void *
+    nonVoidPointerTypes: const int *
+    derefTypes: const int *
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  compare_ints.$1 : const void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedRead
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=compare_ints.$1, behavior=ConcreteSpecializedRead, mediation=Direct, family=DirectConcreteSpecialization, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    summary: const int *
+    pointerTypes: const int *, const void *
+    nonVoidPointerTypes: const int *
+    derefTypes: const int *
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  at_index.$0 : const void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: OpaqueForwarding
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=OpaqueTransport, semanticRiskTier=Low, interpretation=surface-wild pointer transported or type-erased without concrete dereference
+    semanticMediation: kind=Direct, semanticFamily=OpaqueTransport, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=at_index.$0, behavior=OpaqueForwarding, mediation=Direct, family=OpaqueTransport, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    summary: <none>
+    pointerTypes: const void *
+    nonVoidPointerTypes: <none>
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  invoke_direct.$0 : int (*)(const void *, const void *)
+    paramRole: CallbackBehaviorProvider
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: NotWildLike
+    evidenceSources: <none>
+    evidenceSourceKind: no-pointer-use-evidence
+    wildLike: no
+    paperWildness: surfaceKind=not-wild-like, semanticFamily=NotWildLike, semanticRiskTier=Low, interpretation=ordinary/non-wild pointer behavior
+    semanticMediation: kind=Direct, semanticFamily=NotWildLike, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=invoke_direct.$0, behavior=NotWildLike, mediation=Direct, family=NotWildLike, risk=Low, evidenceSourceKind=no-pointer-use-evidence
+    surfaceReasons: not-wild-like
+    summary: <none>
+    pointerTypes: int (*)(const void *, const void *)
+    nonVoidPointerTypes: int (*)(const void *, const void *)
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: function-pointer parameter provides callback behavior; it is not an ordinary wild data pointer
+  invoke_direct.$1 : const void *
+    paramRole: CallbackDependentDataPointer
+    callbackMediationState: FormalCallbackParameter
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentPointer
+    evidenceSources: indirect-call-argument
+    evidenceSourceKind: indirect-call-argument
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=invoke_direct.$1, behavior=CallbackDependentPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: higher-order, void-interface
+    summary: $0.$0
+    pointerTypes: const void *
+    nonVoidPointerTypes: <none>
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: data pointer behavior depends on a callback/function-pointer parameter
+  invoke_direct.$2 : const void *
+    paramRole: CallbackDependentDataPointer
+    callbackMediationState: FormalCallbackParameter
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=invoke_direct.$2, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=project-scc-solved, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, higher-order, pointer-arithmetic, void-interface
+    summary: at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1
+    pointerTypes: const char *, const void *
+    nonVoidPointerTypes: const char *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    callbackInputView: byteView(char *) before callback
+    roleNote: data pointer behavior depends on a callback/function-pointer parameter
+  invoke_deref.$0 : int (*)(const void *, const void *)
+    paramRole: CallbackBehaviorProvider
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: NotWildLike
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: no
+    paperWildness: surfaceKind=not-wild-like, semanticFamily=NotWildLike, semanticRiskTier=Low, interpretation=ordinary/non-wild pointer behavior
+    semanticMediation: kind=Direct, semanticFamily=NotWildLike, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=invoke_deref.$0, behavior=NotWildLike, mediation=Direct, family=NotWildLike, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: not-wild-like
+    summary: <none>
+    pointerTypes: int (*)(const void *, const void *)
+    nonVoidPointerTypes: int (*)(const void *, const void *)
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: function-pointer parameter provides callback behavior; it is not an ordinary wild data pointer
+  invoke_deref.$1 : const void *
+    paramRole: CallbackDependentDataPointer
+    callbackMediationState: FormalCallbackParameter
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentPointer
+    evidenceSources: indirect-call-argument
+    evidenceSourceKind: indirect-call-argument
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, edges=higher-order-call, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=invoke_deref.$1, behavior=CallbackDependentPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=indirect-call-argument, edges=higher-order-call
+    surfaceReasons: higher-order, void-interface
+    summary: $0.$0
+    pointerTypes: const void *
+    nonVoidPointerTypes: <none>
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: data pointer behavior depends on a callback/function-pointer parameter
+  invoke_deref.$2 : const void *
+    paramRole: CallbackDependentDataPointer
+    callbackMediationState: FormalCallbackParameter
+    view: FullView
+    historyShape: FunctionParameterDependent
+    historyRisk: FunctionParameterDependent
+    behavior: CallbackDependentByteViewPointer
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=CallbackDependent, semanticRiskTier=Moderate, interpretation=pointer behavior depends on callback or higher-order target
+    semanticMediation: kind=Callback, semanticFamily=CallbackDependent, callbackState=FormalCallbackParameter, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=invoke_deref.$2, behavior=CallbackDependentByteViewPointer, mediation=Callback, family=CallbackDependent, callbackState=FormalCallbackParameter, risk=FunctionParameterDependent, evidenceSourceKind=project-scc-solved, targets=at_index, edges=direct-call, higher-order-call, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, higher-order, pointer-arithmetic, void-interface
+    summary: at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1
+    pointerTypes: const char *, const void *
+    nonVoidPointerTypes: const char *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    callbackInputView: byteView(char *) before callback
+    roleNote: data pointer behavior depends on a callback/function-pointer parameter
+  exercise.$0 : const int *
+    paramRole: ResolvedCallbackMediatedDataPointer
+    callbackMediationState: ResolvedCallback
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecializedRead
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=ResolvedCallback, semanticFamily=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, targets=compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, resolvedCallbackTarget=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=exercise.$0, behavior=ConcreteSpecializedRead, mediation=ResolvedCallback, family=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, risk=Low, evidenceSourceKind=project-scc-solved, targets=compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer
+    surfaceReasons: higher-order, void-interface
+    summary: const void * => const int *
+    pointerTypes: const int *, const void *
+    nonVoidPointerTypes: const int *
+    derefTypes: const int *
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: data pointer reaches a resolved callback target; the callback is no longer a symbolic dependency
+  exercise.$1 : const int *
+    paramRole: ResolvedCallbackMediatedDataPointer
+    callbackMediationState: ResolvedCallback
+    view: FullView
+    historyShape: ByteView
+    historyRisk: Moderate
+    behavior: ConcreteSpecializedRead
+    evidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+    evidenceSourceKind: project-scc-solved
+    wildLike: yes
+    paperWildness: surfaceKind=higher-order-dependent, semanticFamily=ConcreteSpecialization, semanticRiskTier=Moderate, interpretation=surface-wild interface with concrete operation evidence and structurally mixed history
+    semanticMediation: kind=ResolvedCallback, semanticFamily=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, targets=at_index, compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer, flags: dataField=no, nestedDataField=no, callback=yes, resolvedCallbackTarget=yes, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=exercise.$1, behavior=ConcreteSpecializedRead, mediation=ResolvedCallback, family=ResolvedCallbackMediatedConcreteSpecialization, callbackState=ResolvedCallback, risk=Moderate, evidenceSourceKind=project-scc-solved, targets=at_index, compare_ints, invoke_deref, invoke_direct, edges=direct-call, higher-order-call, higher-order-callback, summary-param-transfer
+    surfaceReasons: byte-view, cast-like-reinterpretation, higher-order, pointer-arithmetic, void-interface
+    summary: const void * => const char * => ptrarith(const char *) => const void * => const int *
+    pointerTypes: const char *, const int *, const void *
+    nonVoidPointerTypes: const char *, const int *
+    derefTypes: const int *
+    writeDerefTypes: <none>
+    flags: higherOrder=yes, branchSplit=no, byteWrite=no, multiTypeWrite=no
+    roleNote: data pointer reaches a resolved callback target; the callback is no longer a symbolic dependency
+
+Function behavior classifications:
+  compare_ints
+    class: ConcreteSpecializerFunction
+    classificationEvidenceSourceKind: local-only
+    classificationEvidenceSources: local-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=deref, init-rhs, derefSources=local-pointer-use, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecializedRead, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=DirectConcreteSpecialization, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=local-only, evidenceSources=local-pointer-use, summary=const int *
+      - $1 role=OrdinaryParameter, behavior=ConcreteSpecializedRead, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=DirectConcreteSpecialization, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=local-only, evidenceSources=local-pointer-use, summary=const int *
+  at_index
+    class: OpaquePolymorphicFunction
+    classificationEvidenceSourceKind: local-only
+    classificationEvidenceSources: local-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=pointer-arithmetic, returned, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=OpaqueForwarding, semanticFamily=OpaqueTransport, mediatedSemanticFamily=OpaqueTransport, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=local-only, evidenceSources=local-pointer-use
+  invoke_direct
+    class: CallbackAdapterFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, init-rhs, pointer-arithmetic, returned, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=yes, callbackDependent=yes, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=CallbackBehaviorProvider, behavior=NotWildLike, semanticFamily=NotWildLike, mediatedSemanticFamily=NotWildLike, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=no-pointer-use-evidence, evidenceSources=<none>
+      - $1 role=CallbackDependentDataPointer, behavior=CallbackDependentPointer, semanticFamily=CallbackDependent, mediatedSemanticFamily=CallbackDependent, mediation=Callback, semanticRiskTier=Moderate, evidenceSourceKind=indirect-call-argument, evidenceSources=indirect-call-argument, summary=$0.$0
+      - $2 role=CallbackDependentDataPointer, behavior=CallbackDependentByteViewPointer, semanticFamily=CallbackDependent, mediatedSemanticFamily=CallbackDependent, mediation=Callback, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=indirect-call-argument, local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, summary=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1
+  invoke_deref
+    class: CallbackAdapterFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, deref, init-rhs, pointer-arithmetic, returned, derefSources=local-pointer-use, writeSources=<none>
+    evidenceFlags: callbackProvider=yes, callbackDependent=yes, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=CallbackBehaviorProvider, behavior=NotWildLike, semanticFamily=NotWildLike, mediatedSemanticFamily=NotWildLike, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=local-only, evidenceSources=local-pointer-use
+      - $1 role=CallbackDependentDataPointer, behavior=CallbackDependentPointer, semanticFamily=CallbackDependent, mediatedSemanticFamily=CallbackDependent, mediation=Callback, semanticRiskTier=Moderate, evidenceSourceKind=indirect-call-argument, evidenceSources=indirect-call-argument, summary=$0.$0
+      - $2 role=CallbackDependentDataPointer, behavior=CallbackDependentByteViewPointer, semanticFamily=CallbackDependent, mediatedSemanticFamily=CallbackDependent, mediation=Callback, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=indirect-call-argument, local-pointer-use, project-scc-pointer-use, same-tu-named-call-pointer-use, summary=at_index⌜const char * => ptrarith(const char *) => const void *⌝at_index => $0.$1
+  exercise
+    class: ConcreteSpecializerFunction
+    classificationEvidenceSourceKind: project-scc-solved
+    classificationEvidenceSources: indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=yes, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=yes, returnAlias=no, importedOrSolved=yes
+    classificationEvidenceOperations: operationKinds=call-arg, deref, init-rhs, pointer-arithmetic, returned, derefSources=local-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=yes, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=ResolvedCallbackMediatedDataPointer, behavior=ConcreteSpecializedRead, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=ResolvedCallbackMediatedConcreteSpecialization, mediation=ResolvedCallback, semanticRiskTier=Low, evidenceSourceKind=project-scc-solved, evidenceSources=indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use, summary=const void * => const int *
+      - $1 role=ResolvedCallbackMediatedDataPointer, behavior=ConcreteSpecializedRead, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=ResolvedCallbackMediatedConcreteSpecialization, mediation=ResolvedCallback, semanticRiskTier=Moderate, evidenceSourceKind=project-scc-solved, evidenceSources=indirect-call-argument, local-pointer-use, project-scc-pointer-use, resolved-higher-order-pointer-use, same-tu-named-call-pointer-use, summary=const void * => const char * => ptrarith(const char *) => const void * => const int *
+
+Unsupported / approximated language features:
+  <none>

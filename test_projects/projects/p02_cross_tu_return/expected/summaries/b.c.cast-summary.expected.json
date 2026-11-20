@@ -1,0 +1,268 @@
+{
+  "functionSummaryDetails": [
+    {
+      "function": "g",
+      "functionBehavior": "BytewiseGenericFunction",
+      "identity": {
+        "linkage": "external",
+        "location": {
+          "column": 7,
+          "file": "b.c",
+          "line": 7
+        },
+        "name": "g",
+        "qualifiedName": "g",
+        "signatureKey": "fn:(ptr:void)->ptr:void",
+        "sourceFile": "b.c",
+        "usr": ""
+      },
+      "params": [
+        {
+          "dataFieldObservations": [],
+          "dataFieldPointerUses": [],
+          "declaredType": "void *",
+          "directLocalSummary": {
+            "ir": {
+              "kind": "none"
+            }
+          },
+          "index": 0,
+          "name": "y",
+          "pointerUses": [
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "none"
+                }
+              },
+              "detail": "init-rhs to char *",
+              "guard": null,
+              "kind": "init-rhs",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "ast-leaf",
+              "operationSiteSpan": {
+                "column": 13,
+                "file": "b.c",
+                "line": 8
+              },
+              "pointerType": "void *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "local",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "",
+                "source": "",
+                "targetFunction": "",
+                "targetLookupKey": "",
+                "targetQualifiedName": "",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 13,
+                "file": "b.c",
+                "line": 8
+              }
+            },
+            {
+              "accessType": null,
+              "attachPath": {
+                "ir": {
+                  "kind": "asType",
+                  "type": {
+                    "canonical": "",
+                    "compatibilityKey": "text:char *",
+                    "functionHasPrototype": false,
+                    "functionIsVariadic": false,
+                    "functionParamCanonical": [],
+                    "functionReturnCanonical": "",
+                    "isArray": false,
+                    "isCharPointer": false,
+                    "isConstQualified": false,
+                    "isFloating": false,
+                    "isFunctionPointer": false,
+                    "isInteger": false,
+                    "isNullPointer": false,
+                    "isPointer": false,
+                    "isRecordPointer": false,
+                    "isVoid": false,
+                    "isVoidPointer": false,
+                    "isVolatileQualified": false,
+                    "kind": "unknown",
+                    "pointeeCanonical": "",
+                    "pointeeConst": false,
+                    "pointeeText": "",
+                    "pointeeVolatile": false,
+                    "recordName": "",
+                    "recordTag": "",
+                    "semanticKey": "text:char *",
+                    "text": "char *"
+                  }
+                }
+              },
+              "detail": "return-alias-parent",
+              "guard": null,
+              "kind": "returned",
+              "operationLocalGuard": null,
+              "operationLocalGuardOrigin": "ast-leaf",
+              "operationSiteSpan": {
+                "column": 3,
+                "file": "b.c",
+                "line": 9
+              },
+              "pointerType": "char *",
+              "provenance": {
+                "calleeExpr": "",
+                "edgeKind": "",
+                "fieldEntity": "",
+                "fieldPath": "",
+                "originKind": "local",
+                "recursiveNamedCallEvidence": false,
+                "signatureKey": "",
+                "source": "",
+                "targetFunction": "",
+                "targetLookupKey": "",
+                "targetQualifiedName": "",
+                "transferKind": ""
+              },
+              "span": {
+                "column": 3,
+                "file": "b.c",
+                "line": 9
+              }
+            }
+          ],
+          "summary": {
+            "ir": {
+              "kind": "asType",
+              "type": {
+                "canonical": "char *",
+                "compatibilityKey": "ptr:byte",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": true,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": true,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": false,
+                "isVolatileQualified": false,
+                "kind": "char-pointer",
+                "pointeeCanonical": "char",
+                "pointeeConst": false,
+                "pointeeText": "char",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "ptr:byte",
+                "text": "char *"
+              }
+            }
+          }
+        }
+      ],
+      "return": {
+        "aliasedParamIndex": 0,
+        "declaredType": "void *",
+        "mayAliasParam": true,
+        "summary": {
+          "ir": {
+            "first": {
+              "first": {
+                "index": 0,
+                "kind": "paramRef"
+              },
+              "kind": "seq",
+              "second": {
+                "kind": "asType",
+                "type": {
+                  "canonical": "",
+                  "compatibilityKey": "text:char *",
+                  "functionHasPrototype": false,
+                  "functionIsVariadic": false,
+                  "functionParamCanonical": [],
+                  "functionReturnCanonical": "",
+                  "isArray": false,
+                  "isCharPointer": false,
+                  "isConstQualified": false,
+                  "isFloating": false,
+                  "isFunctionPointer": false,
+                  "isInteger": false,
+                  "isNullPointer": false,
+                  "isPointer": false,
+                  "isRecordPointer": false,
+                  "isVoid": false,
+                  "isVoidPointer": false,
+                  "isVolatileQualified": false,
+                  "kind": "unknown",
+                  "pointeeCanonical": "",
+                  "pointeeConst": false,
+                  "pointeeText": "",
+                  "pointeeVolatile": false,
+                  "recordName": "",
+                  "recordTag": "",
+                  "semanticKey": "text:char *",
+                  "text": "char *"
+                }
+              }
+            },
+            "kind": "seq",
+            "second": {
+              "kind": "asType",
+              "type": {
+                "canonical": "void *",
+                "compatibilityKey": "ptr:void",
+                "functionHasPrototype": false,
+                "functionIsVariadic": false,
+                "functionParamCanonical": [],
+                "functionReturnCanonical": "",
+                "isArray": false,
+                "isCharPointer": false,
+                "isConstQualified": false,
+                "isFloating": false,
+                "isFunctionPointer": false,
+                "isInteger": false,
+                "isNullPointer": false,
+                "isPointer": true,
+                "isRecordPointer": false,
+                "isVoid": false,
+                "isVoidPointer": true,
+                "isVolatileQualified": false,
+                "kind": "void-pointer",
+                "pointeeCanonical": "void",
+                "pointeeConst": false,
+                "pointeeText": "void",
+                "pointeeVolatile": false,
+                "recordName": "",
+                "recordTag": "",
+                "semanticKey": "ptr:void",
+                "text": "void *"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "returnAliasPointerUseContinuations": [],
+  "schemaName": "cast-history-tu-link-summary",
+  "schemaVersion": 1,
+  "summaryDependencyEdges": [],
+  "summaryParamTransferEdges": [],
+  "toolVersion": "cast-history-dev",
+  "tu": {
+    "compileCommandHash": "",
+    "configurationId": "",
+    "sourceFile": "b.c"
+  }
+}
