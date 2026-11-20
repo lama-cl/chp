@@ -1,6 +1,6 @@
 # Regression Testing — Design & Plan
 
-Status: **Approved plan; Phase 0 done (§8), waiting for go-ahead on Phase 1** (2026-11-20)
+Status: **Phase 0 done (§8), Phase 1 done (§9); waiting for go-ahead on Phase 2** (2026-11-20)
 Owner: project maintainers · Implementers: humans or agents (follow the task list in §5)
 
 ---
@@ -75,24 +75,30 @@ examples/
   expected/
     demo1.expected.txt                      # normalized --debug-dump output
     demo1.runtime.expected.json             # timing baseline (perf check only)
+    regress-meta.expected.json              # LLVM version the files came from
 
 test_projects/projects/<project>/
   a.c  b.c
   expected/
     README.expected.txt                     # existing prose intent (unchanged)
-    a.expected.txt                          # normalized per-TU text report
-    a.cast-summary.expected.json            # normalized, key-sorted summary
+    verify_*.py                             # existing checkers (unchanged)
+    a.c.expected.txt                        # normalized per-TU text report
+    summaries/a.c.cast-summary.expected.json             # normalized, key-sorted
+    prevalence-metrics/a.c.cast-prevalence.expected.json # normalized, key-sorted
     project-summary-index.expected.json     # normalized, key-sorted index
     runtime.expected.json                   # timing baseline (perf check only)
+    regress-meta.expected.json              # LLVM version the files came from
 ```
 
-Rule: `<original-stem>.expected.<ext>`. The `.expected` part sits just before the real extension, so editors keep syntax highlighting.
+Rule: the driver's output path, with `.expected` inserted before the last extension (`a.c.txt` → `a.c.expected.txt`). Subfolders mirror the driver output, so an expected file maps back to its source with no lookup table. The `.expected` part sits just before the real extension, so editors keep syntax highlighting.
+
+`regress.py` owns every `*.expected.txt|json` in these folders **except** `README.expected.txt`, `runtime.expected.json` and `regress-meta.expected.json`. It never touches other files (`verify_*.py`, `README.expected.txt`).
 
 Find everything: `find examples test_projects/projects -path '*/expected/*' -name '*.expected*'`
 
 ### 4.3 Normalization (applied to both actual and expected output)
 
-1. Absolute paths: build, tool, project and output roots become `<build-root>`, `<tool-root>`, `<project-root>`, `<output-root>`. Reuse the logic in `run_all_examples_normalized.sh` and the `--normalize-paths` option of `cast_history_project.sh`.
+1. Absolute paths: tool (repo), project and output roots become `<tool-root>`, `<project-root>`, `<output-root>` (longest path replaced first). Reuse the logic in `run_all_examples_normalized.sh` and the `--normalize-paths` option of `cast_history_project.sh`.
 2. JSON is re-serialized with sorted keys, 2-space indent and a trailing newline.
 3. Fields that change from run to run (found in Phase 0) are removed or replaced with a placeholder. The removed fields are listed explicitly in `regress.py`, not hidden behind regexes.
 4. Timing data is **removed from the diffed files** and kept only in the `runtime.expected.json` files (see §4.5).
@@ -100,22 +106,29 @@ Find everything: `find examples test_projects/projects -path '*/expected/*' -nam
 ### 4.4 `scripts/regress.py`
 
 ```
-regress.py run    [--only NAME] [--tool PATH] [--keep-tmp]   # diff; exit 1 on any mismatch
-regress.py update [--only NAME] [--tool PATH]                # rewrite expected/*.expected*
-regress.py perf   [--only NAME] [--tolerance 0.25]           # compare timings; warn by default
+regress.py run    [--only NAME]...                 # diff; exit 1 on any mismatch
+regress.py update [--only NAME]...                 # rewrite expected/*.expected* (not baselines)
+regress.py perf   [--only NAME]... [--runs 3] [--tolerance 0.25] [--min-delta-ms 50] [--strict]
+regress.py perf --update                           # rewrite runtime baselines
+# common: --tool PATH  --clang CMD  --out-dir DIR (default build/regress-out)  --tu-timeout SEC
+# NAME: a fixture (demo1, p01_direct_cross_tu), or "examples" / "projects"
+# exit: 0 ok, 1 mismatch / fixture failure / strict slowdown, 2 usage or environment problem
 ```
 
 - Calls the existing drivers (`run_all_examples_normalized.sh`, `cast_history_project.sh`) and does not re-implement them.
-- Writes output to a temporary directory and never into the source tree, except for `update`.
+- Writes output to `build/regress-out/` (cleaned per fixture) and never into the source tree, except for `update` / `perf --update` and the gitignored `compile_commands.json`. A normalized copy of every compared file goes to `build/regress-out/normalized/<repo path>` for inspection.
+- Reports expected files that are missing and expected files that are no longer produced (`STALE`). `update` deletes stale ones.
+- Refuses to `update` if any fixture fails.
 - Prints a unified diff for each mismatched file and ends with a `PASS n / FAIL m` summary.
-- Checks the LLVM version (via `llvm-config --version` or the tool's own version) and refuses `update` if it is below 19.
+- Reads the LLVM version from `cast-history-tool --version` and refuses `update` / `perf --update` if it is below 19. Picks `clang-<major>` for builtin headers. `run` warns when `regress-meta.expected.json` names a different LLVM major version.
 - Builds `compile_commands.json` for each project before running (as `CLAUDE.md` requires), using `scripts/regenerate_compile_commands.py` or the driver.
 - Uses only Python standard-library modules (`json`, `difflib`, `subprocess`, `argparse`).
 
 ### 4.5 Perf check
 
-- Source: the `*.cast-runtime.json` sidecars (turned on by default in `cast_history_project.sh`) and the wall time of each example run.
-- Baseline: `runtime.expected.json` per fixture (median of N=3 runs when `update` writes it).
+- Metrics: examples → `wallMs`; projects → `wallMs` (whole driver run), `indexBuildMs` (final index `buildMetadata.timingsMilliseconds.totalBeforeWrite`, see §8) and `tuTotalElapsedMs` (sum of the per-TU `*.cast-runtime.json` `totalElapsed`).
+- Baseline: `runtime.expected.json` per fixture, median of `--runs` (default 3), written only by `perf --update`, so ordinary `update`s don't churn timings.
+- A slowdown also has to be at least `--min-delta-ms` (default 50 ms), so tiny numbers don't flap.
 - Check: flag a fixture if its time exceeds `baseline × (1 + tolerance)`, with the tolerance set to 25% by default. **Warn-only** (exit 0) unless `--strict` is given, because timings depend on the machine.
 - Baselines should be refreshed together with the other expected outputs and come from the same machine class.
 
@@ -150,8 +163,8 @@ Each task ends with its **done when** condition. Do not start a phase until the 
 - [x] **T0.3** Report the T0.2 findings to the maintainer before continuing.
 
 ### Phase 1: driver
-- [ ] **T1.1** Add `scripts/regress.py` with `run`, `update` and `perf` as specified in §4.3–4.5.
-- [ ] **T1.2** Encode the regression-set list and the list of removed fields.
+- [x] **T1.1** Add `scripts/regress.py` with `run`, `update` and `perf` as specified in §4.3–4.5.
+- [x] **T1.2** Encode the regression-set list and the list of removed fields.
   *Done when* `regress.py run` on a fresh build reports a clear "missing expected file" for every fixture (no crash).
 
 ### Phase 2: expected outputs
@@ -229,3 +242,20 @@ No ordering changes (e.g. from hash maps) were seen in any diffed file.
 
 ### Perf finding (affects §4.5)
 In p126 the analyzer itself takes **~37–70 ms** per TU; the rest of the 12 s is the **index build** (`build_summary_index.py`, `timingsMilliseconds.solvedOther` ≈ 8.3 s, run twice: c1-raw and final). The per-TU `*.cast-runtime.json` sidecars do not capture this. **Change to §4.5:** the perf baseline must also record `project-summary-index.json → buildMetadata.timingsMilliseconds` and the project's total wall time, not just the per-TU sidecars. Run-to-run variation seen: index ≈ ±1%, per-TU ms values ±10–30% (small numbers), so compare the per-TU sidecars on totals only.
+
+---
+
+## 9. Phase 1 results (2026-11-20)
+
+Branch: `claude/regression-test-harness`.
+
+- Added `scripts/regress.py` (stdlib only) as specified in §4.2–4.5.
+- Fixed `scripts/regenerate_compile_commands.py`: `--project-glob <project>` now treats a directory that holds sources as one project, even before it has a `compile_commands.json` (the limitation in §8). `regress.py` uses it to create missing compile databases.
+- **Done-when check:** on a fresh build with no expected files, `regress.py run` reports `MISSING expected file …` for all 11 fixtures (35 files) and exits 1.
+- **Rehearsal of Phase 2** (all generated files deleted afterwards; nothing committed):
+  - `update` wrote 35 files; `run` then passed 11/11 twice in a row.
+  - A cast added to `demo1.c` produced a readable unified diff and exit 1.
+  - A fake extra expected file was reported as `STALE`.
+  - `perf` without baselines prints `NOBASE` and exits 0; after `perf --update`, a baseline edited to be 7× too fast is flagged `SLOWER` and `--strict` exits 1.
+  - Unknown `--only` names and a missing tool exit 2.
+- Runtime of the full set: ≈ 15 s (p126 ≈ 12 s, almost all in the index build).

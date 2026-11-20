@@ -61,7 +61,10 @@ def iter_projects(project_root: Path,
     if project_globs:
         for glob_text in project_globs:
             for root in sorted(project_root.glob(glob_text)):
-                if root.is_dir() and (root / "compile_commands.json").exists():
+                # A directory is one project when it already has a compile
+                # database or holds sources directly; otherwise it is a set.
+                if root.is_dir() and ((root / "compile_commands.json").exists()
+                                      or source_files(root)):
                     projects.append(root)
                 elif root.is_dir():
                     projects.extend(
