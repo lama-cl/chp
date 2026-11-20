@@ -1,6 +1,6 @@
 # Regression Testing — Design & Plan
 
-Status: **Approved plan, not yet implemented** (2026-11-20)
+Status: **Approved plan; Phase 0 done (§8), waiting for go-ahead on Phase 1** (2026-11-20)
 Owner: project maintainers · Implementers: humans or agents (follow the task list in §5)
 
 ---
@@ -143,11 +143,11 @@ regress.py perf   [--only NAME] [--tolerance 0.25]           # compare timings; 
 Each task ends with its **done when** condition. Do not start a phase until the previous phase is done.
 
 ### Phase 0: build and stability check (no source changes)
-- [ ] **T0.1** Install or confirm LLVM ≥ 19 (latest). Configure with `cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=$(llvm-config --cmakedir) -G Ninja`, then build with `ninja -C build`.
+- [x] **T0.1** Install or confirm LLVM ≥ 19 (latest). Configure with `cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=$(llvm-config --cmakedir) -G Ninja`, then build with `ninja -C build`.
   *Done when* `build/cast-history-tool` exists and `llvm-config --version` ≥ 19.
-- [ ] **T0.2** Run the regression set (§4.1) **twice** with path normalization and `diff -r` the two runs.
+- [x] **T0.2** Run the regression set (§4.1) **twice** with path normalization and `diff -r` the two runs.
   *Done when* every field that changes between runs is listed (file, field, example).
-- [ ] **T0.3** Report the T0.2 findings to the maintainer before continuing.
+- [x] **T0.3** Report the T0.2 findings to the maintainer before continuing.
 
 ### Phase 1: driver
 - [ ] **T1.1** Add `scripts/regress.py` with `run`, `update` and `perf` as specified in §4.3–4.5.
@@ -191,3 +191,41 @@ Rule: a PR that changes `*.expected*` files must explain **why** the output chan
 | Output changes between runs (hash ordering, temp paths) | Phase 0 finds these fields; fix them at the source if cheap, otherwise remove them in normalization |
 | Timings are noisy | Median of 3 runs, 25% tolerance, warn-only by default |
 | Expected files get updated without review | Separate commit for expected files; PR rule in §6 |
+
+---
+
+## 8. Phase 0 results (2026-11-20)
+
+### Environment
+- Ubuntu 24.04. apt.llvm.org is blocked by the network policy. The newest LLVM in the Ubuntu archive is **20.1.2** (`llvm-20-dev libclang-20-dev clang-20`).
+- Configure needs `PATH=/usr/lib/llvm-20/bin:$PATH` and an explicit `-DClang_DIR=/usr/lib/llvm-20/lib/cmake/clang`. The older system `clang`/`llvm-config` (18) is still on PATH and gets picked otherwise:
+  ```bash
+  export PATH=/usr/lib/llvm-20/bin:$PATH
+  cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug -DLLVM_DIR=$(llvm-config --cmakedir) \
+        -DClang_DIR=/usr/lib/llvm-20/lib/cmake/clang \
+        -DCMAKE_C_COMPILER=clang-20 -DCMAKE_CXX_COMPILER=clang++-20 -G Ninja
+  ninja -C build
+  ```
+  Build time is about 25 s on 4 cores (1305 warnings, 0 errors).
+- `compile_commands.json`: `regenerate_compile_commands.py --cc clang-20 --project-sets projects` (gitignored output). **Limitation:** `--project-glob projects/<one-project>` treats a project that has no `compile_commands.json` yet as a *group of projects* and writes nothing. `regress.py` should generate the selected projects itself, or the script needs a fix.
+- Drivers called with `--clang clang-20` (so the builtin headers match the tool) and `--normalize-paths`.
+
+### Results
+All 6 demos and all 5 projects ran with exit code 0 in both runs. Total ≈ 15 s per run, of which p126 takes about 12 s.
+
+| Output | Same in both runs? | What differs | Plan |
+|---|---|---|---|
+| `examples/*-output.txt` | yes | — | diff exactly. Note: the `Command:` line includes the tool path *as passed*; `regress.py` must pass a relative `./cast-history-tool` or normalize it |
+| `<proj>/<tu>.txt` reports | yes | — | diff exactly |
+| `summaries/*.cast-summary.json` | yes | — | diff exactly (key-sorted) |
+| `prevalence-metrics/*.cast-prevalence.json` | yes* | `project.root` is an absolute **source** path (not normalized) | diff; normalize `root` |
+| `project-summary-index.json` | **no** | `summaryRoot` (absolute output path); `buildMetadata.inputSummaryFingerprint` (hashes absolute file paths, `build_summary_index.py:120`); `buildMetadata.timingsMilliseconds.*` | diff after normalizing `summaryRoot`, removing the fingerprint, and moving timings to the perf baseline |
+| `runtime-metrics/*.cast-runtime.json`, `runtime-duration*.csv/.tex` | no | timings only | perf baseline only, not diffed |
+| `.cast-history-output` marker, `commands.log`, `run.log`, `projects-summary.tsv` | no / not needed | timestamps, elapsed time | not diffed |
+
+\*Same in both runs here only because the sources were read from the same location both times; it will differ on another machine.
+
+No ordering changes (e.g. from hash maps) were seen in any diffed file.
+
+### Perf finding (affects §4.5)
+In p126 the analyzer itself takes **~37–70 ms** per TU; the rest of the 12 s is the **index build** (`build_summary_index.py`, `timingsMilliseconds.solvedOther` ≈ 8.3 s, run twice: c1-raw and final). The per-TU `*.cast-runtime.json` sidecars do not capture this. **Change to §4.5:** the perf baseline must also record `project-summary-index.json → buildMetadata.timingsMilliseconds` and the project's total wall time, not just the per-TU sidecars. Run-to-run variation seen: index ≈ ±1%, per-TU ms values ±10–30% (small numbers), so compare the per-TU sidecars on totals only.
