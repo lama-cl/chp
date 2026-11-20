@@ -7,6 +7,8 @@ to each fixture.  Design and rationale: design/regression-testing.md.
 
 Commands:
   regress.py run    [--only NAME ...]   diff against expected files; exit 1 on mismatch
+  regress.py produce [--only NAME ...]  run fixtures, keep output; exit 1 only if a driver fails
+  regress.py run --reuse                diff the output of the last `produce` without rerunning
   regress.py update [--only NAME ...]   rewrite expected files from the current tool
   regress.py perf   [--only NAME ...]   compare timings with runtime baselines (warn-only)
   regress.py perf --update              rewrite runtime baselines (median of --runs)
@@ -145,6 +147,28 @@ class Env:
     llvm_version: str
     out_dir: Path
     tu_timeout: int
+    reuse: bool = False            # collect existing output instead of running
+
+
+STATUS_NAME = "status.json"        # driver exit code + wall time, per fixture
+
+
+def execute(cmd: list[str], cwd: Path, environ: dict[str, str], base: Path, log: Path,
+            env: Env) -> tuple[int, float]:
+    """Run a driver (or, with --reuse, read the status of the previous run)."""
+    status = base / STATUS_NAME
+    if env.reuse:
+        if not status.exists():
+            return 2, 0.0          # reported as a failed fixture; see the log hint
+        data = json.loads(status.read_text())
+        return data["rc"], data["wallMs"]
+    t0 = time.perf_counter()
+    with log.open("w") as fh:
+        rc = subprocess.run(cmd, cwd=cwd, env=environ, stdout=fh,
+                            stderr=subprocess.STDOUT).returncode
+    wall = (time.perf_counter() - t0) * 1000
+    status.write_text(json.dumps({"rc": rc, "wallMs": round(wall)}) + "\n")
+    return rc, wall
 
 
 def tool_llvm_version(tool: Path) -> str:
@@ -227,22 +251,19 @@ class Fixture:
 
 def run_example(name: str, env: Env) -> Result:
     base = env.out_dir / "examples" / name
-    shutil.rmtree(base, ignore_errors=True)
     src_dir = base / "src" / "examples"       # driver prints ../examples/<name>.c
     out_dir = base / "out"
-    src_dir.mkdir(parents=True)
-    shutil.copy2(EXAMPLES_DIR / f"{name}.c", src_dir / f"{name}.c")
     log = base / "driver.log"
+    if not env.reuse:
+        shutil.rmtree(base, ignore_errors=True)
+        src_dir.mkdir(parents=True)
+        shutil.copy2(EXAMPLES_DIR / f"{name}.c", src_dir / f"{name}.c")
     # Run from the tool's directory with a relative TOOL so the "Command:"
     # line in the output does not depend on where the build lives.
     cmd = ["bash", str(EXAMPLES_DRIVER)]
     environ = dict(os.environ, TOOL=f"./{env.tool.name}", EXAMPLES_DIR=str(src_dir),
                    OUTPUT_DIR=str(out_dir))
-    t0 = time.perf_counter()
-    with log.open("w") as fh:
-        rc = subprocess.run(cmd, cwd=env.tool.parent, env=environ, stdout=fh,
-                            stderr=subprocess.STDOUT).returncode
-    wall = (time.perf_counter() - t0) * 1000
+    rc, wall = execute(cmd, env.tool.parent, environ, base, log, env)
     res = Result(ok=rc == 0, log=log, wall_ms=wall, metrics={"wallMs": round(wall)})
     produced = out_dir / f"{name}-output.txt"
     if produced.exists():
@@ -264,19 +285,16 @@ def ensure_compdb(project: Path, env: Env) -> None:
 
 def run_project(name: str, env: Env) -> Result:
     project = PROJECTS_DIR / name
-    ensure_compdb(project, env)
     base = env.out_dir / "projects" / name
-    shutil.rmtree(base, ignore_errors=True)
-    base.parent.mkdir(parents=True, exist_ok=True)
     log = env.out_dir / "projects" / f"{name}.log"
+    if not env.reuse:
+        ensure_compdb(project, env)
+        shutil.rmtree(base, ignore_errors=True)
+        base.mkdir(parents=True)
     cmd = ["bash", str(PROJECT_DRIVER), "--tool", str(env.tool), "--clang", env.clang,
            "--normalize-paths", "--tu-timeout", str(env.tu_timeout), "--heartbeat", "0",
            "-o", str(base), str(project)]
-    t0 = time.perf_counter()
-    with log.open("w") as fh:
-        rc = subprocess.run(cmd, cwd=REPO, stdout=fh, stderr=subprocess.STDOUT,
-                            env=dict(os.environ, NO_COLOR="1")).returncode
-    wall = (time.perf_counter() - t0) * 1000
+    rc, wall = execute(cmd, REPO, dict(os.environ, NO_COLOR="1"), base, log, env)
     res = Result(ok=rc == 0, log=log, wall_ms=wall)
     out = base / name
     roots = [(project.resolve(), "<project-root>"), (env.out_dir, "<output-root>"),
@@ -336,7 +354,9 @@ def rel(p: Path) -> str:
 
 
 def log_tail(log: Path, n: int = 15) -> str:
-    lines = log.read_text(errors="replace").splitlines() if log.exists() else []
+    if not log.exists():
+        return "      (no output yet: run `regress.py produce` first, or drop --reuse)"
+    lines = log.read_text(errors="replace").splitlines()
     return "\n".join("      " + l for l in lines[-n:])
 
 
@@ -380,7 +400,8 @@ def cmd_run(args: argparse.Namespace, env: Env) -> int:
                     diff = diff[:args.max_diff_lines] + [
                         f"... diff truncated ({len(diff)} lines); full output: {rel(copy)}"]
                 problems.append("DIFF\n" + "\n".join("      " + l for l in diff))
-        for stale in sorted(expected - set(res.files)):
+        # A failed driver produces partial output; don't call the rest stale.
+        for stale in sorted(expected - set(res.files)) if res.ok else []:
             problems.append(f"STALE expected file (no longer produced) {rel(stale)}")
         if res.ok and not res.files:
             problems.append("driver produced no compared output")
@@ -394,6 +415,20 @@ def cmd_run(args: argparse.Namespace, env: Env) -> int:
     if failed:
         print("hint: if the change is intended, run `scripts/regress.py update` and review "
               "`git diff -- '*.expected*'`")
+    return 1 if failed else 0
+
+
+def cmd_produce(args: argparse.Namespace, env: Env) -> int:
+    """Run the fixtures and keep their output for `run --reuse` and the
+    ctest checkers; fails only when a driver fails, never on a diff."""
+    failed = 0
+    for f in select(args.only):
+        res = f.runner(env)
+        print(f"{'OK' if res.ok else 'FAIL':<5} {f.kind:<7} {f.name}  ({res.wall_ms / 1000:.1f}s)")
+        if not res.ok:
+            failed += 1
+            print(f"    driver failed; log: {rel(res.log)}\n{log_tail(res.log)}")
+    print(f"\noutput: {rel(env.out_dir)}  ({failed} failed)")
     return 1 if failed else 0
 
 
@@ -515,9 +550,13 @@ def main() -> int:
                         help="per-TU analyzer time limit in seconds (default 600)")
     sub = ap.add_subparsers(dest="command", required=True)
     p_run = sub.add_parser("run", parents=[common], help="diff against expected files")
+    p_run.add_argument("--reuse", action="store_true",
+                       help="compare the output of the last `produce` instead of running")
     p_run.add_argument("--max-diff-lines", type=int, default=200,
                        help="truncate each file's diff after N lines (default 200)")
     sub.add_parser("update", parents=[common], help="rewrite expected files")
+    sub.add_parser("produce", parents=[common],
+                   help="run fixtures and keep output (for run --reuse / ctest checkers)")
     p_perf = sub.add_parser("perf", parents=[common], help="compare timings with baselines")
     p_perf.add_argument("--update", action="store_true", help="rewrite runtime baselines")
     p_perf.add_argument("--runs", type=int, default=3, help="runs per fixture; median is used")
@@ -529,10 +568,12 @@ def main() -> int:
     args = ap.parse_args()
 
     env = make_env(args)
+    env.reuse = getattr(args, "reuse", False)
     env.out_dir.mkdir(parents=True, exist_ok=True)
     print(f"tool: {rel(env.tool)} (LLVM {env.llvm_version})  clang: {env.clang}  "
           f"out: {rel(env.out_dir)}\n")
-    return {"run": cmd_run, "update": cmd_update, "perf": cmd_perf}[args.command](args, env)
+    commands = {"run": cmd_run, "update": cmd_update, "produce": cmd_produce, "perf": cmd_perf}
+    return commands[args.command](args, env)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Regression Testing — Design & Plan
 
-Status: **Phases 0–2 done (§8–§10); waiting for go-ahead on Phase 3** (2026-11-20)
+Status: **Phases 0–3 done (§8–§11). Perf check deferred (D7). Phase 4 deferred (D6).** (2026-11-20)
 Owner: project maintainers · Implementers: humans or agents (follow the task list in §5)
 
 ---
@@ -46,6 +46,7 @@ The current workflow is to run the drivers on the base commit and on the change,
 | D4 | Expected files live **next to the fixture** in an `expected/` folder and contain `.expected` in the name, so `find -name '*.expected*'` finds them all. |
 | D5 | **Runtime is kept** and used for a perf-regression check (warn-only, tolerance-based), not for an exact diff. |
 | D6 | Phase 4 (corpus/bench runs, CI workflow, CLAUDE.md rewrite) is **deferred** and needs its own plan. |
+| D7 | The perf plan (§4.5) is too weak to rely on; focus is regression testing. `regress.py perf` stays in the script, but **no baselines are committed** and perf is **not** in ctest. Revisit with a stronger design. |
 
 ---
 
@@ -106,7 +107,9 @@ Find everything: `find examples test_projects/projects -path '*/expected/*' -nam
 ### 4.4 `scripts/regress.py`
 
 ```
-regress.py run    [--only NAME]...                 # diff; exit 1 on any mismatch
+regress.py run    [--only NAME]...                 # run fixtures + diff; exit 1 on any mismatch
+regress.py produce [--only NAME]...                # run fixtures, keep output; exit 1 only if a driver fails
+regress.py run --reuse                             # diff the output of the last `produce` (no rerun)
 regress.py update [--only NAME]...                 # rewrite expected/*.expected* (not baselines)
 regress.py perf   [--only NAME]... [--runs 3] [--tolerance 0.25] [--min-delta-ms 50] [--strict]
 regress.py perf --update                           # rewrite runtime baselines
@@ -124,7 +127,7 @@ regress.py perf --update                           # rewrite runtime baselines
 - Builds `compile_commands.json` for each project before running (as `CLAUDE.md` requires), using `scripts/regenerate_compile_commands.py` or the driver.
 - Uses only Python standard-library modules (`json`, `difflib`, `subprocess`, `argparse`).
 
-### 4.5 Perf check
+### 4.5 Perf check (deferred, see D7; script kept, not in ctest)
 
 - Metrics: examples → `wallMs`; projects → `wallMs` (whole driver run), `indexBuildMs` (final index `buildMetadata.timingsMilliseconds.totalBeforeWrite`, see §8) and `tuTotalElapsedMs` (sum of the per-TU `*.cast-runtime.json` `totalElapsed`).
 - Baseline: `runtime.expected.json` per fixture, median of `--runs` (default 3), written only by `perf --update`, so ordinary `update`s don't churn timings.
@@ -134,20 +137,22 @@ regress.py perf --update                           # rewrite runtime baselines
 
 ### 4.6 `ctest` wiring
 
-`CMakeLists.txt` gets `enable_testing()` and these tests:
+`CMakeLists.txt` has `option(CAST_HISTORY_ENABLE_TESTS ON)` → `enable_testing()` + `add_subdirectory(tests)`; everything is in `tests/CMakeLists.txt`. 37 tests:
 
 | ctest name | Label | Command |
 |---|---|---|
-| `regress-examples` | `regress` | `regress.py run --only examples` |
-| `regress-projects` | `regress` | `regress.py run --only projects` |
-| `perf` | `perf` | `regress.py perf` (warn-only) |
-| `contract-<name>` | `contracts` | each `tests/*_source_contract.py` (no tool run, finishes in seconds) |
-| `verify-<checker>-<fixture>` | `checkers` | `tests/verify_*.py --fixture pNNN <report>`, but only for fixtures in the regression set (p126) |
-| `verify-p91*` | `checkers` | `test_projects/projects/p91_*/expected/verify_p91*.py` |
-| `smoke-<name>` | `checkers` | `tests/*_smoke.py` / `.cpp` that run standalone |
-| `validate-summaries` | `checkers` | `scripts/validate_json_summaries.py`, `validate_cast_summary_schema.py` on the produced summaries |
+| `regress-produce` | `regress` | `regress.py produce`: runs the tool once per fixture into `build/regress-out/` (ctest `FIXTURES_SETUP ch_regress_out`) |
+| `regress-examples`, `regress-projects` | `regress` | `regress.py run --reuse --only examples|projects` |
+| `verify-c6g5{q,r,s,t,u}-p126` | `checkers` | `tests/verify_c6g5*_report.py --fixture p126 <p126>/a.c.txt` |
+| `verify-p91`, `verify-p91-json`, `verify-p91-index` | `checkers` | `test_projects/projects/p91_*/expected/verify_p91*.py` on the text report / summary / index |
+| `validate-json-summaries`, `validate-summary-schema` | `checkers` | `scripts/validate_json_summaries.py --strict`, `validate_cast_summary_schema.py --strict` on each project's `summaries/` |
+| `contract-<name>` (11) | `contracts` | each `tests/*_source_contract.py`, no tool needed |
+| `smoke-<name>` (10) | `smoke` | each `tests/*_smoke.py` |
+| `smoke-<name>-cpp` (3) | `smoke` | each `tests/*_smoke.cpp`, built as its own executable (STL-only header; `-UNDEBUG` keeps the asserts) |
 
-`checkers` tests that need a report depend on a ctest `FIXTURES_SETUP` step that runs the tool once and leaves its output in `build/regress-out/`.
+All `regress`/`checkers` tests read the one `regress-produce` output, so an expected-output diff never hides a checker result. If the tool itself fails, `produce` fails and ctest reports the dependent tests as *Not Run*.
+
+Tests that fail today for reasons unrelated to the harness get the extra label `known-failing` (list in `tests/CMakeLists.txt`, see §11). They still run and still fail; `ctest -LE known-failing` gives a clean signal.
 
 ---
 
@@ -174,9 +179,11 @@ Each task ends with its **done when** condition. Do not start a phase until the 
 - [x] **T2.3** Sanity check: make a deliberate change to one demo, confirm `run` fails with a readable diff, then revert.
 
 ### Phase 3: ctest
-- [ ] **T3.1** Add `enable_testing()` and the tests from §4.6.
-- [ ] **T3.2** List any `tests/*` script that cannot run standalone, with the reason.
+- [x] **T3.1** Add `enable_testing()` and the tests from §4.6.
+- [x] **T3.2** List any `tests/*` script that cannot run standalone, with the reason (§11).
   *Done when* `cd build && ctest --output-on-failure` passes and `ctest -L contracts` finishes in seconds.
+  **Status:** passes except the 3 `known-failing` tests (§11); `ctest -LE known-failing` passes 34/34.
+- [ ] **T3.3** Fix or retire the 3 `known-failing` tests and drop them from `CH_KNOWN_FAILING` (needs a maintainer decision; §11).
 
 ### Phase 4: deferred (needs its own plan)
 - Corpus/bench runs (`test_projects/bench-*`), CI workflow, rewriting the lit/FileCheck section of `CLAUDE.md`, growing the regression set.
@@ -187,7 +194,10 @@ Each task ends with its **done when** condition. Do not start a phase until the 
 
 ```bash
 # verify a change
-cd build && ctest --output-on-failure          # or: ctest -L regress
+cd build && ctest --output-on-failure          # all 37 tests, ≈ 15 s
+ctest -L regress                               # expected-output diffs only
+ctest -L contracts                             # static contracts, < 1 s
+ctest -LE known-failing                        # clean signal while §11 is open
 # behaviour changed on purpose -> refresh expected outputs and review the diff
 python3 scripts/regress.py update && git diff -- '*.expected*'
 # view an expected output
@@ -267,4 +277,29 @@ Branch: `claude/regression-test-harness`.
 - `regress.py update` (LLVM 20.1.2) wrote 35 expected files plus a `meta.info` per `expected/` folder. They are committed on their own ("Add expected outputs for the regression set"): 41 files, ≈ 8.6 MB, 168k lines. About 6.9 MB of that is p126: its index (4.5 MB) and summary (2.3 MB).
 - `regress.py run` passed 11/11 twice in a row (exit 0).
 - T2.3: a cast added to `demo3.c` gave a 63-line diff and exit 1; reverted.
-- `regress.py perf --update` wrote 11 `runtime.expected.json` baselines (median of 3) in a separate commit. **They come from a 4-CPU x86_64 cloud container**; refresh them on the machine where perf is checked (`regress.py perf --update`) before trusting `SLOW` results.
+- Runtime baselines were generated but **dropped from the history** (D7): the perf plan is deferred.
+
+---
+
+## 11. Phase 3 results (2026-11-20)
+
+- `CMakeLists.txt`: `CAST_HISTORY_ENABLE_TESTS` option, `enable_testing()`, `add_subdirectory(tests)`. `tests/CMakeLists.txt` registers the 37 tests in §4.6.
+- `regress.py` gained `produce` and `run --reuse` so ctest runs the tool once (≈ 15 s) and the diffs and checkers all read that output.
+- Result: `ctest -j4` runs 37 tests in ≈ 15 s; 34 pass, 3 fail (all `known-failing`, below). `ctest -L contracts` takes 0.3 s.
+- Sanity check: a cast added in `demo5.c`'s `main` makes `regress-examples` fail; reverting makes it pass. A syntax error in a demo makes `regress-produce` fail and the dependent tests show as *Not Run*.
+
+### Known failing (pre-existing; present since the initial commit)
+
+| Test | Why it fails | Suggested fix |
+|---|---|---|
+| `contract-c6g5u_project_materialization` | asserts `isInterproceduralObservationProvenance` is in `CastHistoryVisitor.h`; the name no longer exists anywhere in `include/`, `src/` or `scripts/` | update the contract to the current function name, or drop that needle |
+| `smoke-c6g5u_direct_local_project_materialization` | `forward_solved == a_solved` fails: `⟨| legacy-imported * => stale *, char *, int * |⟩` vs `⟨| char *, int * |⟩` | decide whether the index builder or the smoke test is right. This may be a real bug |
+| `verify-p91-json` | reads `functionSummaries`; the summary schema now calls it `functionSummaryDetails` (C6g5e compact link summaries) | port the checker to the current schema |
+
+### Not wired (cannot run against the regression output)
+
+| Script | Reason |
+|---|---|
+| `tests/verify_c6g5p_recursive_scc_transfer_diagnostics.py` | reads `[recursive-scc-transfer-diagnostic]` log lines; nothing in the tool emits them anymore |
+| `scripts/validate_cast_text_json_consistency.py` | needs `*.cast-report.json` sidecars (driver `--reports`), which the regression run doesn't produce; adding `--reports` is a Phase 4 option |
+| `scripts/validate_classification_labels.py`, `validate_paper_facts.py` | need classification / paper-facts outputs that the default driver run doesn't produce |
