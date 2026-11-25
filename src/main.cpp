@@ -5,6 +5,7 @@
 #include <clang/AST/ASTConsumer.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendActions.h>
+#include <clang/Tooling/ArgumentsAdjusters.h>
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <llvm/ADT/SmallString.h>
@@ -842,6 +843,18 @@ int main(int argc, const char **argv) {
 
   clang::tooling::ClangTool tool(optionsParser.getCompilations(),
                                  optionsParser.getSourcePathList());
+
+#ifdef CAST_HISTORY_DEFAULT_RESOURCE_DIR
+  // Clang builtin headers (stddef.h, stdarg.h, ...) live in the resource
+  // directory of the LLVM the tool was built against.  LibTooling derives it
+  // from the tool binary's location, which is wrong for a binary in build/.
+  // Insert the build-time default first so an explicit -resource-dir (compile
+  // database or --extra-arg) still wins: the driver uses the last occurrence.
+  if (llvm::sys::fs::is_directory(CAST_HISTORY_DEFAULT_RESOURCE_DIR))
+    tool.appendArgumentsAdjuster(clang::tooling::getInsertArgumentAdjuster(
+        "-resource-dir=" CAST_HISTORY_DEFAULT_RESOURCE_DIR,
+        clang::tooling::ArgumentInsertPosition::BEGIN));
+#endif
 
   int rc = tool.run(
       clang::tooling::newFrontendActionFactory<cast_history::CastHistoryAction>().get());

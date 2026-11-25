@@ -28,6 +28,21 @@ target_include_directories(cast-history-tool PRIVATE
 
 target_compile_definitions(cast-history-tool PRIVATE ${LLVM_DEFINITIONS})
 
+# Default clang resource directory (builtin headers) of the LLVM we build
+# against; see src/main.cpp.  An explicit -resource-dir still overrides it.
+set(CAST_HISTORY_DEFAULT_RESOURCE_DIR
+    "${LLVM_LIBRARY_DIR}/clang/${LLVM_VERSION_MAJOR}"
+    CACHE PATH "Clang resource directory used when none is given")
+target_compile_definitions(cast-history-tool PRIVATE
+  CAST_HISTORY_DEFAULT_RESOURCE_DIR="${CAST_HISTORY_DEFAULT_RESOURCE_DIR}")
+
+# Match LLVM's RTTI setting: a -fno-rtti LLVM (e.g. a source build of LLVM 23)
+# provides no typeinfo for llvm::cl / clang::tooling classes the tool derives
+# from.  Distribution packages (Ubuntu LLVM 18) are built with RTTI.
+if (NOT LLVM_ENABLE_RTTI AND NOT MSVC)
+  target_compile_options(cast-history-tool PRIVATE -fno-rtti)
+endif()
+
 target_link_libraries(cast-history-tool PRIVATE
   clangAST
   clangBasic

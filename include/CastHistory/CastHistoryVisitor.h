@@ -3304,7 +3304,7 @@ public:
     recordFeatureSupport(FeatureSupportSeverity::Approximated,
                          "break-statement",
                          "break is not modeled as a control-flow transfer in switch/loop summaries",
-                         breakStmt->getBreakLoc());
+                         breakStmt->getBeginLoc());
     return true;
   }
 
@@ -3314,7 +3314,7 @@ public:
     recordFeatureSupport(FeatureSupportSeverity::Approximated,
                          "continue-statement",
                          "continue is not modeled as a loop-control transfer or loop fixpoint edge",
-                         continueStmt->getContinueLoc());
+                         continueStmt->getBeginLoc());
     return true;
   }
 
