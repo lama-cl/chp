@@ -1,0 +1,221 @@
+fd : void * => int *    [scope=f]    [implicit-cast]    @ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:34:15
+gd : void * => char *    [scope=g]    [implicit-cast]    @ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:38:16
+
+Function summaries:
+  f($0 : void * => int *)
+  g($0 : void * => char *)
+  demo()
+
+Direct cast histories (entity-oriented):
+  f::fd : void * => int *
+  g::gd : void * => char *
+
+Function pointer flows:
+  <none>
+
+Field-sensitive function-pointer targets:
+  <none>
+
+Field-sensitive function-pointer call resolution:
+  <none>
+
+Call-site specialized cast-history observations:
+  <none>
+
+Call-site specialized function classification:
+  <none>
+
+Storage-location cast histories:
+  f::fd : void * => int *
+  g::gd : void * => char *
+
+Observed later interpretations (raw evidence):
+  f::fd
+    - [always] int *    {init-projection, role=Intermediate}
+    - [always] int *    {init-projection-origin, role=Intermediate}
+  g::gd
+    - [always] char *    {init-projection, role=Intermediate}
+    - [always] char *    {init-projection-origin, role=Intermediate}
+
+Derived observation summaries:
+  f::fd
+    branch-cast: <none>
+    grouped: {int * @ always}
+  g::gd
+    branch-cast: <none>
+    grouped: {char * @ always}
+
+Pointer use summaries:
+  f::fd
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to int *}    [origin=local]    @ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:34:15
+  g::gd
+    - [always] attach=<id>, as=void * : init-rhs    {init-rhs to char *}    [origin=local]    @ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:38:16
+
+Semantic pointer-operation summaries:
+  f::fd
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:34:15
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to int *
+  g::gd
+    - [always] init-flow as=void *    count=1    [origin=local]    first=@ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:38:16
+        evidenceKinds: init-rhs
+        sources: local-pointer-use
+        details: init-rhs to char *
+
+Grouped pointer-operation summaries (normalized rows):
+  f::fd
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:34:15
+        sources: local-pointer-use
+        details: init-rhs to int *
+  g::gd
+    - [always] init-rhs as=void *    count=1    [origin=local]    first=@ /home/C00536225/dev/llm-collab/tcc/examples/fptr-1.c:38:16
+        sources: local-pointer-use
+        details: init-rhs to char *
+
+Return-alias pointer-use continuations:
+  <none>
+
+Pointer behavior metrics:
+  f::fd
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecialized
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=f::fd, behavior=ConcreteSpecialized, mediation=Direct, family=DirectConcreteSpecialization, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {int *, void *}
+      pointerTypes: 2 {int *, void *}
+      nonVoidPointerTypes: 1 {int *}
+      flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+      directionalPatterns: byteToConcrete=no, byteMediatedReinterpretation=no, sequentialConcreteReinterpretation=no, byteOffsetRoundTrip=no, byteOffsetDifferentConcrete=no, typeErasureToVoid=no, concreteSpecializationFromVoid=yes, parallelSequentialArm=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=no, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+  g::gd
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use
+    evidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Low, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableClassification: entity=g::gd, behavior=ByteViewNoDeref, mediation=Direct, family=ByteView, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, void-interface
+    history:
+      seqDepth: 2
+      maxParallelBreadth: 0
+      maxBranchBreadth: 0
+      nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+      distinctTypes: 2 {char *, void *}
+      pointerTypes: 2 {char *, void *}
+      nonVoidPointerTypes: 1 {char *}
+      flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+    operations:
+      sourceKinds: voidInterface=yes, castLike=no, higherOrder=no, ptrArith=no, externalUnknown=no
+      useKinds: byteView=yes, byteRead=no, byteWrite=no, concreteDeref=no, concreteWrite=no
+      multiType: deref=no, write=no, branchSplit=no
+      derefTypes: <none>
+      writeDerefTypes: <none>
+
+Storage-location history metrics:
+  f::fd
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {int *, void *}
+    pointerTypes: 2 {int *, void *}
+    nonVoidPointerTypes: 1 {int *}
+    flags: void=yes, charPtr=no, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+  g::gd
+    historyShape: StableViaVoid
+    historyRisk: Low
+    seqDepth: 2
+    maxParallelBreadth: 0
+    maxBranchBreadth: 0
+    nodes: seq=0, parallel=0, branch=0, callwrap=0, ptrarith=0, higherOrderRefs=0
+    distinctTypes: 2 {char *, void *}
+    pointerTypes: 2 {char *, void *}
+    nonVoidPointerTypes: 1 {char *}
+    flags: void=yes, charPtr=yes, ptrArith=no, intToPtr=no, ptrToInt=no, externalSink=no
+
+Function parameter behavior metrics:
+  f.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ConcreteSpecialized
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ConcreteSpecialization, semanticRiskTier=Low, interpretation=surface-wild interface with stable concrete specialization
+    semanticMediation: kind=Direct, semanticFamily=DirectConcreteSpecialization, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=f.$0, behavior=ConcreteSpecialized, mediation=Direct, family=DirectConcreteSpecialization, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: void-interface
+    summary: int *
+    pointerTypes: int *, void *
+    nonVoidPointerTypes: int *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+  g.$0 : void *
+    paramRole: OrdinaryParameter
+    view: FullView
+    historyShape: StableViaVoid
+    historyRisk: Low
+    behavior: ByteViewNoDeref
+    evidenceSources: local-pointer-use
+    evidenceSourceKind: local-only
+    wildLike: yes
+    paperWildness: surfaceKind=void-interface, semanticFamily=ByteView, semanticRiskTier=Low, interpretation=byte-oriented view without concrete dereference
+    semanticMediation: kind=Direct, semanticFamily=ByteView, flags: dataField=no, nestedDataField=no, callback=no, externalBoundary=no, returnAlias=no
+    stableParamClassification: param=g.$0, behavior=ByteViewNoDeref, mediation=Direct, family=ByteView, risk=Low, evidenceSourceKind=local-only
+    surfaceReasons: byte-view, void-interface
+    summary: char *
+    pointerTypes: char *, void *
+    nonVoidPointerTypes: char *
+    derefTypes: <none>
+    writeDerefTypes: <none>
+    flags: higherOrder=no, branchSplit=no, byteWrite=no, multiTypeWrite=no
+
+Function behavior classifications:
+  f
+    class: ConcreteSpecializerFunction
+    classificationEvidenceSourceKind: local-only
+    classificationEvidenceSources: local-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=init-rhs, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=no, typeErasure=no, concreteSpecializer=yes, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ConcreteSpecialized, semanticFamily=ConcreteSpecialization, mediatedSemanticFamily=DirectConcreteSpecialization, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=local-only, evidenceSources=local-pointer-use, summary=int *
+  g
+    class: BytewiseGenericFunction
+    classificationEvidenceSourceKind: local-only
+    classificationEvidenceSources: local-pointer-use
+    classificationEvidenceFlags: local=yes, sameTUCall=no, sameTURecursive=no, importedDirect=no, importedFnPtr=no, projectSCC=no, returnAlias=no, importedOrSolved=no
+    classificationEvidenceOperations: operationKinds=init-rhs, derefSources=<none>, writeSources=<none>
+    evidenceFlags: callbackProvider=no, callbackDependent=no, fieldCallbackProvider=no, guardedFieldCallbackSelection=no, resolvedCallbackMediation=no, bytewise=yes, typeErasure=no, concreteSpecializer=no, reinterpretingWrite=no, byteWrite=no, concreteWrite=no, taggedUnionLike=no, multiTargetReinterpretation=no, unsafeReinterpretation=no
+    evidence:
+      - $0 role=OrdinaryParameter, behavior=ByteViewNoDeref, semanticFamily=ByteView, mediatedSemanticFamily=ByteView, mediation=Direct, semanticRiskTier=Low, evidenceSourceKind=local-only, evidenceSources=local-pointer-use, summary=char *
+
+Unsupported / approximated language features:
+  <none>
