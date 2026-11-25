@@ -98,6 +98,21 @@ Each **fact** is one thing the analyzer must know or do so that a `void*` reachi
 | X12 | loop back edge with cross-TU targets, **unsound today** (F10) | `p143_fptr_xtu_loop_backedge_unsound` |
 | X13 | job executor in b.c (F20) | `p144_fptr_xtu_job_struct_executor` |
 
+## F2. Review round 2 additions (2026-11-25)
+
+These came from the owner's probes (originals kept byte-identical in [`examples/probes/`](../../examples/probes/README.md)) and from the plan review ([05-plan-review.md](05-plan-review.md)). "Control" means the category and types are already right today; only the `resolution` facet is missing, so M1 claims them.
+
+| ID | Fact | Fixture | Layer / milestone | Today |
+|---|---|---|---|---|
+| F36 | one-armed `if` after a multi-target merge drops earlier targets (**unsound today**) | `fptr-36-one-armed-if-after-merge-unsound.c` | L0, M2 (seam S5) | ⚠️ `long*` only |
+| F37 | fptr in a nested record shared by two outer records, installed and called in different functions | `fptr-37-nested-record-slot-cross-function.c` | L1 record slot, M3c, **D7′** | ❌ Opaque |
+| F38 | local fptr strongly updated between two calls | `fptr-38-strong-update-between-calls.c` | L0 control, M1 | ✅ |
+| F39 | fptr reassigned between two higher-order calls; `hof::data` stays parametric | `fptr-39-hof-reassign-between-calls.c` | L0 + `$k.$i` control, M1 | ✅ |
+| F40 | nested ops record with two slots, two local instances | `fptr-40-nested-and-multi-slot-local.c` | L0 per-object overlay control, M1 | ✅ |
+| F41 | explicit dereference call `(*s.fn)(ctx)` on sibling record types | `fptr-41-deref-call-through-field.c` | resolver normalisation control, M1 | ✅ |
+| F42 | slot read through a cast to a layout-compatible base record | `fptr-42-base-prefix-cast-slot.c` | L1 soundness guard for D7′, M3c | ❌ Opaque (must become a sound set, or `unresolved`) |
+| F43 | global killed by an unknown store, in the same function (`run_local`) or in another one (`run`) | `fptr-43-global-killed-by-unknown-store.c` | L0 tri-state + L1 ⊤, M3a | `run_local` ✅ Opaque; `run` ⚠️ `int*` only (same defect as F35) |
+
 ## G. Documented, not fixtured (out of scope or no void* impact)
 
 | ID | Pattern | Why not fixtured | Citation |

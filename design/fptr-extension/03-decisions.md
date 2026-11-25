@@ -13,7 +13,7 @@ Status values:
 | D4 | Fix the switch/loop unsoundness inside the fptr extension, for fptr state only; document it with fixtures | Accepted (owner) |
 | D5 | Curated library callback model (libc/POSIX/C11 first) | Accepted (owner) |
 | D6 | `dlsym` results are ExternalUnknown; a matching project name is only a hint | Accepted (owner); hint part Proposed |
-| D7 | Record slots are keyed by record type + field path (object-insensitive) | Proposed |
+| D7 | Record slots are keyed by record type + field path (object-insensitive) | Superseded by D7′ |
 | D8 | Guard policy: a selector visible at the call → guarded; temporal selection → unguarded | Proposed |
 | D9 | Callback–context binding is reduced to existing higher-order `$k.$i` summaries when same-instance storage can be shown | Proposed |
 | D10 | Evidence first: fixtures with pinned baselines before code; markers are the single source of truth | Accepted (owner) |
@@ -23,6 +23,12 @@ Status values:
 | D14 | L1 pre-pass runs before function traversal (order independence) | Accepted (derived from D2/D3) |
 | D15 | Loops use pre-scan widening, not body re-traversal | Proposed |
 | D16 | New data model lives in `FptrResolution.h`, not in `CastHistoryVisitor.h` | Proposed |
+| D7′ | Record slots keyed by the **outermost record visible in the access path**; cast reads union prefix-compatible slots or give ⊤ (supersedes D7) | Proposed (round 2) |
+| D17 | Seam architecture: backbone changes only at seams S1–S8 ([06-backbone-contract.md](06-backbone-contract.md)) | Proposed (round 2); the owner asked to preserve the backbone |
+| D18 | L0 tri-state `known / killed-unknown / no-info`; L1 is consulted only on `no-info` | Proposed (round 2) |
+| D19 | Gate hardening: probes in `examples/probes/`, strict fixture discovery, ctest label `fptr`, LLVM pin in `examples/fptr-meta.info`, fptr fixtures added to the `regress.py` set at M1 | Accepted (owner) for the probe move; the rest Proposed |
+| D20 | Split M3 → M3a/b/c and M8 → M8a–d; each milestone carries an owner gate | Proposed (round 2) |
+| D21 | Target sets have a deterministic order (lookup key, then source location) | Proposed (round 2) |
 
 ---
 
@@ -116,3 +122,39 @@ Status values:
 
 ### D16 — Code placement (Proposed)
 - **Location.** New types (`SlotKey`, `TargetSet`, `IndirectCallResolution`) and the resolver go in `include/CastHistory/FptrResolution.h`. The library table goes in `LibraryCallbackModels.def`. Both use LLVM containers (`SmallVector`, `DenseMap`) per CLAUDE.md.
+
+---
+
+## Round 2 (2026-11-25), see [05-plan-review.md](05-plan-review.md)
+
+### D7′ — Record slot keys: outermost visible path (Proposed, supersedes D7)
+- **Evidence.** F37: keying by the innermost type (`record:struct ops.fn`) merges two outer records into a false multi-type answer. F42: a read through `(struct base *)` hits a type with no stores.
+- **Rule.**
+  1. The key is the outermost record type visible in the member-access chain plus the field path: `x->o.fn` → `record:struct X.o.fn`.
+  2. An access that starts from a pointer to the inner type (`struct ops *p; p->fn`) uses `record:struct ops.fn`. That slot is the union of every outer slot that embeds `struct ops`.
+  3. A read through a pointer that was cast from another record type (F42) unions every slot of records whose leading members are layout-compatible with the read path. If that set cannot be computed, the result is `⊤(cast)` → `unresolved`, never empty.
+- **Cost.** Rules 2 and 3 widen sets in GObject-style code. Mitigated by the K cap and the `L1` layer tag. Measure on bench-3c at M3c.
+
+### D17 — Seam architecture (Proposed)
+- **Context.** The owner asked to preserve the visitor backbone and modify it only when strictly necessary. The visitor is 32 128 lines.
+- **Decision.** New logic lives in `FptrResolution.h`. The visitor is touched only at seams S1–S8, within a diff budget. S5 (the if-merge) is the only semantic edit to existing code, because it fixes an existing defect (F36).
+- **Alternatives.** Growing the visitor in place (rejected: not reviewable); a CFG-based fptr dataflow (kept as a fallback for switches); a summary post-pass (used only for cross-TU).
+
+### D18 — L0 tri-state (Proposed)
+- **Evidence.** F43 `run_local`: `g = lookup_plugin(..)` erases the L0 binding. If the resolver then fell back to L1, it would return the initializer target `use_int`, which is unsound.
+- **Decision.** L0 distinguishes `known(set)`, `killed-unknown` (a strong update to an unresolvable value: report `unresolved`) and `no-info` (never written in this function: consult L1).
+
+### D19 — Gate hardening (probe move Accepted by the owner; rest Proposed)
+- The owner's exploratory probes live in `examples/probes/` (byte-identical) and are not fixtures.
+- `check_fptr_evidence.py` only accepts `examples/fptr-NN-*.c` and names any other `fptr-*.c` file.
+- ctest test `fptr-baseline` (label `fptr`).
+- The baselines are re-pinned on the project's LLVM (23 on the owner's host) in a dedicated commit, with the version in `examples/fptr-meta.info`.
+- At M1, the fptr fixtures join the `regress.py` full-output set, so text drift is visible.
+
+### D20 — Smaller milestones with owner gates (Proposed)
+- M3 → M3a (globals, tri-state, file-scope initializers), M3b (arrays and tables), M3c (record slots, D7′).
+- M8 → M8a (global/array slots), M8b (record slots), M8c (return/FSM), M8d (CCB, LIB, executor).
+- Every milestone names the decision it depends on. An agent stops if that decision is still Proposed.
+
+### D21 — Deterministic target order (Proposed)
+- `std::set<const FunctionDecl*>` orders by address. New `TargetSet`s order by (lookup key, file, line, column). Existing L0 sets are converted at the seam.

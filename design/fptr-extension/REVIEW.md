@@ -73,9 +73,52 @@ Details: [02-design.md](02-design.md). Milestones: [04-implementation-plan.md](0
 5. **D11 caps**: is K = 16 / L2 ≤ 8 with L2 off by default acceptable?
 6. **C4**: open a separate issue for switch/loop handling of non-fptr state?
 
+## 6b. Round 2: plan review (2026-11-25)
+
+**Asked:** is the incremental, gated plan solid? Does it keep the visitor backbone? Record the discussion, diagrams and decisions so that humans can review them (with a short guide) and agents can act on them.
+
+**Answer:** the direction is solid, but the plan was not yet safe to hand to agents. Full reasoning: [05-plan-review.md](05-plan-review.md). Backbone contract: [06-backbone-contract.md](06-backbone-contract.md). Guide: [REVIEWING.md](REVIEWING.md).
+
+What changed:
+- **Gate fixed.** The owner's untracked probes had broken `check_fptr_evidence.py`. They now live byte-identical in `examples/probes/`. Discovery only accepts `fptr-NN-*.c` and names stray files. ctest test `fptr-baseline` (label `fptr`) runs the gate: 56 fixtures, 65 subjects, drift 0.
+- **Two more wrong answers found and pinned.** F36: a one-armed `if` after a multi-target merge drops targets, because `TraverseIfStmt` never snapshots `functionPointerTargetSets`. F43 `run`: a global overwritten by an external call elsewhere still reports the initializer target.
+- **Three design corrections.** D7′ (record keys use the outermost visible path; F37, F42), D18 (L0 tri-state; F43), D21 (deterministic order).
+- **Backbone.** New code goes beside the visitor; the visitor changes only at eight seams. One seam (S5) changes existing semantics, and only to fix F36.
+- **Plan shape.** M0.5 inserted; M3 → M3a/b/c; M8 → M8a–d; every milestone names its owner gate.
+
+**Owner answers this round**
+
+| Question | Answer |
+|---|---|
+| What to do with the 8 probes | Move the originals to `examples/probes`; add corrected, marker-carrying copies as F36+ only if they add something new. *Done: F37–F41 come from the probes; F36, F42, F43 come from the review.* |
+| What should the struct probes pass to `s.fn()`? | "Depends on the example: could be the sibling member or self. Is a separate void* ctx well supported?" *Yes. A separate ctx is the most common idiom. All three readings are fixtured (probes README).* |
+| LLVM version | "LLVM 23 is available, show me how you checked." *Shown in 05 §6: the alternatives link goes to `/opt/llvm-23`, which the agent's shell cannot see. Re-pinning is an owner step (REVIEWING.md).* |
+
+**New concerns**
+
+| # | Concern | Position |
+|---|---|---|
+| C11 | The LLVM re-pin may move baselines. **Update 2026-11-25:** LLVM 23.1.4 is reachable from the agent's shell, but only as `bin/`; there are no libs, headers or cmake configs, so the tool cannot be built against it there (configure falls back to llvm-18/clang-14 and the link fails). The llvm-18 build was restored. | Re-pin in its own commit before M1, on a host with the LLVM 23 development install; record the version in `examples/fptr-meta.info`. Steps in REVIEWING.md. **Superseded (later 2026-11-25):** `/opt/llvm-23` does include `lib/cmake`, headers and static libraries. The tool was built against it once the clang 18 `C_INCLUDE_PATH`/`CPLUS_INCLUDE_PATH` were unset and the CMake cache was fresh. Result: fptr drift 0 (no re-pin needed); version recorded in `examples/fptr-meta.info`. |
+| C12 | S5 edits an existing backbone function. | Justified by the F36 defect. The change is limited to fptr maps. F01/F02/F38–F41 guard it. |
+| C13 | D7′ cast rule (F42) can widen sets in GObject-style code. | K cap, `L1` tag; measure on bench-3c at M3c. |
+| C14 | Switch arms without a CFG (S3) can be fragile. | Fall back to `entry ∪ stores`, unguarded. If it fires often on bench code, use a CFG for switches only (option c in 05 §3). |
+| C15 | Controls F38–F41 show `xfail` until M1, which may look like failures. | They are claimed by M1. Category and types are already guarded by `@baseline`. |
+| C16 | Marker checks do not show text-report drift. | At M1, add the fptr fixtures to the `regress.py` set (D19). |
+| C17 | `ctest -LE known-failing` on the llvm-18 build fails only in `regress-projects`. That failure predates this change, which touches no C++. The diffs are the clang resource-dir in the recorded command line and **identical lines printed in a different order** (expected files from 20.1.2). | The reordering is live evidence for D21 (deterministic order). **Re-checked on LLVM 23.1.4:** same picture. The text reports have identical content once sorted, and the JSON is identical. Output is stable across 3 runs of one binary, so the order depends on the build, not on the run. Fix by regenerating with `regress.py update` on LLVM 23 (owner decision, regression-testing.md D1), or by D21. Everything else is green on 23. |
+
+**New open questions**
+
+7. **D17**: accept the seam contract and the diff budgets as binding for agents?
+8. **D7′**: accept outermost-path record keys, plus the cast-union rule (or `unresolved` when it cannot be computed)?
+9. **D18**: accept the L0 tri-state?
+10. **D20**: accept the milestone splits and the "stop if the owner gate is open" rule?
+11. **F42 expectation**: a sound union (`set@L1`, as pinned) or `unresolved`?
+
 ## 7. Change log
 
 | Date | Change |
 |---|---|
 | 2026-11-18 | Probes; challenges identified; owner decisions D1, D2, D4, D5/D6, D10 |
 | 2026-11-20 | M0 landed: 35 single-TU fixtures (`examples/fptr-01..35`), 13 cross-TU projects (`p132`–`p144`), `scripts/check_fptr_evidence.py`, design docs. F34/F35 (global-initializer unsoundness) found while writing the fixtures. |
+| 2026-11-25 | Review round 2 (05, 06, REVIEWING.md). Probes moved to `examples/probes/`. F36–F43 added and pinned (56 fixtures, 65 subjects, drift 0). Checker discovery made strict. ctest label `fptr`. D7′, D17–D21. M0.5 inserted; M3/M8 split. LLVM 23 re-pin pending (owner step). |
+| 2026-11-25 | Built on LLVM 23.1.4: fptr drift 0 (no re-pin), 129/129 examples and 145/145 projects pass. Portable build fixes: RTTI follows LLVM, default `-resource-dir`, `getBeginLoc()` for break/continue. The shell profile's clang 18 `C_INCLUDE_PATH`/`CPLUS_INCLUDE_PATH` must be unset. |

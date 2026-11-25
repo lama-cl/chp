@@ -64,7 +64,7 @@ So fptr coverage is a **target-resolution problem**: find the functions an fptr 
 | F29 | `if (cb == use_int) cb(x)` | ❌ | no equality refinement |
 | F31 | callback formal in a generic helper | ✅ (parametric) | must stay parametric, not be counted as a failure |
 
-**Totals:** 48 fixtures, 50 subjects. 6 already have the required category and types: F01, F02, F03 (by traversal order only), F14 (without the mismatch flag), F25 and F31. 5 subjects get a **wrong** answer today: F09, F10, F35, X11 and X12. The full matrix is in [evidence/evidence-table.md](evidence/evidence-table.md).
+**Totals at M0:** 48 fixtures, 50 subjects. 6 already have the required category and types: F01, F02, F03 (by traversal order only), F14 (without the mismatch flag), F25 and F31. 5 subjects get a **wrong** answer today: F09, F10, F35, X11 and X12. The full matrix is in [evidence/evidence-table.md](evidence/evidence-table.md).
 
 ## The underlying challenges
 
@@ -76,3 +76,25 @@ So fptr coverage is a **target-resolution problem**: find the functions an fptr 
 6. **Cross-TU.** Tables, vtables and registries are usually defined in one TU and used in another. Static targets have no public symbol (X04).
 7. **Signature laundering.** fptr casts and `void*` round trips hide the signature that really runs (F13, F14). C17 6.3.2.3p8 / 6.5.2.2p9 make such calls undefined unless the types are compatible.
 8. **Reporting honesty.** `callbackMediation=Resolved*` is set for F07/F13/F20/F24/F27/F28 even though no evidence was transferred. Coverage must be measured on what was actually composed.
+
+## Review round 2 additions (2026-11-25)
+
+Measured on the same llvm-18 build. Fixture details are in [01-fact-catalog.md §F2](01-fact-catalog.md#f2-review-round-2-additions-2026-11-25); the reasoning is in [05-plan-review.md](05-plan-review.md).
+
+| # | Pattern | Today | Root cause |
+|---|---|---|---|
+| **F36** | `if (a) cb=f; else cb=g; if (b) cb=h; cb(ctx)` | ⚠️ `long*` only | `TraverseIfStmt` (`:3074`) does not snapshot `functionPointerTargetSets`; `mergeFunctionPointerStates` (`:25352`) joins only the single-target maps, so a set that exists before the `if` is lost on the untouched path. The same code labels the untouched path `[always]` instead of `[!(b)]`. |
+| F37 | nested `struct ops` inside two different outer records, set and called in different functions | ❌ Opaque | no L1 record slots yet. **Design risk:** keying slots by the innermost type (D7) would merge both outer records into one false multi-type set. |
+| F42 | slot read through `(struct base *)` with layout-compatible derived records | ❌ Opaque | no L1 yet. **Design risk:** a type-keyed slot for `struct base` has no stores, so a naive L1 lookup would be confidently empty. |
+| **F43** `run` | global with an initializer, overwritten in another function by an external call | ⚠️ `int*` only | same as F35; the escaped/unknown store must make the slot ⊤ |
+| F43 `run_local` | the same overwrite right before the call | ✅ Opaque | L0 erases the binding. **Design risk:** L0 cannot tell "no info" from "killed by unknown". An L1 fallback behind L0 would bring the initializer back. |
+| F38–F41 | strong update between calls, HOF reassign, nested/multi-slot locals, `(*s.fn)(x)` | ✅ | controls that M2/M3 must not break |
+
+**Totals after round 2:** 56 fixtures, 65 subjects, baseline drift 0. Subjects with a **wrong** answer today: F09, F10, F35, X11, X12, plus **F36** and **F43:run** (7).
+
+### Additional challenges
+
+9. **State encoding.** L0 keeps a single-target map and a target-set map side by side; branch merges read the first one only (F36). Every new join (switch, loop) must work on sets and treat "absent" as one of three states: *no info*, *killed by an unknown store*, *known set*.
+10. **Slot identity for nested and cast records.** Object-insensitive record slots are only sound and precise if the key is the outermost record visible in the access path (F37). Reads through a cast to another record type must union every slot that the cast can alias (F42).
+11. **Deterministic output.** Target sets are `std::set<const FunctionDecl*>`, which orders by address. New sets must order by a stable key, or the guard lists will reorder between runs.
+12. **Gate integrity.** Any stray `examples/fptr-*.c` used to abort the checker (fixed in M0.5). The fptr gate now runs in ctest under the label `fptr`.

@@ -52,6 +52,8 @@ A **slot key** names a storage location that can hold an fptr, independent of th
 | `param` | `param:<fn>.$k` (symbolic; existing `$k`) | `param:apply.$0` | F31, F04 setter |
 | `vararg` | `vararg:<fn>.$...` | `call_with` | F28 |
 
+> **Round 2 (2026-11-25):** the record key rule below is superseded by **D7′** ([03-decisions.md](03-decisions.md)). The key is the *outermost* record visible in the access path, and cast reads union prefix-compatible slots. Evidence: F37 and F42.
+
 **Record slots are object-insensitive** (D7). `o->vt->read` and `p->vt->read` share `record:struct ops.read`. This is the C analogue of a C++ virtual slot: one may-set per (record type, field). Local struct objects still get the existing per-base field state (`functionPointerFieldTargetSets`) as an L0 overlay, so F25/F17-style local precision is not lost.
 
 ### 3.2 Target sets
@@ -259,3 +261,5 @@ New compact-summary section (`cast-history-tu-link-summary`, additive):
 | New | `include/CastHistory/FptrResolution.h` (slot keys, TargetSet, resolver), `include/CastHistory/LibraryCallbackModels.def` |
 
 Do not grow `CastHistoryVisitor.h` (already over 32k lines) with the new data model. Put it in `FptrResolution.h` and call it from the visitor.
+
+**Round 2:** these touch points are narrowed to the seams S1–S8 in [06-backbone-contract.md](06-backbone-contract.md) (D17). That contract wins where the two disagree. It adds one item missing here: `TraverseIfStmt` must snapshot and merge `functionPointerTargetSets` (F36, seam S5).
