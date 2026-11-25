@@ -16,7 +16,9 @@ Several ``@subject`` blocks may appear in one fixture; ``@baseline`` and
 .c file of a multi-TU project; the subject is looked up across all TUs.
 
 Fixtures discovered by default:
-  examples/fptr-*.c                         single TU, run directly
+  examples/fptr-NN-*.c                      single TU, run directly (NN = two
+                                            digits; exploratory probes live in
+                                            examples/probes/ and are not fixtures)
   test_projects/projects/p*_fptr_*/         multi TU, run through
                                             scripts/run_all_multitu_projects.sh
 
@@ -199,7 +201,14 @@ def compare(want: dict, got: dict) -> list:
 
 
 def discover(only: list) -> list:
-    fixtures = [Fixture(p, False) for p in sorted((REPO / "examples").glob("fptr-*.c"))]
+    # Only fptr-NN-<fact>.c files are fixtures (D13).  Other fptr-*.c files in
+    # examples/ are a mistake: say so by name instead of failing on markers.
+    singles = sorted((REPO / "examples").glob("fptr-*.c"))
+    stray = [p for p in singles if not re.match(r"fptr-\d\d-", p.name)]
+    if stray:
+        raise SystemExit("not fixtures (rename to fptr-NN-<fact>.c or move to examples/probes/): "
+                         + ", ".join(rel(p) for p in stray))
+    fixtures = [Fixture(p, False) for p in singles]
     fixtures += [Fixture(p, True) for p in sorted((REPO / "test_projects/projects").glob("p*_fptr_*"))
                  if p.is_dir()]
     for fx in fixtures:

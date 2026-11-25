@@ -85,6 +85,15 @@ ch_add_test(validate-summary-schema checkers
 set_tests_properties(validate-json-summaries validate-summary-schema
   PROPERTIES FIXTURES_REQUIRED ch_regress_out)
 
+# ------------------------------------------------------------------------ fptr
+# Function-pointer extension evidence gate (design/fptr-extension/REVIEWING.md).
+# Every examples/fptr-NN-*.c and p*_fptr_* fixture must still match its pinned
+# @baseline.  Milestone acceptance (--check expected --only <ids>) is run by
+# hand per 04-implementation-plan.md, not here: unclaimed @expected are xfail.
+ch_add_test(fptr-baseline fptr
+  ${Python3_EXECUTABLE} ${CH_REPO}/scripts/check_fptr_evidence.py
+  --check baseline --tool $<TARGET_FILE:cast-history-tool>)
+
 # ------------------------------------------------- contracts and smoke tests
 # These need neither the tool nor its output.
 file(GLOB contract_scripts "${CH_REPO}/tests/*_source_contract.py")
