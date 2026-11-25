@@ -2,7 +2,7 @@
 
 This extends Cast History so that `void*` and other data pointers that flow through **function pointers** can be classified. Resolution quality is reported through a new facet, alongside the existing 7 primary categories.
 
-**Status:** M0 (evidence and design) and M0.5 (gate hardening, review round 2) are done. No analyzer code has changed yet. Baselines are verified on LLVM 23.1.4 (drift 0; see [REVIEWING.md](REVIEWING.md) §LLVM). Next milestone: **M1** (resolution facet, reporting only), gated on D12.
+**Status:** M0 (evidence and design) and M0.5 (gate hardening, review round 2) are done. Baselines are verified on LLVM 23.1.4 (drift 0; see [REVIEWING.md](REVIEWING.md) §LLVM). **M1** (resolution facet, reporting only) is done. Next: **M2** (soundness: if-merge on sets, switch, loops, `?:`, cast normalisation), gated on **D8** (guard policy).
 
 ## Read in this order
 

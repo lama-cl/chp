@@ -10,7 +10,7 @@
 //
 // @fptr-fact F01 local-var-known-target
 // @subject   run::ctx
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=int*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=int* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=int* resolution=exact@L0
 typedef int (*handler_t)(void *);
 

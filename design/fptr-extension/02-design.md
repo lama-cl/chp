@@ -111,20 +111,21 @@ Every subject in paper facts and reports gains:
 
 ```json
 "indirectCallResolution": {
-  "state": "none | exact | set | parametric | signature | unresolved | external-modeled | external-unknown",
+  "state": "none | exact | parametric | set | external-modeled | signature | external-unknown | unresolved",
   "layer": "L0 | L1 | L2 | LIB | -",
   "signatureMismatch": false,
   "sites": [
     {"callee": "table[op & 1]", "slot": "global:table[*]", "state": "set", "layer": "L1",
-     "targets": ["use_int", "use_int_neg"], "guarded": false, "composed": true,
+     "targets": ["use_int", "use_int_neg"], "guarded": false,
+     "indirectHistoryComposition": "full", "parametricClosure": null,
      "signatureMismatch": false, "span": {"file": "...", "line": 23, "column": 10}}
   ]
 }
 ```
 
 - `none`: the subject never reaches an indirect call.
-- Subject-level `state` is the *weakest* site state, using this order: `unresolved < external-unknown < signature < parametric < external-modeled < set < exact`. `layer` is the highest layer that was needed. The fixture marker form is `resolution=<state>@<layer>`.
-- `composed` reports whether a summary was actually transferred. `callbackMediation=Resolved*` can be set even when nothing was composed (F07, F13, F20, F24, F27, F28), so the facet records the truth separately (D12).
+- Subject-level `state` is the *weakest* site state, using this order (D12 as amended by the owner): `unresolved < external-unknown < signature < external-modeled < set < parametric = exact`. On a tie, `parametric` is reported. A `parametric` site also carries `parametricClosure: closed | open` (open = some call site of the formal is unresolved or unseen). `layer` is the highest layer that was needed. The fixture marker form is `resolution=<state>@<layer>`.
+- `indirectHistoryComposition` (`full | partial | none`) reports whether the targets' summaries were actually transferred. `callbackMediation=Resolved*` can be set even when nothing was composed (F07, F13, F20, F24, F27, F28), so the facet records the truth separately, and the validator warns on `Resolved*` together with `none` (D12).
 - The 7 categories are **not changed** (D1). Aggregators can cross-tabulate `primaryCategory × indirectCallResolution.state`. For example, *OpaqueTransportOrViewOnly ∧ unresolved* means "opaque only because the callee is invisible", while *OpaqueTransportOrViewOnly ∧ exact* means "really opaque".
 
 ## 5. Data flow of pointers through indirect calls

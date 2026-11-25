@@ -12,10 +12,10 @@
 //
 // @fptr-fact F40 nested-and-multi-slot-local
 // @subject   demo::x
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedWrite types=int*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedWrite types=int* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=int* resolution=exact@L0
 // @subject   demo::y
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedWrite types=double*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedWrite types=double* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=double* resolution=exact@L0
 typedef int (*handler_t)(void *);
 static int rd_int(void *p) { int *q = p; return *q; }

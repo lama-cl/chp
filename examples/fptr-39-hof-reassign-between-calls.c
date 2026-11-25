@@ -10,13 +10,13 @@
 //
 // @fptr-fact F39 hof-reassign-between-calls
 // @subject   demo::a
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=int*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=int* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=int*
 // @subject   demo::b
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=double*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=double* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=double*
 // @subject   hof::data
-// @baseline  category=OpaqueTransportOrViewOnly callback=FormalCallbackParameter behavior=CallbackDependentPointer types=-
+// @baseline  category=OpaqueTransportOrViewOnly callback=FormalCallbackParameter behavior=CallbackDependentPointer types=- resolution=parametric@L0 sigmismatch=false
 // @expected  category=OpaqueTransportOrViewOnly callback=FormalCallbackParameter resolution=parametric@L0
 typedef int (*handler_t)(void *);
 static int use_int(void *p) { int *q = p; return *q; }

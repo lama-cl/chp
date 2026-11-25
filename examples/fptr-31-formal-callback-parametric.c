@@ -7,7 +7,7 @@
 //
 // @fptr-fact F31 formal-callback-parametric
 // @subject   apply::ctx
-// @baseline  category=OpaqueTransportOrViewOnly callback=FormalCallbackParameter behavior=CallbackDependentPointer types=-
+// @baseline  category=OpaqueTransportOrViewOnly callback=FormalCallbackParameter behavior=CallbackDependentPointer types=- resolution=parametric@L0 sigmismatch=false
 // @expected  category=OpaqueTransportOrViewOnly callback=FormalCallbackParameter resolution=parametric@L0
 typedef int (*handler_t)(void *);
 

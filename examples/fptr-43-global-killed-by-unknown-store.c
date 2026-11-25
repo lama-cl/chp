@@ -12,10 +12,10 @@
 //
 // @fptr-fact F43 global-killed-by-unknown-store
 // @subject   run_local::ctx
-// @baseline  category=OpaqueTransportOrViewOnly callback=UnresolvedCallback behavior=CallbackDependentPointer types=-
+// @baseline  category=OpaqueTransportOrViewOnly callback=UnresolvedCallback behavior=CallbackDependentPointer types=- resolution=unresolved@- sigmismatch=false
 // @expected  category=OpaqueTransportOrViewOnly resolution=unresolved@-
 // @subject   run::ctx
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=int*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=int* resolution=exact@L0 sigmismatch=false
 // @expected  category=OpaqueTransportOrViewOnly resolution=unresolved@-
 typedef int (*handler_t)(void *);
 static int use_int(void *p) { int *q = p; return *q; }

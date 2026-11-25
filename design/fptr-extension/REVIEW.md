@@ -106,6 +106,13 @@ What changed:
 | C16 | Marker checks do not show text-report drift. | At M1, add the fptr fixtures to the `regress.py` set (D19). |
 | C17 | `ctest -LE known-failing` on the llvm-18 build fails only in `regress-projects`. That failure predates this change, which touches no C++. The diffs are the clang resource-dir in the recorded command line and **identical lines printed in a different order** (expected files from 20.1.2). | The reordering is live evidence for D21 (deterministic order). **Re-checked on LLVM 23.1.4:** same picture. The text reports have identical content once sorted, and the JSON is identical. Output is stable across 3 runs of one binary, so the order depends on the build, not on the run. Fix by regenerating with `regress.py update` on LLVM 23 (owner decision, regression-testing.md D1), or by D21. Everything else is green on 23. |
 
+**Owner decisions after round 2**
+
+| # | Decision |
+|---|---|
+| D12 | **Accepted with amendments:** order `… < external-modeled < set < parametric = exact`; `composed` renamed `indirectHistoryComposition`. The author's pushback (open vs closed parametric) is recorded in D12 and adds `parametricClosure`. The facet is emitted in paper facts for every subject (`none` when no indirect call); the text report is unchanged. M1 is unblocked. |
+| Process | M1 uses mixed models: Opus for C++ seam work, a Sonnet subagent for schema/validator/aggregator, direct shell for test runs. |
+
 **New open questions**
 
 7. **D17**: accept the seam contract and the diff budgets as binding for agents?
@@ -113,6 +120,19 @@ What changed:
 9. **D18**: accept the L0 tri-state?
 10. **D20**: accept the milestone splits and the "stop if the owner gate is open" rule?
 11. **F42 expectation**: a sound union (`set@L1`, as pinned) or `unresolved`?
+
+## 6c. M1 landed (2026-11-25): resolution facet, reporting only
+
+- **What.** Every paper-facts subject now carries `indirectCallResolution` (schema **v9 → v10**; the "3 → 4" written at M0 was stale). The text report is unchanged.
+- **Code.** New `include/CastHistory/FptrResolution.h` (facet builder: a pure function over existing pointer-use records). The visitor changes only at **seam S8**: +34/−1 lines in `paperSubjectJson`, the closure helper and the version line. Python side: schema, `validate_paper_facts.py` (rules + the `Resolved*`/`none` warning), `aggregate_paper_facts.py` (category × resolution CSV), `aggregate_declared_pointer_populations.py` (accepts v10), smoke test `tests/fptr_resolution_facet_smoke.py`.
+- **Claims met:** F01, F02, F25, F31, F38, F39, F40, F41 (13 subjects).
+- **Deviations.**
+  - **F14 moved to M2.** The incompatible fn-type cast is not recorded anywhere today, so `sigmismatch=true` needs the cast-normalisation step of the resolver (seam S6). It was not claimable through S8.
+  - **F43 `run_local::ctx` flipped unclaimed.** It was already correct; the facet completed it (`unresolved@-`). Moved into M1's claim.
+- **What the facet shows today** (honest, not fixed): `callbackMediation=Resolved*` with `indirectHistoryComposition=none` for F07, F13 `caller`, and F20 `submit`, which the validator flags with a warning. F09 and F36 report `exact` for a single target; that is their known unsound answer, fixed in M2. F31 `apply` is `parametric/open` (no callers) and F39 `hof` is `parametric/closed`.
+- **M1 approximation (documented in `FptrResolution.h`).** A site is `parametric` when the subject's own summary still contains a `$k.$i` reference. The callee text is `<indirect>`, or `f.$k -> <indirect>` when the call is reached through a direct call. M2's resolver records the real callee expression.
+- **Verification.** Claimed fixtures meet `@expected`. Baseline drift is 0 across all 56 fixtures (65 subjects), with no `@expected` edited. ctest passes except the pre-existing `regress-projects` (C17). 129/129 examples and 145/145 projects pass.
+- **Models and tokens.** Schema, validator and aggregator were done by a Sonnet subagent (about 79k tokens, 16 tool calls, about 2 min). The C++ facet builder, seam S8, verification and docs were done in the main Opus session. The main session cannot measure its own token use.
 
 ## 7. Change log
 
@@ -122,3 +142,4 @@ What changed:
 | 2026-11-20 | M0 landed: 35 single-TU fixtures (`examples/fptr-01..35`), 13 cross-TU projects (`p132`–`p144`), `scripts/check_fptr_evidence.py`, design docs. F34/F35 (global-initializer unsoundness) found while writing the fixtures. |
 | 2026-11-25 | Review round 2 (05, 06, REVIEWING.md). Probes moved to `examples/probes/`. F36–F43 added and pinned (56 fixtures, 65 subjects, drift 0). Checker discovery made strict. ctest label `fptr`. D7′, D17–D21. M0.5 inserted; M3/M8 split. LLVM 23 re-pin pending (owner step). |
 | 2026-11-25 | Built on LLVM 23.1.4: fptr drift 0 (no re-pin), 129/129 examples and 145/145 projects pass. Portable build fixes: RTTI follows LLVM, default `-resource-dir`, `getBeginLoc()` for break/continue. The shell profile's clang 18 `C_INCLUDE_PATH`/`CPLUS_INCLUDE_PATH` must be unset. |
+| 2026-11-25 | M1 landed: `indirectCallResolution` facet (paper facts v10), seam S8 only. 8 fixtures (13 subjects) met, plus F43 `run_local`. F14 moved to M2. |

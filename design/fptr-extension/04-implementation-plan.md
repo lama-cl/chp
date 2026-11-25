@@ -38,8 +38,8 @@ Revised in review round 2 (2026-11-25; D17, D20): M0.5 inserted, M3 and M8 split
 |---|---|---|---|---|---|
 | **M0** ✅ | Fixtures, evidence checker, design | — (50 subjects pinned) | — | — | `examples/fptr-*`, `p132`–`p144`, `scripts/check_fptr_evidence.py` |
 | **M0.5** ✅ | Gate hardening: probes → `examples/probes/`, F36–F43, strict discovery, ctest `fptr`; verified on LLVM 23.1.4 (drift 0) with portable build fixes | — (65 subjects pinned) | D19 | — | `scripts/check_fptr_evidence.py`, `tests/CMakeLists.txt` |
-| **M1** | Facet only, no semantic change: `indirectCallResolution` from today's state; `exact`/`set`@L0, `parametric`, `unresolved`; `signatureMismatch`; paper-facts schema v4 + validator + aggregator CSV; fptr fixtures join `regress.py` | F01, F02, F14, F25, F31, F38, F39, F40, F41 | D12 | S8 | `FptrResolution.h` (facet builder) |
-| **M2** | Soundness + expression forms: **if-merge on sets**, switch join, loop prescan widening, `?:` | F08, F09, F10, **F36**, X11, X12 | D8 | S2, S3, S4, S5, S6 (`?:`) | `FptrFlowTracker` |
+| **M1** ✅ | Facet only, no semantic change: `indirectCallResolution` from today's state; `exact`/`set`@L0, `parametric` (+`parametricClosure`), `unresolved`; paper-facts schema **v9 → v10** + validator + aggregator CSV | F01, F02, F25, F31, F38, F39, F40, F41, F43:`run_local`‡ | D12 ✅ | S8 | `FptrResolution.h` (facet builder) |
+| **M2** | Soundness + expression forms: **if-merge on sets**, switch join, loop prescan widening, `?:`; fn-type cast normalisation records `signatureMismatch` | F08, F09, F10, F14, **F36**, X11, X12 | D8 | S2, S3, S4, S5, S6 (`?:`, casts) | `FptrFlowTracker` |
 | **M3a** | L1 pre-pass, global slots, file-scope initializers → L1, L0 tri-state | F03, F04, F32, F34, F35, **F43** | D18 | S1, S6 (fallback), S7 | `FptrSlotCollector`, `TargetSet`, `SlotKey` (global) |
 | **M3b** | array / table slots, struct arrays, `memcpy` | F05, F06, F07, F26, F33 | D8 (F33 guards) | — (via S1/S6) | `SlotKey` (array) |
 | **M3c** | record slots (D7′), unions, cast reads | F15, F16, F30, **F37**, **F42** | D7′ | — (via S1/S6) | `SlotKey` (record, D7′ rules) |
@@ -52,6 +52,8 @@ Revised in review round 2 (2026-11-25; D17, D20): M0.5 inserted, M3 and M8 split
 | **M8c** | Cross-TU returns / FSM | X04, X07 | — | — | `fptrFacts.returnTargets` |
 | **M8d** | Cross-TU CCB, LIB, executor | X05, X06, X09, X10, X13 | D9 | — | `fptrFacts.callbackBindings` |
 | **M9** | L2 signature fallback (flag); coverage aggregation; migrate fixture checks into `FileCheck` under `test/` | — (new L2 fixtures first, as M9a) | D11 | S6 | `--fptr-signature-fallback`, lit config |
+
+‡ F43 `run_local::ctx` was already correct and needed only the facet, so it flipped in M1 as an unclaimed subject. Per the rules it moved into M1's claim (REVIEW.md, 2026-11-25 M1 entry). F43 `run::ctx` stays with M3a.
 
 † X11/X12 are claimed by M2 (they only need L0 control flow plus today's cross-TU import). M8a re-runs them as a regression check after slot serialization; it does not claim them.
 

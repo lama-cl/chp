@@ -18,7 +18,7 @@ Status values:
 | D9 | Callback–context binding is reduced to existing higher-order `$k.$i` summaries when same-instance storage can be shown | Proposed |
 | D10 | Evidence first: fixtures with pinned baselines before code; markers are the single source of truth | Accepted (owner) |
 | D11 | Target-set cap K = 16; L2 off by default (flag), capped at 8 | Proposed |
-| D12 | Facet distinguishes `unresolved` / `external-*` / `parametric` and records `composed`; `callbackMediation` is unchanged | Proposed |
+| D12 | Facet distinguishes `unresolved` / `external-*` / `parametric` and records `indirectHistoryComposition`; `callbackMediation` is unchanged | Accepted (owner, amended 2026-11-25) |
 | D13 | Fixture conventions: `examples/fptr-NN-*.c` (Fnn), `test_projects/projects/p1NN_fptr_xtu_*` (Xnn), one fact each | Accepted (owner directive) |
 | D14 | L1 pre-pass runs before function traversal (order independence) | Accepted (derived from D2/D3) |
 | D15 | Loops use pre-scan widening, not body re-traversal | Proposed |
@@ -40,7 +40,7 @@ Status values:
   3. Route unresolved calls to `ExternalUnknown`.
 - **Decision.** Option 1.
 - **Owner's rationale (verbatim):** *"OpaqueTransportOrViewOnly is just the category of a pointer in the scope of its visible history. Adding a resolution facet makes more sense that can be combined later with different categories."*
-- **Consequences.** No schema-breaking change to `primaryCategory`. Paper-facts `schemaVersion` goes 3 → 4 (additive). Aggregators gain a `primaryCategory × resolution` table.
+- **Consequences.** No schema-breaking change to `primaryCategory`. Paper-facts `schemaVersion` goes 9 → 10 (additive; the "3 → 4" written at M0 was stale). Aggregators gain a `primaryCategory × resolution` table.
 
 ### D2 — Layered resolution with precision tags
 - **Layers.**
@@ -104,8 +104,10 @@ Status values:
 - **K = 16** per target set. Above the cap the set becomes `⊤(cap)` → `unresolved`, with the reason recorded.
 - **L2** is behind `--fptr-signature-fallback` (default off), with at most 8 candidates.
 
-### D12 — Facet semantics (Proposed)
-- **States** are ordered `unresolved < external-unknown < signature < parametric < external-modeled < set < exact`. A subject reports its weakest site. Per-site `composed` records whether any summary was actually transferred.
+### D12 — Facet semantics (Accepted by owner 2026-11-25, amended)
+- **Owner amendment.** The states are ordered `unresolved < external-unknown < signature < external-modeled < set < parametric = exact`. A subject reports its weakest site; on a `parametric`/`exact` tie it reports `parametric`, because that carries the deferral information.
+- **Owner amendment (rename).** The per-site field `composed` is renamed **`indirectHistoryComposition`**, with values `full` (every target's summary was transferred), `partial` (some were) and `none`. This is a refinement of the boolean the owner proposed, so that a multi-target set with a missing summary is visible.
+- **Author's pushback, recorded with the owner's request:** `parametric = exact` holds only for a **closed** formal, where every call site in the analyzed scope passes a resolvable function (for example `hof(fp, a)` with `fp = use_int`). An **open** formal, such as an exported `int apply(handler_t cb, void *ctx) { return cb(ctx); }` with no callers, has the same summary (`ctx => $0.$0`), but no type is ever determined. Ranking it like `exact` would overstate coverage. **Resolution:** keep the owner's ordering and add the per-site field `parametricClosure: closed | open`. M1 computes it within the TU; M8 recomputes it project-wide. Aggregates report `parametric(open)` separately.
 - **Open question.** `callbackMediation=Resolved*` is currently set without a transfer (F07, F13, F20, F24, F27, F28). Proposed: leave it unchanged for compatibility, and add a validator warning when `Resolved*` appears with `composed=false`.
 
 ### D13 — Fixture conventions (Accepted)

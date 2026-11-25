@@ -11,10 +11,10 @@
 //
 // @fptr-fact F41 deref-call-through-field
 // @subject   demo::a
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedRead types=int*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedRead types=int* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=int* resolution=exact@L0
 // @subject   demo::b
-// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedRead types=double*
+// @baseline  category=MonomorphicActiveSpecialization callback=ResolvedFieldCallback behavior=ConcreteSpecializedRead types=double* resolution=exact@L0 sigmismatch=false
 // @expected  category=MonomorphicActiveSpecialization types=double* resolution=exact@L0
 typedef int (*handler_t)(void *);
 static int use_int(void *p) { int *q = p; return *q; }
