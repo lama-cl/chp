@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CastHistory/AnalysisState.h"
+#include "CastHistory/FptrResolution.h"
 #include "CastHistory/HistoryMetrics.h"
 #include "CastHistory/Options.h"
 #include "CastHistory/PrevalenceMetrics.h"
@@ -21401,9 +21402,41 @@ public:
         {"behavior", wildPointerBehaviorClassName(behavior)},
         {"paperWildness", paperWildnessJson(paper)},
         {"semanticMediation", semanticMediationJson(mediation)}};
+    // fptr seam S8 (06-backbone-contract.md): reporting-only facet.
+    subject["indirectCallResolution"] =
+        indirectCallResolutionJson(buildIndirectCallResolutionFacet(
+            uses, metrics.numHORefs > 0, fptrCallbackFormalsClosed(fd)));
     if (entity.kind == EntityKey::Kind::FieldEntity)
       subject["fieldStorage"] = paperFieldStorageJson(entity);
     return subject;
+  }
+
+  // fptr seam S8 helper: a parametric callback formal is "closed" when the
+  // function has at least one in-TU direct caller and every caller binds each
+  // function-pointer formal to a resolved target (D12 parametricClosure).
+  std::optional<bool> fptrCallbackFormalsClosed(const FunctionDecl *fd) const {
+    if (!fd)
+      return std::nullopt;
+    const FunctionDecl *canon = fd->getCanonicalDecl();
+    std::vector<unsigned> fnFormals;
+    for (unsigned i = 0; i < fd->getNumParams(); ++i)
+      if (isFunctionPointerType(fd->getParamDecl(i)->getType()))
+        fnFormals.push_back(i);
+    bool sawCaller = false;
+    for (const NamedCallEdge &edge : namedCallEdges) {
+      if (!edge.callee || edge.callee->getCanonicalDecl() != canon)
+        continue;
+      sawCaller = true;
+      for (unsigned k : fnFormals) {
+        bool resolved = false;
+        for (const auto &actual : edge.resolvedHigherOrderActuals)
+          resolved = resolved ||
+                     (actual.calleeFunctionParamIndex == k && actual.target);
+        if (!resolved)
+          return false;
+      }
+    }
+    return sawCaller;
   }
 
   json::Array emitPaperSubjectFactsJson() const {
@@ -21780,7 +21813,7 @@ public:
     }
 
     return json::Object{
-        {"schemaVersion", static_cast<int64_t>(9)},
+        {"schemaVersion", static_cast<int64_t>(10)}, // v10: indirectCallResolution (fptr M1, S8)
         {"schemaName", "cast-history-tu-paper-facts"},
         {"toolVersion", "cast-history-dev"},
         {"tu",
