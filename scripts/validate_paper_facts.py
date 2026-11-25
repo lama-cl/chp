@@ -18,7 +18,7 @@ from typing import Any, Iterable, Mapping, Optional, Sequence
 
 SCHEMA_NAME = "cast-history-tu-paper-facts"
 CURRENT_SCHEMA_VERSION = 9
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 OUTER_POINTER_KINDS = {
     "void-data-pointer", "nonvoid-data-pointer", "function-pointer",
     "not-pointer", "unknown",
@@ -28,6 +28,18 @@ CALLBACK_MEDIATION_STATES = {
     "ResolvedCallback", "ResolvedFieldCallback", "GuardedResolvedFieldCallback",
     "Unknown",
 }
+RESOLUTION_STATES = (
+    "none", "exact", "parametric", "set", "external-modeled", "signature",
+    "external-unknown", "unresolved",
+)
+RESOLUTION_LAYERS = ("-", "L0", "L1", "LIB", "L2")
+HISTORY_COMPOSITIONS = {"full", "partial", "none"}
+# Weakest first; parametric and exact tie, reported as parametric.
+RESOLUTION_STATE_ORDER = {
+    "unresolved": 0, "external-unknown": 1, "signature": 2,
+    "external-modeled": 3, "set": 4, "parametric": 5, "exact": 5,
+}
+RESOLUTION_LAYER_ORDER = {layer: rank for rank, layer in enumerate(RESOLUTION_LAYERS)}
 CATEGORIES = {
     "OpaqueTransportOrViewOnly",
     "MonomorphicActiveSpecialization",
@@ -95,6 +107,115 @@ def discover(paths: Iterable[Path], root: Optional[Path]) -> list[Path]:
 
 def error(path: Path, message: str) -> None:
     print(f"ERROR: {path}: {message}", file=sys.stderr)
+
+
+def warning(path: Path, message: str) -> None:
+    print(f"WARNING: {path}: {message}", file=sys.stderr)
+
+
+def validate_indirect_resolution(path: Path, where: str, res: Any, callback_state: str) -> int:
+    """Check the per-subject indirectCallResolution facet (schema version 10+)."""
+    if not isinstance(res, Mapping):
+        error(path, f"{where}.indirectCallResolution must be an object in schema version 10+")
+        return 1
+    errors = 0
+    where = f"{where}.indirectCallResolution"
+    state = res.get("state")
+    layer = res.get("layer")
+    sites = res.get("sites")
+    if state not in RESOLUTION_STATES:
+        error(path, f"{where}.state is outside the fixed vocabulary")
+        errors += 1
+    if layer not in RESOLUTION_LAYER_ORDER:
+        error(path, f"{where}.layer is outside the fixed vocabulary")
+        errors += 1
+    if not isinstance(res.get("signatureMismatch"), bool):
+        error(path, f"{where}.signatureMismatch must be boolean")
+        errors += 1
+    if not isinstance(sites, list):
+        error(path, f"{where}.sites must be an array")
+        return errors + 1
+    if (state == "none") != (not sites):
+        error(path, f"{where}.state must be none iff sites is empty")
+        errors += 1
+    if state == "none" and layer != "-":
+        error(path, f"{where}.layer must be '-' when state is none")
+        errors += 1
+    site_states: list[str] = []
+    site_layers: list[str] = []
+    mismatch = False
+    has_none_composition = False
+    for index, site in enumerate(sites):
+        sw = f"{where}.sites[{index}]"
+        if not isinstance(site, Mapping):
+            error(path, f"{sw} must be an object")
+            errors += 1
+            continue
+        if not isinstance(site.get("callee"), str) or not site.get("callee"):
+            error(path, f"{sw}.callee must be a non-empty string")
+            errors += 1
+        if site.get("slot") is not None and not isinstance(site.get("slot"), str):
+            error(path, f"{sw}.slot must be a string or null")
+            errors += 1
+        site_state = site.get("state")
+        if site_state not in RESOLUTION_STATE_ORDER:
+            error(path, f"{sw}.state is outside the fixed vocabulary (none is not a site state)")
+            errors += 1
+        else:
+            site_states.append(site_state)
+        site_layer = site.get("layer")
+        if site_layer not in RESOLUTION_LAYER_ORDER:
+            error(path, f"{sw}.layer is outside the fixed vocabulary")
+            errors += 1
+        else:
+            site_layers.append(site_layer)
+        targets = site.get("targets")
+        if not isinstance(targets, list) or not all(isinstance(t, str) for t in targets):
+            error(path, f"{sw}.targets must be an array of strings")
+            errors += 1
+        for flag in ("guarded", "signatureMismatch"):
+            if not isinstance(site.get(flag), bool):
+                error(path, f"{sw}.{flag} must be boolean")
+                errors += 1
+        mismatch = mismatch or site.get("signatureMismatch") is True
+        composition = site.get("indirectHistoryComposition")
+        if composition not in HISTORY_COMPOSITIONS:
+            error(path, f"{sw}.indirectHistoryComposition is outside the fixed vocabulary")
+            errors += 1
+        elif composition == "none":
+            has_none_composition = True
+        closure = site.get("parametricClosure")
+        if closure not in ("closed", "open", None):
+            error(path, f"{sw}.parametricClosure must be closed, open or null")
+            errors += 1
+        elif (closure is not None) != (site_state == "parametric"):
+            error(path, f"{sw}.parametricClosure must be non-null iff state is parametric")
+            errors += 1
+        span = site.get("span")
+        if (not isinstance(span, Mapping) or not isinstance(span.get("file"), str)
+                or not isinstance(span.get("line"), int) or isinstance(span.get("line"), bool)
+                or not isinstance(span.get("column"), int) or isinstance(span.get("column"), bool)):
+            error(path, f"{sw}.span must have string file and integer line/column")
+            errors += 1
+    if sites and len(site_states) == len(sites) and state in RESOLUTION_STATES:
+        weakest = min(site_states, key=lambda x: RESOLUTION_STATE_ORDER[x])
+        expected = weakest
+        if RESOLUTION_STATE_ORDER[weakest] == RESOLUTION_STATE_ORDER["parametric"] and "parametric" in site_states:
+            expected = "parametric"
+        if state != expected:
+            error(path, f"{where}.state must be the weakest site state {expected!r}, got {state!r}")
+            errors += 1
+    if sites and len(site_layers) == len(sites) and layer in RESOLUTION_LAYER_ORDER:
+        expected_layer = max(site_layers, key=lambda x: RESOLUTION_LAYER_ORDER[x])
+        if layer != expected_layer:
+            error(path, f"{where}.layer must be the highest site layer {expected_layer!r}, got {layer!r}")
+            errors += 1
+    if isinstance(res.get("signatureMismatch"), bool) and res["signatureMismatch"] != mismatch:
+        error(path, f"{where}.signatureMismatch must equal any(site.signatureMismatch)")
+        errors += 1
+    if has_none_composition and (callback_state.startswith("Resolved") or callback_state.startswith("GuardedResolved")):
+        warning(path, f"{where}: callbackMediation.state {callback_state!r} but a site has indirectHistoryComposition none")
+    return errors
 
 
 def validate_document(path: Path, data: Any) -> int:
@@ -275,6 +396,10 @@ def validate_document(path: Path, data: Any) -> int:
                         if not isinstance(flags.get(flag), bool):
                             error(path, f"{where}.callbackMediation.flags.{flag} must be boolean")
                             errors += 1
+        if schema_version is not None and schema_version >= 10:
+            callback_state = callback_mediation.get("state") if isinstance(callback_mediation, Mapping) else ""
+            errors += validate_indirect_resolution(
+                path, where, subject.get("indirectCallResolution"), str(callback_state or ""))
         if schema_version is not None and schema_version >= 5 and subject.get("subjectKind") == "field-storage":
             field_storage = subject.get("fieldStorage")
             if not isinstance(field_storage, Mapping):

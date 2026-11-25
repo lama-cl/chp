@@ -34,8 +34,13 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 SCHEMA_NAME = "cast-history-tu-paper-facts"
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 VERSION = "v9-c6g5f4j-paper-facts-aggregation"
+
+RESOLUTION_COLUMNS = (
+    "none", "exact", "parametric(closed)", "parametric(open)", "set",
+    "external-modeled", "signature", "external-unknown", "unresolved", "absent",
+)
 
 PRIMARY_CATEGORIES = (
     "OpaqueTransportOrViewOnly",
@@ -67,7 +72,7 @@ SUBJECT_FIELDS = (
     "field_storage_declaring_type", "field_storage_declaring_canonical_type",
     "field_storage_declaring_file", "field_storage_declaring_line", "field_storage_declaring_column",
     "has_final_history", "canonical_history_id",
-    "callback_mediation_state", "callback_is_callback", "callback_resolved_target",
+    "indirect_resolution_state", "callback_mediation_state", "callback_is_callback", "callback_resolved_target",
     "callback_field_carrier", "callback_guarded_selection",
     "semantic_mediation_kind", "semantic_mediation_family",
     "history_shape", "history_risk", "history_depth", "history_parallel",
@@ -365,7 +370,33 @@ def merge_subject(existing: MutableMapping[str, Any], incoming: Mapping[str, Any
     # Retain a visible record of all sidecars that contributed evidence.
     source_files = sorted({*sorted_unique_strings(existing.get("_sourceFiles")), *sorted_unique_strings(incoming.get("_sourceFiles"))})
     existing["_sourceFiles"] = source_files
+    if "indirectCallResolution" not in existing and "indirectCallResolution" in incoming:
+        existing["indirectCallResolution"] = incoming["indirectCallResolution"]
     existing["primaryCategory"] = category_from_facts(existing)
+
+
+def resolution_column(value: Any) -> str:
+    """Cross-tab column of a subject's indirectCallResolution; parametric split by closure."""
+    if not isinstance(value, Mapping):
+        return "absent"
+    state = str(value.get("state") or "")
+    if state != "parametric":
+        return state or "absent"
+    sites = [as_obj(site) for site in as_list(value.get("sites"))]
+    is_open = any(site.get("state") == "parametric" and site.get("parametricClosure") == "open" for site in sites)
+    return "parametric(open)" if is_open else "parametric(closed)"
+
+
+def resolution_cross_tab(rows: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+    counts: Counter = Counter((str(row.get("primary_category") or ""), str(row.get("indirect_resolution_state") or "absent")) for row in rows)
+    result = []
+    for category in PRIMARY_CATEGORIES:
+        row: Dict[str, Any] = {"category": category}
+        for column in RESOLUTION_COLUMNS:
+            row[column] = counts[(category, column)]
+        row["total"] = sum(row[column] for column in RESOLUTION_COLUMNS)
+        result.append(row)
+    return result
 
 
 def flatten_subject(project: str, path: Path, subject: Mapping[str, Any]) -> Dict[str, Any]:
@@ -416,6 +447,7 @@ def flatten_subject(project: str, path: Path, subject: Mapping[str, Any]) -> Dic
         "callback_resolved_target": bool_value(callback_flags.get("resolvedTarget")),
         "callback_field_carrier": bool_value(callback_flags.get("fieldCarrier")),
         "callback_guarded_selection": bool_value(callback_flags.get("guardedSelection")),
+        "indirect_resolution_state": resolution_column(subject.get("indirectCallResolution")),
         "semantic_mediation_kind": semantic_mediation.get("kind", ""),
         "semantic_mediation_family": semantic_mediation.get("semanticFamily", ""),
         "has_final_history": bool_value(subject.get("hasFinalHistory")),
@@ -872,6 +904,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     write_csv(out_dir / "pointer_operations_by_project.csv", OPERATION_SUMMARY_FIELDS, operation_rows)
     write_csv(out_dir / "callback_mediation_by_project.csv", CALLBACK_MEDIATION_SUMMARY_FIELDS,
               callback_mediation_rows)
+    write_csv(out_dir / "category_by_indirect_resolution.csv", ("category", *RESOLUTION_COLUMNS, "total"),
+              resolution_cross_tab(flat_subjects))
     (out_dir / "history_metrics.tex").write_text(latex_history_table(history_rows), encoding="utf-8")
     (out_dir / "pointer_operations.tex").write_text(latex_operation_table(operation_rows), encoding="utf-8")
     write_alignment_templates(out_dir, flat_subjects)

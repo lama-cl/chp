@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.org/cast-history/cast-paper-facts.schema.json",
-  "title": "Cast History Compact Paper Facts (C6g5f4j)",
-  "description": "Per-translation-unit compact paper-facts sidecar for paper aggregation and external-tool alignment. Schema version 9 separates raw API-shape declaration inventory from implementation-level semantic and callback-slot relational eligibility. Versions 1 through 8 remain accepted for legacy validation only.",
+  "title": "Cast History Compact Paper Facts (fptr M1)",
+  "description": "Per-translation-unit compact paper-facts sidecar for paper aggregation and external-tool alignment. Schema version 9 separates raw API-shape declaration inventory from implementation-level semantic and callback-slot relational eligibility. Schema version 10 adds the per-subject indirectCallResolution facet. Versions 1 through 8 remain accepted for legacy validation only.",
   "type": "object",
   "additionalProperties": true,
   "required": [
@@ -27,7 +27,8 @@
         6,
         7,
         8,
-        9
+        9,
+        10
       ],
       "description": "Version 9 is current. Versions 1 through 8 are accepted for legacy validation only."
     },
@@ -557,6 +558,35 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 10
+          }
+        },
+        "required": [
+          "schemaVersion"
+        ]
+      },
+      "then": {
+        "required": [
+          "declaredPointerInventory",
+          "nestedCallbackSlotRelations",
+          "voidPointerUsageFingerprints",
+          "allocationOriginDerivedAliasUses"
+        ],
+        "properties": {
+          "subjects": {
+            "items": {
+              "required": [
+                "indirectCallResolution"
+              ]
+            }
+          }
+        }
+      }
     }
   ],
   "$defs": {
@@ -771,6 +801,9 @@
         },
         "fieldStorage": {
           "$ref": "#/$defs/fieldStorage"
+        },
+        "indirectCallResolution": {
+          "$ref": "#/$defs/indirectCallResolution"
         }
       }
     },
@@ -1465,6 +1498,140 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "indirectCallSite": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "callee",
+        "slot",
+        "state",
+        "layer",
+        "targets",
+        "guarded",
+        "indirectHistoryComposition",
+        "parametricClosure",
+        "signatureMismatch",
+        "span"
+      ],
+      "properties": {
+        "callee": {
+          "type": "string"
+        },
+        "slot": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "enum": [
+            "exact",
+            "parametric",
+            "set",
+            "external-modeled",
+            "signature",
+            "external-unknown",
+            "unresolved"
+          ]
+        },
+        "layer": {
+          "enum": [
+            "L0",
+            "L1",
+            "L2",
+            "LIB",
+            "-"
+          ]
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "guarded": {
+          "type": "boolean"
+        },
+        "indirectHistoryComposition": {
+          "enum": [
+            "full",
+            "partial",
+            "none"
+          ]
+        },
+        "parametricClosure": {
+          "enum": [
+            "closed",
+            "open",
+            null
+          ]
+        },
+        "signatureMismatch": {
+          "type": "boolean"
+        },
+        "span": {
+          "type": "object",
+          "required": [
+            "file",
+            "line",
+            "column"
+          ],
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer"
+            },
+            "column": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "indirectCallResolution": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "state",
+        "layer",
+        "signatureMismatch",
+        "sites"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "none",
+            "exact",
+            "parametric",
+            "set",
+            "external-modeled",
+            "signature",
+            "external-unknown",
+            "unresolved"
+          ]
+        },
+        "layer": {
+          "enum": [
+            "L0",
+            "L1",
+            "L2",
+            "LIB",
+            "-"
+          ]
+        },
+        "signatureMismatch": {
+          "type": "boolean"
+        },
+        "sites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/indirectCallSite"
           }
         }
       }

@@ -464,3 +464,36 @@ carriers: a project-owned call through such a field/global is still direct
 source-level relation evidence. A declaration followed by a project-owned
 function definition continues to use the existing definition-preferred
 redeclaration policy and remains eligible exactly once.
+
+## fptr M1 / schema v10: indirect-call resolution facet
+
+Paper facts advance to `schemaVersion: 10`. Each subject gains
+`indirectCallResolution`, a facet orthogonal to `primaryCategory`
+(design/fptr-extension D1, D12):
+
+```text
+indirectCallResolution: { state, layer, signatureMismatch, sites: [ {
+  callee, slot|null, state, layer, targets[], guarded,
+  indirectHistoryComposition: full|partial|none,
+  parametricClosure: closed|open|null (non-null iff state == parametric),
+  signatureMismatch, span: {file, line, column} } ] }
+state: none | exact | parametric | set | external-modeled | signature
+       | external-unknown | unresolved      layer: L0 | L1 | L2 | LIB | "-"
+```
+
+The key is required on every subject at version 10 and absent in versions
+1-9, which stay valid. `validate_paper_facts.py` enforces: `state == none`
+iff `sites` is empty (then `layer == "-"`); the subject state is the weakest
+site state under `unresolved < external-unknown < signature <
+external-modeled < set < parametric = exact` (a parametric/exact tie reports
+`parametric`); the subject layer is the highest site layer under
+`- < L0 < L1 < LIB < L2`; the subject `signatureMismatch` is the OR of the
+sites'. It warns (exit code unchanged) when `callbackMediation.state` starts
+with `Resolved`/`GuardedResolved` while a site has
+`indirectHistoryComposition == none`.
+
+`aggregate_paper_facts.py` adds `indirect_resolution_state` to
+`paper_subject_facts.csv` and writes `category_by_indirect_resolution.csv`
+(`primaryCategory` x resolution state, `parametric` split into
+`parametric(closed)` / `parametric(open)`; subjects from pre-v10 files fall
+under `absent`).
