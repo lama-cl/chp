@@ -20,15 +20,12 @@ Each seam is a small, named edit, at most about 15 lines unless the PR justifies
 | Seam | Anchor (grep) | Allowed change | Reviewer check | Milestone |
 |---|---|---|---|---|
 | **S1** pre-pass | `src/main.cpp`: `visitor.TraverseDecl(context.getTranslationUnitDecl())` | before that line: run `FptrCFGSolver` over the TU and hand the result table to the visitor (round 4: replaces `FptrSlotCollector`) | the solver records no cast observations and never mutates visitor state | M2a |
-| ~~**S2** switch~~ retired (D24) | `bool TraverseSwitchStmt(` | `fptr.enterSwitch(stmt, state)` before and `fptr.exitSwitch(...)` after the existing delegation; the `Approximated` record is kept for non-fptr state | the delegation line is unchanged | M2 |
-| ~~**S3** case arms~~ retired (D24) | new overrides `TraverseCaseStmt`, `TraverseDefaultStmt`, `TraverseBreakStmt` | arm bookkeeping on fptr state only, then delegate | the new overrides touch no non-fptr member | M2 |
-| ~~**S4** loops~~ retired (D24) | `bool TraverseForStmt(`, `TraverseWhileStmt(`, `TraverseDoStmt(` | `fptr.prescanLoop(body, state)` before the delegation; the body is still traversed once | count of `VisitCallExpr` hits unchanged (F10 output diff limited to fptr sections) | M2 |
-| ~~**S5** if-merge~~ retired (D24) | `bool TraverseIfStmt(`, `void mergeFunctionPointerStates(` | **retired**: the CFG solver (08) supersedes the AST merge, so the existing code stays untouched; F36's AST defect remains only on the no-CFG fallback path | — | — |
 | **S6** lookups | `resolveFunctionValueSet(`, `resolveFunctionValue(`, `functionPointerSelectionGuardForTarget(` | at the top of each: if the CFG table has an entry for this `Expr*`, return it (targets, or the guard evidence for a target); otherwise fall through to the existing AST code | fallthrough path byte-identical; F01–F41 controls unchanged | M2a |
-| ~~**S7** binding~~ retired (D24) | `void recordFunctionPointerBinding(` | write the tri-state (`killed-unknown` instead of plain erase); at file scope (`!currentFunction`), record into L1 and not into L0 (F35) | F03 stays correct, now `@L1` | M3a |
 | **S8** report | `json::Object paperSubjectJson(` | add the `indirectCallResolution` key from `fptr.facetFor(entity)` | text report unchanged in M1 | M1 |
 
 | **S9** edges | next to `recordSameTUFieldFunctionPointerNamedCallEdges(` | additive recorder: a resolved local-variable or L1 fptr call appends a `NamedCallEdge` (with `layer`), so the existing Tarjan and two-phase solves see it (F27) | SCC report shows the recursive component; no change to SCC/fixpoint code | M4 |
+
+Seams S2–S5 and S7 (AST control-flow patches) were retired in round 4 (D24).
 
 The visitor also gains **one member**, `FptrResolution fptr;`, with its accessor. That does not count as a seam.
 

@@ -98,17 +98,9 @@ flowchart TD
   SIG --> G
 ```
 
-### 4.1 Guard policy for multi-target sets (D8; superseded by D30, see [08 §6](08-cfg-fptr-resolution.md))
+### 4.1 Multi-target sets
 
-A multi-target set becomes **guarded** alternatives (`⟨[g1] T1, [g2] T2⟩`, which gives `GuardedActiveReinterpretation`) when the program value that selects the target is visible at the call:
-
-| Selector | Guard text (example) | Facts |
-|---|---|---|
-| branch / `?:` / `switch` case | `[kind == 0]`, `[!(is_int)]` | F08, F09, X11 |
-| table index | `[sel(by_kind[kind & 1]) = use_int]` | F33 |
-| object's own slot (vtable) | `[sel(o->vt->read) = use_int]` | F15 |
-
-The set becomes **unguarded** (`UnguardedMultiTargetActiveReinterpretation`) when the selection is *temporal*. That covers loop back edges (F10/X12) and globals mutated elsewhere (F35). In those cases the same object can be passed to different targets over time, with no value at the call that tells them apart.
+Superseded. The D8 guard policy is replaced by **dispatch correlation (D30)**; see [08 §6](08-cfg-fptr-resolution.md#6-what-a-target-set-means-for-cast-history-dispatch-correlation-d30).
 
 ### 4.2 Resolution facet
 
@@ -158,35 +150,7 @@ flowchart LR
 
 ## 6. Control flow for fptr state (D4)
 
-> **Round 4:** this section's AST-based plan (switch join, loop prescan, S2–S5) is **superseded by [08-cfg-fptr-resolution.md](08-cfg-fptr-resolution.md)** (D24). Kept below for the record.
-
-Only fptr target state (`functionPointerTargets`, `functionPointerTargetSets`, `functionPointerFieldTargetSets`) receives the fixes below. Origin, field and alias state keep the current syntactic behaviour; that is a separate issue.
-
-```mermaid
-stateDiagram-v2
-  direction LR
-  state "switch (k)" as SW {
-    [*] --> Entry
-    Entry --> Arm0: guard k==0
-    Entry --> Arm1: guard default
-    Arm0 --> Exit: break
-    Arm1 --> Exit: break
-    Arm0 --> Arm1: fallthrough
-    Exit --> [*]: join(all arms) + entry if no default
-  }
-  state "for/while/do" as LP {
-    [*] --> Head
-    Head --> Body: S_head = S_entry ∪ prescan(body stores)
-    Body --> Head: back edge (no re-traversal)
-    Head --> After: S_after = S_head ∪ S_body_end
-  }
-```
-
-- **switch.** Snapshot the state at entry. Each `case`/`default` arm starts from entry plus the fallthrough state, with guard `kind == c` (default: the negated disjunction). The state at `break` is collected; the exit state is the join of all collected states. If the switch has no `default`, the entry state is joined as well. Bodies that are not structured (case labels nested in blocks, Duff's device) fall back to `entry ∪ every fptr store in the body`, unguarded, plus an `Approximated` feature record.
-- **Loops: pre-scan widening.** Before the single traversal of a loop body, collect every fptr store in the body syntactically, including nested blocks and calls with out-parameters. Resolve each right-hand side with the L0/L1 resolver and seed `S_head = S_entry ∪ stores`. The body is **not traversed twice**, so no cast observation is duplicated. A store whose RHS reads loop-carried state (`s = s.next(ctx)`, F17) is resolved by iterating the return-target relation to a fixpoint over the current set (bounded by K). *Round 3 (D15 amended):* this iteration follows the engine's convention: cap at `MaxNamedCallSummaryIters` (16), record a termination reason in text **and** JSON, and record an `Approximated` feature when the cap is hit.
-- **`?:`.** Expression-level: `set(c ? a : b) = set(a)[c] ∪ set(b)[!c]`.
-- **Indirect edges in the call graph (revised in round 3).** The engine already puts some indirect calls into its SCCs: resolved field-fptr calls (`recordSameTUFieldFunctionPointerNamedCallEdges`) and imported fptr targets (`recordImportedFunctionPointerTargetParamTransferEdge`) become `namedCallEdges`; known/multi-target `SummaryDependencyEdge`s reach the project Tarjan. Missing: resolved **local-variable** and (new) **L1** targets. Seam **S9** adds an additive recorder mirroring the field one, with a `layer` attribute; the existing Tarjans and two-phase solves then close recursion through tables (F27) with no new SCC code.
-- **Early exits (D23, proposed).** A branch that ends in `return`, `break` or `continue` contributes nothing to the fptr join after the `if` (F44). Fptr state only (D4); implemented in the S5 merge.
+The engine has no CFG today ([07](07-existing-engine.md)). Fptr control flow (loops > conditions > goto, early exits, recursion) is handled by the **CFG solver** in [08-cfg-fptr-resolution.md](08-cfg-fptr-resolution.md) (D24). The earlier AST plan (switch join, loop prescan, seams S2–S5) is retired; it is kept in git history and summarised in [05 §3](05-plan-review.md).
 
 ## 7. Library callback model (LIB, D5)
 
