@@ -13,7 +13,7 @@
 // @fptr-fact F14 incompatible-signature-cast
 // @subject   run::ctx
 // @baseline  category=MonomorphicActiveSpecialization callback=ResolvedCallback behavior=ConcreteSpecializedRead types=long*
-// @expected  category=MonomorphicActiveSpecialization types=long* resolution=exact@L0 sigmismatch=true
+// @expected  category=MonomorphicActiveSpecialization types=long* resolution=exact@L0 sigmismatch=true ubkind=param-type-incompatible
 typedef int (*handler_t)(void *);
 
 static int use_long(long *p) { return (int)*p; }
