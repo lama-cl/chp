@@ -14,14 +14,14 @@ Status values:
 | D5 | Curated library callback model (libc/POSIX/C11 first) | Accepted (owner) |
 | D6 | `dlsym` results are ExternalUnknown; a matching project name is only a hint | Accepted (owner); hint part Proposed |
 | D7 | Record slots are keyed by record type + field path (object-insensitive) | Superseded by D7′ |
-| D8 | Guard policy: a selector visible at the call → guarded; temporal selection → unguarded | Proposed |
+| D8 | Guard policy: a selector visible at the call → guarded; temporal selection → unguarded | Superseded by D30 |
 | D9 | Callback–context binding is reduced to existing higher-order `$k.$i` summaries when same-instance storage can be shown | Proposed |
 | D10 | Evidence first: fixtures with pinned baselines before code; markers are the single source of truth | Accepted (owner) |
 | D11 | Target-set cap K = 16; L2 off by default (flag), capped at 8 | Proposed |
 | D12 | Facet distinguishes `unresolved` / `external-*` / `parametric` and records `indirectHistoryComposition`; `callbackMediation` is unchanged | Accepted (owner, amended 2026-11-25) |
 | D13 | Fixture conventions: `examples/fptr-NN-*.c` (Fnn), `test_projects/projects/p1NN_fptr_xtu_*` (Xnn), one fact each | Accepted (owner directive) |
 | D14 | L1 pre-pass runs before function traversal (order independence) | Accepted (derived from D2/D3) |
-| D15 | Loops use pre-scan widening, not body re-traversal | Proposed |
+| D15 | Loops use pre-scan widening, not body re-traversal | Superseded by D24 |
 | D16 | New data model lives in `FptrResolution.h`, not in `CastHistoryVisitor.h` | Proposed |
 | D7′ | Record slots keyed by the **outermost record visible in the access path**; cast reads union prefix-compatible slots or give ⊤ (supersedes D7) | Proposed (round 2) |
 | D17 | Seam architecture: backbone changes only at seams S1–S8 ([06-backbone-contract.md](06-backbone-contract.md)) | Proposed (round 2); the owner asked to preserve the backbone |
@@ -29,6 +29,15 @@ Status values:
 | D19 | Gate hardening: probes in `examples/probes/`, strict fixture discovery, ctest label `fptr`, LLVM pin in `examples/fptr-meta.info`, fptr fixtures added to the `regress.py` set at M1 | Accepted (owner) for the probe move; the rest Proposed |
 | D20 | Split M3 → M3a/b/c and M8 → M8a–d; each milestone carries an owner gate | Proposed (round 2) |
 | D21 | Target sets have a deterministic order (lookup key, then source location) | Proposed (round 2) |
+| D22 | Cross-TU L1 slot solving runs in C++ during import rounds (next to the cross-TU two-phase solve), not as the first solver in `build_summary_index.py` | Resolved by D27 |
+| D23 | Early exits: for fptr state, a branch ending in `return`/`break`/`continue` contributes nothing to the join (M2, seam S5); a full CFG stays option (c) | Superseded by D24 |
+| D24 | CFG-based fptr solver (`clang::CFG`, TU pre-pass) supersedes the AST patches S2–S5, D15 prescan and D23; fptr only (D4) | Proposed (round 4; owner asked for the CFG) |
+| D25 | Guards come from CFG edge labels and are evidence, not the classifier; back edges marked; guard cap | Proposed (round 4) |
+| D26 | TU solver: per-function fptr summaries, on-the-fly call graph, capped SCC fixpoint; termination in text and JSON | Proposed (round 4) |
+| D27 | fptr summaries serialized cross-TU; index merges only; C++ import rounds solve; driver gains an fptr fingerprint | Proposed (round 4) |
+| D28 | No-CFG fallback to the AST L0 maps plus `--fptr-cfg-crosscheck` | Proposed (round 4) |
+| D29 | fn-type casts get a cast history: `fnptr-transport` (no flag), `fnptr-param-variance` (flag, `ubKind=param-type-incompatible`), `fnptr-incompatible` (flag, `ubKind=signature-incompatible`) | Accepted (owner, round 4) |
+| D30 | Dispatch correlation replaces the D8 guard policy: `single-view` / `object-correlated` / `per-iteration-subject` / `unrelated` decide the category | Accepted (owner, round 4) |
 
 ---
 
@@ -121,6 +130,7 @@ Status values:
 ### D15 — Loop pre-scan widening (Proposed)
 - **Rule.** Seed the loop-head state with the entry state ∪ every fptr store in the body; traverse once.
 - **Alternative rejected.** A two-pass body traversal duplicates cast observations and pointer-use records.
+- **Amended (round 3).** Any fptr iteration (prescan RHS resolution, F17 loop-carried returns) follows the engine's existing fixpoint convention ([07 §3](07-existing-engine.md#3-inter-procedural-sccs-and-fixpoints)): cap `MaxNamedCallSummaryIters` (16), a termination reason in text **and** JSON, and an `Approximated` feature on hitting the cap.
 
 ### D16 — Code placement (Proposed)
 - **Location.** New types (`SlotKey`, `TargetSet`, `IndirectCallResolution`) and the resolver go in `include/CastHistory/FptrResolution.h`. The library table goes in `LibraryCallbackModels.def`. Both use LLVM containers (`SmallVector`, `DenseMap`) per CLAUDE.md.
@@ -160,3 +170,51 @@ Status values:
 
 ### D21 — Deterministic target order (Proposed)
 - `std::set<const FunctionDecl*>` orders by address. New `TargetSet`s order by (lookup key, file, line, column). Existing L0 sets are converted at the seam.
+
+## Round 3 (2026-11-25), see [07-existing-engine.md](07-existing-engine.md)
+
+### D22 — Where cross-TU slots are solved (Proposed)
+- **Fact.** `build_summary_index.py` builds SCC metadata only ("Python does not execute the C++ SCC solver"). All fixpoints run in C++ (same-TU and cross-TU two-phase) or in the external driver over import rounds. `SUMMARY_IMPORT_ROUNDS` defaults to 1.
+- **Options.** (a) Solve `slot ⊇ param:f.$k` constraints in Python while building the index: simple, but it is the index's first solver and duplicates convergence/caps logic. (b) Serialize slot facts; let the C++ import round solve them with the existing cap and termination conventions and report status in the existing cross-TU fixpoint JSON.
+- **Recommendation.** (b): one solver family, one convergence report. Forwarding chains then need either rounds ≥ 2 or the external driver; X fixtures already run with 2.
+
+### D23 — Early exits for fptr state (Proposed)
+- **Evidence.** F44: the engine has no CFG and `return`/`break`/`continue` do not end a branch's state, so infeasible targets reach later calls (imprecise, not unsound).
+- **Decision.** In the S5 merge, a then/else branch whose last statement is a `return`, `break` or `continue` (syntactically, including in nested compound blocks) contributes no fptr state to the join. Fptr state only (D4). `goto` stays unsupported.
+- **Alternative.** Option (c), a `clang::CFG` for fptr state, fixes this together with switch fallthrough, loops and `goto`, at the cost of the engine's first CFG (`clangAnalysis` dependency, block↔guard-text mapping). Trigger to switch: if S2–S5 exceed their diff budget, or bench runs show a high `Approximated` rate for fptr state.
+
+## Round 4 (2026-11-25), see [08-cfg-fptr-resolution.md](08-cfg-fptr-resolution.md)
+
+### D24 — CFG-based fptr solver (Proposed)
+- **Owner request.** Add a CFG supporting loops > conditions > goto and their combinations, used for fptr resolution, with recursion and cross-TU composition.
+- **Evidence.** Unsound today: F09, F10, F36, F46, F47, F50, F51, X11, X12. Imprecise: F44, F45. Bench C code has 9,204 `goto` statements in 732 files.
+- **Decision.** A `clang::CFG` worklist solver runs as a TU pre-pass (seam S1). The visitor consults its table (S6). There is no semantic edit to existing visitor code. It covers fptr state only (D4).
+- **Supersedes** S2–S5 and S7, D15 and D23.
+
+### D25 — Edge-labelled guards (Proposed)
+- Guards come from CFG terminators (`[c]`, `[!(c)]`, `[k == c]`), rendered with `exprToString`. Back edges are marked. Guards over the cap are dropped, with the reason. Guards are evidence for D30, not the category classifier.
+
+### D26 — TU summaries and an on-the-fly call graph (Proposed)
+- The per-function summary holds `ret`, out-param effects, slot contributions and indirect sites. Tarjan runs bottom-up, with a capped SCC fixpoint (16) and capped re-planning (16). Termination goes to text and JSON (G6). The cast-history recursion reuses the existing solves via S9 edges.
+
+### D27 — Cross-TU fptr summaries (Proposed; resolves D22)
+- `fptrFacts` are serialized. `build_summary_index.py` only merges. The C++ import round solves with the same caps. `run_scc_param_fixpoint.py` gains an fptr fingerprint. Rounds = 1 is documented as insufficient for forwarding chains.
+
+### D28 — Fallback and cross-check (Proposed)
+- When no CFG can be built, the AST L0 maps are used and `Approximated` is recorded. `--fptr-cfg-crosscheck` reports where the CFG and AST results differ.
+
+### D29 — Function-type casts (Accepted by owner)
+- **Owner.** *"Case A (transport) and case B (pointer-parameter variance) can be labelled similar to cast history labels for pointers. Case B being UB is more dangerous than case A and should be flagged with reason to support later analyses that may cover UB conditions or multiple platforms."*
+- **Labels:**
+  - `fnptr-transport`: no flag. F53, F13.
+  - `fnptr-param-variance`: `signatureMismatch=true`, `ubKind=param-type-incompatible`, plus argument cast evidence. F14.
+  - `fnptr-incompatible`: `ubKind=signature-incompatible`. F56.
+
+### D30 — Dispatch correlation (Accepted by owner, replaces D8)
+- **Owner.** Loops are modelled well but are not well defined for history, and "unguarded" is not an interesting tag for fptrs. Table dispatch is safe when reads and writes happen on the same object through the same function. Use the subject and function set to decide mismatch.
+- **Rule** ([08 §6](08-cfg-fptr-resolution.md#6-what-a-target-set-means-for-cast-history-dispatch-correlation-d30)):
+  - `single-view` gives Monomorphic;
+  - `object-correlated` gives Guarded;
+  - `per-iteration-subject` is decided per call;
+  - `unrelated` gives UnguardedMultiTarget.
+- **Author's pushback, recorded.** Guards stay as the evidence for object correlation, for example `switch (o->tag)`.

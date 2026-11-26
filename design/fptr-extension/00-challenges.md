@@ -59,7 +59,7 @@ So fptr coverage is a **target-resolution problem**: find the functions an fptr 
 | F23, X10 | `dlsym` | ❌ unresolved (should be external) | unresolved and external are indistinguishable |
 | F24 | indirect call returning its argument | ❌ | return-alias continuation is not applied to indirect calls (it works for direct calls) |
 | F26 | `memcpy` of an ops struct | ❌ | memcpy is not a struct copy for fptr fields |
-| F27 | recursion only through a table | ❌ | indirect edges are absent from the SCC |
+| F27 | recursion only through a table | ❌ | the table call `ops[i](…)` is never resolved, so **no call edge exists** and `op_rec` is an acyclic SCC. *Corrected in round 3:* resolved field-fptr calls and imported fptr targets already are SCC edges; resolved local-variable fptr calls are not ([07](07-existing-engine.md#4-indirect-calls-and-the-scc-graph-measured)) |
 | F28 | fptr via `va_arg` | ❌ | not a named formal |
 | F29 | `if (cb == use_int) cb(x)` | ❌ | no equality refinement |
 | F31 | callback formal in a generic helper | ✅ (parametric) | must stay parametric, not be counted as a failure |
@@ -69,7 +69,7 @@ So fptr coverage is a **target-resolution problem**: find the functions an fptr 
 ## The underlying challenges
 
 1. **Target identity is a storage (points-to) problem.** fptrs live in globals, arrays, struct slots, unions, return values and out-parameters. These outlive one function body, and today's state does not.
-2. **Flow-sensitivity without a CFG.** The engine walks the AST once. For data-pointer origins the approximation is tolerable. For fptr state it is **unsound**, because a strong update in AST order deletes a reachable target (F09, F10, F35).
+2. **Flow-sensitivity without a CFG.** No CFG is built ([07 §2](07-existing-engine.md#2-intra-procedural-flow-no-cfg)). Only `if/else` snapshots and merges state; `switch`, loops, `?:` and `&&`/`||` are traversed once in AST order; `return`/`break`/`continue` do not end a branch's state. For data-pointer origins the approximation is tolerable. For fptr state it is **unsound** where a strong update in AST order deletes a reachable target (F09, F10, F35, F36), and **imprecise** where an exited branch is still joined (F44).
 3. **The caller ↔ callee link is the evidence.** An unresolved call does not merely lose precision. It removes all of the callee's operations from the caller's history, so `ctx` *looks* like pure transport.
 4. **Pairing.** A callback and its `void*` context are stored together and reunited later. Tracking each half separately crosses the pairs (F19), so the pairing must be preserved.
 5. **External callers.** libc/POSIX functions invoke the callbacks themselves (`pthread_create`, `qsort`), and `dlsym` targets are not in the project. Neither is an analysis failure, but today both look like one.
@@ -89,6 +89,7 @@ Measured on the same llvm-18 build. Fixture details are in [01-fact-catalog.md �
 | **F43** `run` | global with an initializer, overwritten in another function by an external call | ⚠️ `int*` only | same as F35; the escaped/unknown store must make the slot ⊤ |
 | F43 `run_local` | the same overwrite right before the call | ✅ Opaque | L0 erases the binding. **Design risk:** L0 cannot tell "no info" from "killed by unknown". An L1 fallback behind L0 would bring the initializer back. |
 | F38–F41 | strong update between calls, HOF reassign, nested/multi-slot locals, `(*s.fn)(x)` | ✅ | controls that M2/M3 must not break |
+| F44 *(round 3)* | `if (x) { cb = g; return cb(a); } return cb(b);` | ❌ imprecise: `b` gets `{f, g}` | early exits are not modelled; the then-state is joined after the `if` |
 
 **Totals after round 2:** 56 fixtures, 65 subjects, baseline drift 0. Subjects with a **wrong** answer today: F09, F10, F35, X11, X12, plus **F36** and **F43:run** (7).
 
@@ -98,3 +99,15 @@ Measured on the same llvm-18 build. Fixture details are in [01-fact-catalog.md �
 10. **Slot identity for nested and cast records.** Object-insensitive record slots are only sound and precise if the key is the outermost record visible in the access path (F37). Reads through a cast to another record type must union every slot that the cast can alias (F42).
 11. **Deterministic output.** Target sets are `std::set<const FunctionDecl*>`, which orders by address. New sets must order by a stable key, or the guard lists will reorder between runs.
 12. **Gate integrity.** Any stray `examples/fptr-*.c` used to abort the checker (fixed in M0.5). The fptr gate now runs in ctest under the label `fptr`.
+
+## Round 4 additions (2026-11-25): CFG evidence
+
+Measured on fixtures F45–F56 and X14 ([01 round 4](01-fact-catalog.md)). More wrong answers that come from having no CFG:
+- F46 `while`, F47 switch fallthrough, F50 backward goto and F51 dispatch loop each lose a reachable target.
+- F45 is imprecise.
+
+Function-type casts need labels rather than a single flag (D29). For cast history, what matters is **dispatch correlation**, not guards alone (D30).
+
+**Totals after round 4:** 70 fixtures, 80 subjects, drift 0.
+
+**Wrong answers today:** F09, F10, F35, F36, F43:run, F46:run_while, F47, F50, F51, X11 and X12 (11 subjects).

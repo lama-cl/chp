@@ -28,9 +28,14 @@ flowchart LR
   IDX["build_summary_index.py<br/>+ NEW fptr slot merge & solve"]
   IMP["import rounds<br/>(--summary-index)<br/>L1 reads use project solution"]
   REP["paper facts / reports<br/>+ NEW indirectCallResolution facet"]
+  SCC["existing SCC solves<br/>same-TU Tarjan + two-phase worklist<br/>cross-TU two-phase sweeps (caps 16)"]
   XFER --> SUM --> IDX --> IMP --> REP
   XFER --> REP
+  RES -- "NEW S9: namedCallEdges for<br/>resolved variable / L1 targets" --> SCC
+  SCC --> XFER
 ```
+
+*Round 4:* intra-procedural fptr flow is now a **CFG solver** run as a TU pre-pass ([08](08-cfg-fptr-resolution.md)); it replaces the "switch join / loop widening" box and the L1 pre-pass below. *Round 3:* the SCC/fixpoint stage already exists and is reused unchanged; the extension only feeds it edges. See [07-existing-engine.md](07-existing-engine.md) for what the engine does today (no CFG; if/else-only merge; two Tarjans; capped two-phase fixpoints).
 
 The analyzer already has most of the transfer machinery. This includes C3c multi-target import with selection guards (`functionPointerSelectionGuardForTarget`, `CastHistoryVisitor.h:14828`), field-fptr calls (C5*), and same-TU replay (C6d5/C6e1). **The extension adds what is missing in front of it: target discovery.** It also adds a small number of new flow relations.
 
@@ -93,7 +98,7 @@ flowchart TD
   SIG --> G
 ```
 
-### 4.1 Guard policy for multi-target sets (D8)
+### 4.1 Guard policy for multi-target sets (D8; superseded by D30, see [08 §6](08-cfg-fptr-resolution.md))
 
 A multi-target set becomes **guarded** alternatives (`⟨[g1] T1, [g2] T2⟩`, which gives `GuardedActiveReinterpretation`) when the program value that selects the target is visible at the call:
 
@@ -153,6 +158,8 @@ flowchart LR
 
 ## 6. Control flow for fptr state (D4)
 
+> **Round 4:** this section's AST-based plan (switch join, loop prescan, S2–S5) is **superseded by [08-cfg-fptr-resolution.md](08-cfg-fptr-resolution.md)** (D24). Kept below for the record.
+
 Only fptr target state (`functionPointerTargets`, `functionPointerTargetSets`, `functionPointerFieldTargetSets`) receives the fixes below. Origin, field and alias state keep the current syntactic behaviour; that is a separate issue.
 
 ```mermaid
@@ -176,9 +183,10 @@ stateDiagram-v2
 ```
 
 - **switch.** Snapshot the state at entry. Each `case`/`default` arm starts from entry plus the fallthrough state, with guard `kind == c` (default: the negated disjunction). The state at `break` is collected; the exit state is the join of all collected states. If the switch has no `default`, the entry state is joined as well. Bodies that are not structured (case labels nested in blocks, Duff's device) fall back to `entry ∪ every fptr store in the body`, unguarded, plus an `Approximated` feature record.
-- **Loops: pre-scan widening.** Before the single traversal of a loop body, collect every fptr store in the body syntactically, including nested blocks and calls with out-parameters. Resolve each right-hand side with the L0/L1 resolver and seed `S_head = S_entry ∪ stores`. The body is **not traversed twice**, so no cast observation is duplicated. A store whose RHS reads loop-carried state (`s = s.next(ctx)`, F17) is resolved by iterating the return-target relation to a fixpoint over the current set (bounded by K).
+- **Loops: pre-scan widening.** Before the single traversal of a loop body, collect every fptr store in the body syntactically, including nested blocks and calls with out-parameters. Resolve each right-hand side with the L0/L1 resolver and seed `S_head = S_entry ∪ stores`. The body is **not traversed twice**, so no cast observation is duplicated. A store whose RHS reads loop-carried state (`s = s.next(ctx)`, F17) is resolved by iterating the return-target relation to a fixpoint over the current set (bounded by K). *Round 3 (D15 amended):* this iteration follows the engine's convention: cap at `MaxNamedCallSummaryIters` (16), record a termination reason in text **and** JSON, and record an `Approximated` feature when the cap is hit.
 - **`?:`.** Expression-level: `set(c ? a : b) = set(a)[c] ∪ set(b)[!c]`.
-- **Indirect edges in the call graph.** Every resolved target produces a `SummaryDependencyEdge`, of kind `known-function-pointer-target-call` or `multi-function-pointer-target-call`, with a new `layer` attribute. These edges go into the named-call SCC computation, so recursion closed through a table (F27) reaches a fixpoint.
+- **Indirect edges in the call graph (revised in round 3).** The engine already puts some indirect calls into its SCCs: resolved field-fptr calls (`recordSameTUFieldFunctionPointerNamedCallEdges`) and imported fptr targets (`recordImportedFunctionPointerTargetParamTransferEdge`) become `namedCallEdges`; known/multi-target `SummaryDependencyEdge`s reach the project Tarjan. Missing: resolved **local-variable** and (new) **L1** targets. Seam **S9** adds an additive recorder mirroring the field one, with a `layer` attribute; the existing Tarjans and two-phase solves then close recursion through tables (F27) with no new SCC code.
+- **Early exits (D23, proposed).** A branch that ends in `return`, `break` or `continue` contributes nothing to the fptr join after the `if` (F44). Fptr state only (D4); implemented in the S5 merge.
 
 ## 7. Library callback model (LIB, D5)
 
@@ -233,7 +241,7 @@ New compact-summary section (`cast-history-tu-link-summary`, additive):
 
 - **Index solve.** Union slots across TUs by key, then iterate to a fixpoint `slot ⊇ param:f.$k` for every call `f(actual)` whose actual resolves. The call edges are already in the index as `SummaryDependencyEdge`s. Complexity is O(edges × K).
 - **Statics (X04).** Targets carry the TU-qualified lookup key that the index already uses for static functions (see `p04_static_same_name`).
-- **Rounds.** Slot facts depend only on C1 summaries, so one import round resolves direct cases. Chains such as a setter that forwards to another setter converge within `SUMMARY_IMPORT_ROUNDS` (the default of 2 covers every X fixture).
+- **Rounds (corrected in round 3).** `SUMMARY_IMPORT_ROUNDS` defaults to **1** in `run_all_multitu_projects.sh`; the fptr checker runs with 2. Slot facts depend only on C1 summaries, so one round resolves direct cases; forwarding chains need more rounds or a solve. `build_summary_index.py` runs **no** solver today (it only builds SCC metadata), so the "index solve" above would be its first. **D22** decides between that and solving slots in C++ during import rounds, next to the existing cross-TU two-phase solve.
 
 ## 9. Soundness, precision, cost
 

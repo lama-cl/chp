@@ -2,7 +2,7 @@
 
 This extends Cast History so that `void*` and other data pointers that flow through **function pointers** can be classified. Resolution quality is reported through a new facet, alongside the existing 7 primary categories.
 
-**Status:** M0 (evidence and design) and M0.5 (gate hardening, review round 2) are done. Baselines are verified on LLVM 23.1.4 (drift 0; see [REVIEWING.md](REVIEWING.md) §LLVM). **M1** (resolution facet, reporting only) is done. Next: **M2** (soundness: if-merge on sets, switch, loops, `?:`, cast normalisation), gated on **D8** (guard policy).
+**Status:** M0 (evidence and design) and M0.5 (gate hardening, review round 2) are done. Baselines are verified on LLVM 23.1.4 (drift 0; see [REVIEWING.md](REVIEWING.md) §LLVM). **M1** (resolution facet, reporting only) is done. Next: **M2a** (CFG solver + loops, [08](08-cfg-fptr-resolution.md)), gated on **D24**.
 
 ## Read in this order
 
@@ -11,17 +11,19 @@ This extends Cast History so that `void*` and other data pointers that flow thro
 | [REVIEWING.md](REVIEWING.md) | humans, start here, ~2 min | what to read, three commands, red-flag checklist |
 | [REVIEW.md](REVIEW.md) | humans, ~5 min | discussion summary, owner decisions, pushback and concerns, open questions |
 | [00-challenges.md](00-challenges.md) | everyone | why fptrs limit classification, with measured gaps and 3 soundness bugs |
-| [01-fact-catalog.md](01-fact-catalog.md) | everyone | the 56 facts (F01–F43, X01–X13) plus 9 documented-only patterns, with real-world citations |
+| [01-fact-catalog.md](01-fact-catalog.md) | everyone | the 70 facts (F01–F56, X01–X14) plus 9 documented-only patterns, with real-world citations |
 | [02-design.md](02-design.md) | implementers | slots, resolver layers, data/control-flow tracking, cross-TU, facet, diagrams |
-| [03-decisions.md](03-decisions.md) | reviewers | ADR log D1–D21 with status |
+| [03-decisions.md](03-decisions.md) | reviewers | ADR log D1–D30 with status |
 | [04-implementation-plan.md](04-implementation-plan.md) | agents | milestones M0.5–M9 with claims, owner gates and seams, exact commands, definition of done |
 | [05-plan-review.md](05-plan-review.md) | everyone | round 2 review: findings, architecture options, diagrams, owner answers |
 | [06-backbone-contract.md](06-backbone-contract.md) | agents + reviewers | invariants, seams S1–S8, diff budget, PR task card, stop conditions |
+| [07-existing-engine.md](07-existing-engine.md) | implementers | what the engine does today: no CFG, if/else-only merge, SCCs, capped fixpoints, import rounds |
+| [08-cfg-fptr-resolution.md](08-cfg-fptr-resolution.md) | everyone | the CFG-based fptr solver (loops > conditions > goto), dispatch correlation, fn-type cast labels |
 | [evidence/evidence-table.md](evidence/evidence-table.md) | everyone | generated table: baseline today vs expected, per subject |
 
 ## Fixtures and evidence
 
-- Single TU: `examples/fptr-NN-<fact>.c` (fact IDs F01–F43). Exploratory probes that are not fixtures go in `examples/probes/`.
+- Single TU: `examples/fptr-NN-<fact>.c` (fact IDs F01–F56). Exploratory probes that are not fixtures go in `examples/probes/`.
 - Cross-TU: `test_projects/projects/p1NN_fptr_xtu_<fact>/` (fact IDs X01–X13), with `expected/README.expected.txt`.
 - Each fixture's header comment carries the contract:
 

@@ -134,6 +134,58 @@ What changed:
 - **Verification.** Claimed fixtures meet `@expected`. Baseline drift is 0 across all 56 fixtures (65 subjects), with no `@expected` edited. ctest passes except the pre-existing `regress-projects` (C17). 129/129 examples and 145/145 projects pass.
 - **Models and tokens.** Schema, validator and aggregator were done by a Sonnet subagent (about 79k tokens, 16 tool calls, about 2 min). The C++ facet builder, seam S8, verification and docs were done in the main Opus session. The main session cannot measure its own token use.
 
+## 6d. Round 3: the existing engine, checked against `main` (2026-11-25)
+
+**Asked:** the docs say the CFG is approximated from the AST. Compare against `main`, look at the SCCs, fixpoint convergence and whether a CFG exists, and revise the docs. Reference: [07-existing-engine.md](07-existing-engine.md).
+
+**Findings** (`main` = `codex/main` = this branch's base):
+- **No CFG.** Only `if/else` merges state. Switch, loops, `?:` and `&&`/`||` are traversed once. Early exits are not modelled (new fixture F44).
+- **Inter-procedural machinery is mature:**
+  - two Tarjans: same-TU in C++, project in `build_summary_index.py`;
+  - capped two-phase fixpoints (16);
+  - widening tokens;
+  - import rounds (default **1**).
+- **Termination rests on caps.** The same-TU termination status is in the text report only, not in JSON (G6).
+
+**Corrections to earlier docs:**
+- F27's root cause: there is no edge because the table call is unresolved, not because SCCs exclude indirect edges.
+- Field and imported fptr edges *are* SCC edges; local-variable fptr calls are not (B7).
+- The rounds default is 1, not 2.
+- `build_summary_index.py` runs no solver.
+
+**Agents:** two Sonnet Explore agents, about 53k and 87k tokens, plus direct probes in the main session.
+
+## 6e. Round 4: CFG for fptr resolution (2026-11-25)
+
+**Owner's request:** discuss a CFG addition supporting **loops > conditions > goto** and their combinations, used for fptr resolution, with recursion and cross-TU composition. Design: [08-cfg-fptr-resolution.md](08-cfg-fptr-resolution.md).
+
+**Decisions**
+
+| # | Decision | Status |
+|---|---|---|
+| D24 | `clang::CFG` solver as a TU pre-pass. The visitor only looks results up (S6) and records edges (S9). No semantic edit to existing visitor code. Supersedes S2–S5 and S7, D15 and D23 | Proposed |
+| D25–D28 | edge-label guards as evidence; TU summaries with an on-the-fly call graph and capped SCC fixpoint; cross-TU fptr summaries solved in C++ import rounds (resolves D22); no-CFG fallback plus cross-check | Proposed |
+| D29 | fn-type casts get a cast history. `fnptr-transport`: no flag. `fnptr-param-variance`: flagged `ubKind=param-type-incompatible` with the reason (UB, kept for later UB and multi-platform analyses). `fnptr-incompatible`: flagged `ubKind=signature-incompatible` | **Accepted (owner)** |
+| D30 | dispatch correlation (`single-view` / `object-correlated` / `per-iteration-subject` / `unrelated`) replaces the D8 guard policy | **Accepted (owner; "unrelated" is the owner's term)** |
+
+**Discussion**
+- **Owner.** Loops "while modeled well are still not well-defined for history". An unguarded tag is not interesting for fptrs. Table dispatch is safe when reads and writes happen on the same object through the same function. Use the subject and the function set to decide mismatch.
+- **Author.** Agreed. A loop contributes only (1) sound target sets and (2) whether the same subject meets different targets across iterations.
+- **Author's pushback.** Guards remain the evidence for object correlation, for example `switch (o->tag)`.
+
+**Evidence** (fixture before code)
+- F45–F56 and X14 are pinned. Four more subjects are **unsound today**: F46 `run_while`, F47, F50 and F51.
+- F14's expected result gains `ubkind=param-type-incompatible`, in its own commit.
+- The checker accepts the `ubkind` and `dispatch` keys.
+
+**Plan re-cut:** M2a loops, M2b conditions, M2c goto/combinations, M3b gains F54/F55, M4 gains F52, M8c gains X14.
+
+**New open questions**
+
+12. Accept D24–D28 (the CFG solver architecture)?
+13. Runtime budget for the CFG pre-pass: is ≤ 10 % on bench acceptable?
+14. Should `per-iteration-subject` dispatch be reported per call (the current proposal) or as its own category flag?
+
 ## 7. Change log
 
 | Date | Change |
@@ -143,3 +195,5 @@ What changed:
 | 2026-11-25 | Review round 2 (05, 06, REVIEWING.md). Probes moved to `examples/probes/`. F36–F43 added and pinned (56 fixtures, 65 subjects, drift 0). Checker discovery made strict. ctest label `fptr`. D7′, D17–D21. M0.5 inserted; M3/M8 split. LLVM 23 re-pin pending (owner step). |
 | 2026-11-25 | Built on LLVM 23.1.4: fptr drift 0 (no re-pin), 129/129 examples and 145/145 projects pass. Portable build fixes: RTTI follows LLVM, default `-resource-dir`, `getBeginLoc()` for break/continue. The shell profile's clang 18 `C_INCLUDE_PATH`/`CPLUS_INCLUDE_PATH` must be unset. |
 | 2026-11-25 | M1 landed: `indirectCallResolution` facet (paper facts v10), seam S8 only. 8 fixtures (13 subjects) met, plus F43 `run_local`. F14 moved to M2. |
+| 2026-11-25 | Round 3: 07-existing-engine.md (no CFG; SCC/fixpoint model), F44, D22/D23, corrections. |
+| 2026-11-25 | Round 4: 08-cfg-fptr-resolution.md; D24–D30 (D29/D30 accepted); F45–F56, X14 pinned; F14 gains ubkind; M2 re-cut into M2a/b/c. 70 fixtures, 80 subjects, drift 0. |

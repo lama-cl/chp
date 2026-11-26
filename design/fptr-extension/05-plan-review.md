@@ -32,6 +32,7 @@ python3 scripts/check_fptr_evidence.py --check baseline     # 56 fixtures, 65 su
 | G2 | The fptr gate was not in ctest, although CLAUDE.md says "run ctest". | **Fixed in M0.5:** test `fptr-baseline`, label `fptr`. |
 | G3 | **LLVM version skew.** fptr pins come from 18.1.3, `examples/expected/meta.info` from 20.1.2, and CLAUDE.md asks for 19+. On this host `/usr/bin/llvm-config → /etc/alternatives/llvm-config → /opt/llvm-23/bin/llvm-config`, but `/opt` is not mounted in the agent's shell (the link dangles), so `build/` is configured with `/usr/lib/llvm-18`. | **Resolved 2026-11-25.** Built on LLVM 23.1.4: fptr drift 0, so no re-pin was needed. Version recorded in `examples/fptr-meta.info`. Three portable build fixes were required (REVIEWING.md §LLVM). |
 | G4 | Marker checks are coarse (category, types, callback, behavior). Other output drift in fptr fixtures is invisible. | Proposed in D19: add the fptr fixtures to the `regress.py` full-output set at M1, so reviewers see a text diff. |
+| **G6** *(round 3)* | The same-TU fixpoint's termination reason (e.g. `cast-scc-worklist-execution-limit`) is printed in the text report only; no JSON carries it, so a capped (approximate) summary is invisible to aggregates. The cross-TU solve does emit JSON. | New fptr iterations report in both (04 observability rule); a future facet field `fixpoint: converged | capped`. |
 | G5 | Seven of the eight owner probes do not compile as C. Their `.history` files describe a recovered AST. | Probes kept byte-identical; their ideas were rewritten as valid fixtures F37–F41 ([probes README](../../examples/probes/README.md)). |
 
 ### B — semantics (would have produced wrong answers)
@@ -43,6 +44,8 @@ python3 scripts/check_fptr_evidence.py --check baseline     # 56 fixtures, 65 su
 | **B3** | **D7 misses aliasing through casts.** A read through `(struct base *)` hits a slot with no stores. | **F42** | D7′: a cast-read unions every slot whose record has a compatible prefix; otherwise ⊤ → `unresolved`. |
 | **B4** | **L0 conflates "no info" with "killed".** `recordFunctionPointerBinding` erases in both cases, so a naive L1 fallback would bring back stale targets. | **F43** (`run_local` correct today and must stay so; `run` unsound like F35) | **D18:** L0 tri-state `known / killed-unknown / no-info`; L1 is consulted only on `no-info`. |
 | B5 | Address-ordered `std::set<const FunctionDecl*>` | `:24088` | **D21:** new sets order by a stable key (lookup key, then source location). |
+| **B6** *(round 3)* | **Early exits are joined.** No CFG; `return`/`break`/`continue` don't end a branch's state, so an infeasible target reaches later calls. | **F44**: `UnguardedMultiTarget`, `double*,int*` (should be `int*`) | **D23:** fptr-only early-exit rule in the S5 merge; option (c) as fallback. |
+| **B7** *(round 3)* | **Resolved local-variable fptr calls are not SCC edges** (field and imported ones are). | probe in [07 §4](07-existing-engine.md#4-indirect-calls-and-the-scc-graph-measured): `op_rec` acyclic vs recursive | seam **S9** in M4; no SCC code changes. |
 
 ```mermaid
 flowchart LR
@@ -74,8 +77,8 @@ The visitor is 32 128 lines, and fptr state is threaded through `TraverseFunctio
 | Option | Backbone impact | Soundness | Reviewability | Verdict |
 |---|---|---|---|---|
 | **(a) Grow the visitor in place** (as 02-design §10 implicitly allowed) | high: edits spread across many functions | as designed | poor: diffs land in a 32k-line file | rejected |
-| **(b) Seam extension**: new logic in `FptrResolution.h`, called from eight named seams | low: ≤ ~15 lines per seam, one existing function semantically changed (S5) | as designed | good: every backbone line is accounted for in the PR | **recommended (D17)** |
-| (c) CFG-based fptr dataflow on `clang::CFG` | medium: needs a CFG per function and a mapping to the visitor's guard text | best (real joins, loops, `goto`) | medium: new paradigm, duplicated guard logic | fallback if S2–S4 prove fragile on bench code |
+| **(b) Seam extension**: new logic in `FptrResolution.h`, called from eight named seams (round 4: kept, with the CFG solver behind S1/S6, so seams shrink to S1, S6, S8, S9) | low: ≤ ~15 lines per seam, one existing function semantically changed (S5) | as designed | good: every backbone line is accounted for in the PR | **recommended (D17)** |
+| (c) CFG-based fptr dataflow on `clang::CFG` | medium: the engine's **first** CFG (no `clang/Analysis/CFG.h` today; adds a `clangAnalysis` link dependency) plus a mapping from blocks to the visitor's text guards | best: one mechanism fixes switch fallthrough, loops, early exits (F44) and `goto` | medium: new paradigm beside an AST-structured engine; duplicated guard logic | **round 4: adopted** (D24) at the owner's request; see [08](08-cfg-fptr-resolution.md) |
 | (d) Post-pass over emitted summaries only | none | cannot see L0 or guards; F36/F09/F10 unfixable | good | rejected for L0; **used** for cross-TU (M8, `build_summary_index.py`) |
 
 ```mermaid
@@ -103,7 +106,11 @@ flowchart TB
   COL --> RES
 ```
 
+*Round 3 check against `main`* ([07](07-existing-engine.md)): the intra-procedural model is AST-structured with an if/else-only merge and no CFG, while the inter-procedural side is mature (two Tarjans, capped two-phase fixpoints, widening tokens). Option (b) keeps both; option (c) would change only the intra-procedural half, for fptr state.
+
 Why (b) is enough: the existing visitor already overrides every control-flow node the extension needs (`TraverseSwitchStmt` etc. today only record an `Approximated` feature and delegate). The extension adds calls *around* the delegation and never replaces it, so traversal order, observation counts and non-fptr state are unchanged by construction. The one exception is **S5**: B1 is a defect *in* the backbone's existing fptr merge, and fixing it in place is cheaper and more honest than shadowing it.
+
+> **Round 4 reversal.** Option (c) was the fallback. The owner asked for a CFG with loops > conditions > goto, and round 3 showed the AST model is if/else-only, so (c) is now the design ([08](08-cfg-fptr-resolution.md)), combined with (b)'s seam discipline. Challenges 1, 2 and 8 below are resolved by it.
 
 ## 4. Remaining challenges (for discussion)
 
@@ -111,7 +118,9 @@ Why (b) is enough: the existing visitor already overrides every control-flow nod
 2. **Loop prescan (S4) and loop-carried RHS.** `s = s->next(ctx)` (F17) needs the return-target relation to a fixpoint. Bounded by K, but it is the first place where cost can grow. Measure it on bench-3c at M4.
 3. **D8 guard policy decides category counts.** "Guarded" vs "unguarded" changes `GuardedActive…` vs `UnguardedMultiTarget…` in every aggregate. It needs owner sign-off before M2 (owner gate).
 4. **D7′ precision vs soundness.** Outermost-path keys are precise. The cast rule (F42) can widen sets considerably in GObject-style code. The facet's `L1` tag and the K cap bound the damage; measure on icecast/libarchive.
-5. **Non-fptr state has the same switch/loop issue** (C4). Out of scope by D4; it should be its own issue.
+5. **Non-fptr state has the same switch/loop issue** (C4), and also the early-exit join (F44 pattern). Out of scope by D4; it should be its own issue.
+8. **Early exits without a CFG (round 3, D23).** Detecting "branch ends in return/break/continue" syntactically covers the common case; exits in nested `switch`/loops inside the branch need care (a `break` inside an inner loop does not exit the `if`).
+9. **Fixpoint caps and observability (round 3).** The engine's termination guarantee is its caps (16), not a proof (fact enumeration fails open). New fptr iterations must follow the same convention and report capping in JSON, otherwise a capped answer looks exact in the facet (G6).
 6. **Facet rollout (M1) touches every paper-facts subject.** Plan: add the key to paper facts only, and leave the text report unchanged in M1, so `regress.py` text diffs stay empty.
 7. **LLVM re-pin.** Done: LLVM 23.1.4 gives the same fptr baselines as 18. `regress.py` project expected files (from 20.1.2) differ on 23 only in line *order* (content identical when sorted; JSON identical; stable run to run on one binary) and in the recorded `-resource-dir`. Order that depends on the build is D21 evidence. Regenerating them is a decision for the regress harness (regression-testing.md), not for this extension.
 
@@ -121,11 +130,11 @@ Why (b) is enough: the existing visitor already overrides every control-flow nod
 flowchart LR
   M0["M0 ✅ evidence"] --> M05["M0.5 ✅ gate hardening<br/>probes, F36–F43, ctest<br/>LLVM 23 verified (drift 0)"]
   M05 --> M1["M1 facet<br/>gate: D12"]
-  M1 --> M2["M2 soundness: if-sets, switch, loop, ?:<br/>gate: D8"]
+  M1 --> M2["M2a loops → M2b conditions → M2c goto<br/>(CFG solver, D24)"]
   M2 --> M3a["M3a globals + tri-state<br/>gate: D18"]
   M3a --> M3b["M3b arrays / tables"]
   M3a --> M3c["M3c record slots<br/>gate: D7′"]
-  M3b --> M4["M4 RET / out-param / SCC"]
+  M3b --> M4["M4 RET / out-param<br/>+ S9 edges into existing SCCs"]
   M3c --> M4
   M3b --> M5["M5 binding forms"]
   M3c --> M5

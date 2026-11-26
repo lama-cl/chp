@@ -113,6 +113,30 @@ These came from the owner's probes (originals kept byte-identical in [`examples/
 | F42 | slot read through a cast to a layout-compatible base record | `fptr-42-base-prefix-cast-slot.c` | L1 soundness guard for D7′, M3c | ❌ Opaque (must become a sound set, or `unresolved`) |
 | F43 | global killed by an unknown store, in the same function (`run_local`) or in another one (`run`) | `fptr-43-global-killed-by-unknown-store.c` | L0 tri-state + L1 ⊤, M3a | `run_local` ✅ Opaque; `run` ⚠️ `int*` only (same defect as F35) |
 
+### Round 3 addition (2026-11-25)
+
+| ID | Fact | Fixture | Layer / milestone | Today |
+|---|---|---|---|---|
+| F44 | a branch ending in `return` is still joined after the `if`, so an infeasible target reaches later calls | `fptr-44-early-return-merge-imprecise.c` | CF early exit, M2 if D23 is accepted | ❌ `UnguardedMultiTarget`, `double*,int*` (should be `int*`) |
+
+### Round 4 additions (2026-11-25): CFG evidence, see [08](08-cfg-fptr-resolution.md)
+
+| ID | Fact | Fixture | Milestone | Today (measured) |
+|---|---|---|---|---|
+| F45 | loop exits only via `break` after a reassignment | `fptr-45-loop-exit-only-via-break.c` | M2a | imprecise set (should be exact `g`) |
+| F46 | do-while (≥1 iteration) vs while (0 iterations possible) | `fptr-46-do-while-vs-while.c` | M2a | `run_do` ✅; `run_while` ⚠️ exact `double*` |
+| F47 | switch fallthrough into the call | `fptr-47-switch-fallthrough.c` | M2b | ⚠️ exact `double*` |
+| F48 | `&&` guard on the assignment | `fptr-48-short-circuit-guard.c` | M2b | set ✅ by accident (no conjunction guard) |
+| F49 | forward goto cleanup | `fptr-49-goto-cleanup.c` | M2c (control) | set ✅ by accident |
+| F50 | backward goto retry loop | `fptr-50-goto-retry-loop.c` | M2c | ⚠️ exact `int*` |
+| F51 | dispatch loop with switch, continue, break, return | `fptr-51-dispatch-loop-switch.c` | M2c | ⚠️ exact `double*` |
+| F52 | recursion through a local fptr variable | `fptr-52-recursion-through-local-fptr.c` | M4 | types right, `unresolved`, no SCC edge |
+| F53 | fn-pointer transport round trip (`void(*)(void)`) | `fptr-53-fnptr-transport-roundtrip.c` | M1 (control) | ✅ |
+| F54 | table dispatch selected by the object (`tbl[o->kind]`) | `fptr-54-object-correlated-table.c` | M3b | ❌ unresolved |
+| F55 | table dispatch with an unrelated selector | `fptr-55-unrelated-table-selector.c` | M3b | ❌ unresolved |
+| F56 | arity-mismatching fn-type cast | `fptr-56-fnptr-arity-mismatch.c` | M2b | ❌ not flagged |
+| X14 | a.c `lookup` returns via switch; b.c calls `lookup(i)(x)` in a loop | `p145_fptr_xtu_switch_return_in_loop` | M8c | ❌ unresolved |
+
 ## G. Documented, not fixtured (out of scope or no void* impact)
 
 | ID | Pattern | Why not fixtured | Citation |
@@ -126,3 +150,4 @@ These came from the owner's probes (originals kept byte-identical in [`examples/
 | N7 | weak symbols / `LD_PRELOAD` interposition | the target is decided at link or load time. Reported as external | ext: ELF symbol interposition |
 | N8 | K&R unprototyped `void (*)()` | signature unknown; L2 matching must treat it as a wildcard | ext: legacy C (e.g. older thttpd sources) |
 | N9 | JIT / generated code, Apple blocks, C++ | out of scope for a C AST analyzer | — |
+| N10 | irreducible loops (goto into a loop body) | supported by construction in the CFG solver (DFS retreating edges); fixture once a bench instance is pinned | ext: hand-written state machines |
