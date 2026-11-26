@@ -31,6 +31,11 @@ Checked keys (all optional per marker line):
   resolution  indirectCallResolution "<state>@<layer>" (new fptr facet, see
               design/fptr-extension/02-design.md); "<absent>" until emitted
   sigmismatch indirectCallResolution.signatureMismatch ("true"/"false")
+  ubkind      indirectCallResolution.ubKind (D29: param-type-incompatible,
+              signature-incompatible, none); "<absent>" until emitted
+  dispatch    indirectCallResolution.dispatchCorrelation (D30: single-view,
+              object-correlated, per-iteration-subject, unrelated);
+              "<absent>" until emitted
 A missing subject is reported as category=<absent>.
 
 Modes:
@@ -61,7 +66,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-KEYS = ("category", "callback", "behavior", "types", "resolution", "sigmismatch")
+KEYS = ("category", "callback", "behavior", "types", "resolution", "sigmismatch",
+        "ubkind", "dispatch")
 MARKER = re.compile(r"^\s*(?://|\*)\s*@(fptr-fact|subject|baseline|expected)\b\s*(.*?)\s*$")
 
 
@@ -134,8 +140,10 @@ def subject_values(s: dict) -> dict:
     if isinstance(icr, dict):
         resolution = f"{icr.get('state', '?')}@{icr.get('layer', '?')}"
         sigmismatch = "true" if icr.get("signatureMismatch") else "false"
+        ubkind = icr.get("ubKind", "<absent>")
+        dispatch = icr.get("dispatchCorrelation", "<absent>")
     else:
-        resolution, sigmismatch = "<absent>", "<absent>"
+        resolution = sigmismatch = ubkind = dispatch = "<absent>"
     return {
         "category": s.get("primaryCategory", "<absent>"),
         "callback": s.get("callbackMediation", {}).get("state", "<absent>"),
@@ -143,6 +151,8 @@ def subject_values(s: dict) -> dict:
         "types": ",".join(normalize_type(t) for t in types) or "-",
         "resolution": resolution,
         "sigmismatch": sigmismatch,
+        "ubkind": ubkind,
+        "dispatch": dispatch,
     }
 
 
@@ -297,7 +307,7 @@ def pin_baselines(fixtures: list) -> None:
                 if m and m.group(1) == "subject":
                     got = fx.observed[m.group(2)]
                     keys = ["category", "callback", "behavior", "types"] + [
-                        k for k in ("resolution", "sigmismatch") if got[k] != "<absent>"]
+                        k for k in ("resolution", "sigmismatch", "ubkind", "dispatch") if got[k] != "<absent>"]
                     prefix = " * " if ln.lstrip().startswith("*") else "// "
                     out.append(f"{prefix}@baseline  " + " ".join(f"{k}={got[k]}" for k in keys) + "\n")
             f.write_text("".join(out))
